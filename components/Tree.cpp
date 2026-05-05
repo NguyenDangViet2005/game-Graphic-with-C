@@ -3,6 +3,7 @@
 
 #include <graphics.h>
 #include <math.h>
+#include "../algorithms/index.cpp"
 
 // Vẽ tầng cây xa
 // yOffset: 0 cho game (cao), 100 cho menu (thấp)
@@ -59,7 +60,10 @@ void drawFarLayer(int yOffset = 0) {
             tx - topW/2, farY - th,
             tx - bottomW/2, farY
         };
-        fillpoly(4, points);
+        
+        // Sử dụng thuật toán scanline fill thay vì fillpoly
+        setcolor(COLOR(3, 3, 3));
+        algorithmFillPoly(points, 4);
         
         // Viền đen sâu
         setcolor(COLOR(1, 1, 1));
@@ -97,7 +101,9 @@ void drawDarkTree(int x, int y, int height) {
     // Thân cây tối màu - đen nâu đậm trong đêm
     setcolor(COLOR(8, 5, 3));
     setfillstyle(SOLID_FILL, COLOR(8, 5, 3));
-    fillpoly(4, trunk);
+    
+    // Sử dụng thuật toán scanline fill cho thân cây chính
+    algorithmFillPoly(trunk, 4);
     
     // Phần thân trên - đậm hơn
     int trunk2[] = {
@@ -108,7 +114,9 @@ void drawDarkTree(int x, int y, int height) {
     };
     setcolor(COLOR(15, 10, 7));
     setfillstyle(SOLID_FILL, COLOR(15, 10, 7));
-    fillpoly(4, trunk2);
+    
+    // Sử dụng thuật toán scanline fill cho phần thân trên
+    algorithmFillPoly(trunk2, 4);
     
     // Vẽ vân gỗ dọc - đen đậm
     setcolor(COLOR(8, 5, 3));

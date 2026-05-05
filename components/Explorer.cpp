@@ -2,10 +2,11 @@
 #define EXPLORER_H
 
 #include <graphics.h>
+#include "../algorithms/index.cpp"
 
 #define S(val) ((int)((val) * scale)) // macro scale tọa độ
 
-void drawExplorer(int x, int y, float scale = 1.0f) {
+void drawExplorer(int x, int y, float scale) {
     // Bảng màu nhân vật
     int armorDark = COLOR(45, 50, 70);      // Giáp tối
     int armorMain = COLOR(80, 90, 110);     // Giáp sáng
@@ -26,12 +27,12 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     // quầng sáng dưới chân
     setcolor(goldDark);
     setlinestyle(SOLID_LINE, 0, thickBold);
-    ellipse(x, y, 0, 360, S(48), S(14));
+    algorithmEllipse(x, y, 48 * scale, 14 * scale);
     setcolor(goldMain);
     setlinestyle(SOLID_LINE, 0, thickNormal);
-    ellipse(x, y, 0, 360, S(56), S(18));
+    algorithmEllipse(x, y, 56 * scale, 18 * scale);
     setcolor(glowColor);
-    ellipse(x, y, 0, 360, S(40), S(10));
+    algorithmEllipse(x, y, 40 * scale, 10 * scale);
 
     setlinestyle(SOLID_LINE, 0, thickNormal);
 
@@ -45,15 +46,15 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     // 3 mũi tên trong ống
     setcolor(goldLight);
     setlinestyle(SOLID_LINE, 0, thickBold);
-    line(quiverX+S(2), quiverY-S(12), quiverX-S(8), quiverY-S(30));
-    line(quiverX+S(6), quiverY-S(9), quiverX-S(2), quiverY-S(32));
-    line(quiverX+S(10), quiverY-S(6), quiverX+S(4), quiverY-S(28));
+    algorithmLine(quiverX+S(2), quiverY-S(12), quiverX-S(8), quiverY-S(30));
+    algorithmLine(quiverX+S(6), quiverY-S(9), quiverX-S(2), quiverY-S(32));
+    algorithmLine(quiverX+S(10), quiverY-S(6), quiverX+S(4), quiverY-S(28));
     
     // lông tên đỏ
     setcolor(gemColor);
-    line(quiverX-S(8), quiverY-S(30), quiverX-S(12), quiverY-S(27));
-    line(quiverX-S(2), quiverY-S(32), quiverX-S(6), quiverY-S(29));
-    line(quiverX+S(4), quiverY-S(28), quiverX, quiverY-S(25));
+    algorithmLine(quiverX-S(8), quiverY-S(30), quiverX-S(12), quiverY-S(27));
+    algorithmLine(quiverX-S(2), quiverY-S(32), quiverX-S(6), quiverY-S(29));
+    algorithmLine(quiverX+S(4), quiverY-S(28), quiverX, quiverY-S(25));
     setlinestyle(SOLID_LINE, 0, thickNormal); 
     setcolor(outlineColor);
 
@@ -83,8 +84,8 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     
     // nắm tay trái
     setfillstyle(SOLID_FILL, armorMain);
-    fillellipse(x - S(24), y - S(12), S(6), S(6));
-    circle(x - S(24), y - S(12), S(6));
+    algorithmFillEllipse(x - S(24), y - S(12), S(6), S(6));
+    algorithmCircle(x - S(24), y - S(12), S(6));
 
     // chân phải - đùi
     setfillstyle(SOLID_FILL, armorMain);
@@ -97,7 +98,7 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     int kneeR[] = {x+S(3), y-S(28), x+S(22), y-S(28), x+S(21), y-S(16), x+S(4), y-S(16)};
     fillpoly(4, kneeR); drawpoly(4, kneeR);
     setcolor(goldMain);
-    line(x+S(3), y-S(28), x+S(22), y-S(28));
+    algorithmLine(x+S(3), y-S(28), x+S(22), y-S(28));
     setcolor(outlineColor);
 
     // ống và bàn chân phải
@@ -115,8 +116,8 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     // viền vàng chữ v trên ngực
     setcolor(goldMain);
     setlinestyle(SOLID_LINE, 0, thickBold);
-    line(x-S(18), y-S(40), x+S(4), y-S(25));
-    line(x+S(18), y-S(40), x+S(4), y-S(25));
+    algorithmLine(x-S(18), y-S(40), x+S(4), y-S(25));
+    algorithmLine(x+S(18), y-S(40), x+S(4), y-S(25));
     setlinestyle(SOLID_LINE, 0, thickNormal); 
     setcolor(outlineColor);
 
@@ -128,18 +129,18 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     // ngọc đỏ trên đai
     setcolor(outlineColor);
     setfillstyle(SOLID_FILL, goldMain);
-    fillellipse(x+S(4), y-S(20), S(8), S(8)); 
-    circle(x+S(4), y-S(20), S(8));
+    algorithmFillEllipse(x+S(4), y-S(20), S(8), S(8)); 
+    algorithmCircle(x+S(4), y-S(20), S(8));
     setfillstyle(SOLID_FILL, gemColor);
-    fillellipse(x+S(4), y-S(20), S(5), S(5));
+    algorithmFillEllipse(x+S(4), y-S(20), S(5), S(5));
 
     // giáp háng
     setfillstyle(SOLID_FILL, armorMain);
     int groin[] = {x-S(10), y-S(15), x+S(14), y-S(15), x+S(10), y-S(5), x-S(2), y-S(5)};
     fillpoly(4, groin); drawpoly(4, groin);
     setcolor(goldMain);
-    line(x-S(10), y-S(15), x-S(2), y-S(5));
-    line(x+S(14), y-S(15), x+S(10), y-S(5));
+    algorithmLine(x-S(10), y-S(15), x-S(2), y-S(5));
+    algorithmLine(x+S(14), y-S(15), x+S(10), y-S(5));
     setcolor(outlineColor);
 
     // tay phải cầm cung
@@ -149,8 +150,8 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
 
     // nắm tay phải
     setfillstyle(SOLID_FILL, armorDark);
-    fillellipse(x+S(40), y-S(30), S(7), S(7));
-    circle(x+S(40), y-S(30), S(7));
+    algorithmFillEllipse(x+S(40), y-S(30), S(7), S(7));
+    algorithmCircle(x+S(40), y-S(30), S(7));
 
     // cung tên
     int bowX = x + S(40);
@@ -168,18 +169,18 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     setcolor(outlineColor);
     rectangle(bowX-S(2), bowY-S(6), bowX+S(5), bowY+S(6));
     setfillstyle(SOLID_FILL, gemColor);
-    fillellipse(bowX+S(1), bowY, S(2), S(2));
+    algorithmFillEllipse(bowX+S(1), bowY, S(2), S(2));
 
     // dây cung
     setcolor(glowColor);
     setlinestyle(SOLID_LINE, 0, thickNormal); 
-    line(bowX - S(4), bowY - S(24), bowX - S(14), bowY);
-    line(bowX - S(4), bowY + S(24), bowX - S(14), bowY);
+    algorithmLine(bowX - S(4), bowY - S(24), bowX - S(14), bowY);
+    algorithmLine(bowX - S(4), bowY + S(24), bowX - S(14), bowY);
     
     // mũi tên năng lượng
     setcolor(goldLight);
     setlinestyle(SOLID_LINE, 0, thickBold);
-    line(bowX - S(14), bowY, bowX + S(16), bowY);
+    algorithmLine(bowX - S(14), bowY, bowX + S(16), bowY);
     
     // đầu mũi tên
     setfillstyle(SOLID_FILL, eyeColor);
@@ -200,14 +201,14 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     int shoulderL[] = {x-S(16), y-S(50), x-S(28), y-S(45), x-S(34), y-S(30), x-S(18), y-S(35)};
     fillpoly(4, shoulderL); drawpoly(4, shoulderL);
     setcolor(goldMain);
-    line(x-S(28), y-S(45), x-S(34), y-S(30)); 
+    algorithmLine(x-S(28), y-S(45), x-S(34), y-S(30)); 
     setcolor(outlineColor);
 
     setfillstyle(SOLID_FILL, armorDark);
     int shoulderR[] = {x+S(16), y-S(50), x+S(28), y-S(45), x+S(34), y-S(30), x+S(18), y-S(35)};
     fillpoly(4, shoulderR); drawpoly(4, shoulderR);
     setcolor(goldMain);
-    line(x+S(28), y-S(45), x+S(34), y-S(30));
+    algorithmLine(x+S(28), y-S(45), x+S(34), y-S(30));
     setcolor(outlineColor);
 
     // mũ giáp chính
@@ -240,13 +241,13 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     int hornL[] = {headX-S(22), headY-S(5), headX-S(38), headY-S(35), headX-S(15), headY-S(22)};
     fillpoly(3, hornL); drawpoly(3, hornL);
     setcolor(armorMain);
-    line(headX-S(22), headY-S(5), headX-S(29), headY-S(22)); 
+    algorithmLine(headX-S(22), headY-S(5), headX-S(29), headY-S(22)); 
     setcolor(outlineColor);
 
     int hornR[] = {headX+S(22), headY-S(5), headX+S(38), headY-S(35), headX+S(15), headY-S(22)};
     fillpoly(3, hornR); drawpoly(3, hornR);
     setcolor(armorMain);
-    line(headX+S(22), headY-S(5), headX+S(29), headY-S(22));
+    algorithmLine(headX+S(22), headY-S(5), headX+S(29), headY-S(22));
     setcolor(outlineColor);
 
     // chóp mũ có ngọc
@@ -255,9 +256,9 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     fillpoly(3, crest); drawpoly(3, crest);
 
     setfillstyle(SOLID_FILL, goldDark);
-    fillellipse(headX+S(6), headY - S(18), S(6), S(8));
+    algorithmFillEllipse(headX+S(6), headY - S(18), S(6), S(8));
     setfillstyle(SOLID_FILL, gemColor);
-    fillellipse(headX+S(6), headY - S(18), S(4), S(6));
+    algorithmFillEllipse(headX+S(6), headY - S(18), S(4), S(6));
 
     // khe nhìn
     setfillstyle(SOLID_FILL, BLACK);
@@ -276,9 +277,9 @@ void drawExplorer(int x, int y, float scale = 1.0f) {
     setcolor(armorMain);
     setlinestyle(SOLID_LINE, 0, thickBold);
     for(int i=0; i<6; i++) {
-        line(visor[i*2], visor[i*2+1], visor[i*2+2], visor[i*2+3]);
+        algorithmLine(visor[i*2], visor[i*2+1], visor[i*2+2], visor[i*2+3]);
     }
-    line(visor[12], visor[13], visor[0], visor[1]);
+    algorithmLine(visor[12], visor[13], visor[0], visor[1]);
     
     // đôi mắt phát sáng
     setcolor(outlineColor);

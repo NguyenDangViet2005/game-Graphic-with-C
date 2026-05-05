@@ -6,20 +6,60 @@
 #include <string.h>
 #include "configs/Config.cpp"
 #include "components/index.cpp"
+#include "components/LoadingScreen.cpp"
 
 // Caching background để không phải render lại tĩnh
 void* cachedBackground = NULL;
+void* cachedGameBackground = NULL;  // Cache riêng cho game
 
 void loadAndDrawBackground() {
     if (cachedBackground == NULL) {
+        // Bắt đầu loading
+        drawLoadingScreen(0, "Initializing...");
+        delay(150);
+        
+        // Vẽ vào buffer ẩn trong khi hiển thị progress
+        int oldPage = getactivepage();
+        setactivepage(1);  // Vẽ vào page ẩn
+        
         cleardevice();
         setbkcolor(BLACK);
-        drawMenuBackground(); // Hàm này render chậm
+        
+        // Load từng phần với status text
+        setactivepage(0);
+        drawLoadingScreen(15, "Loading assets...");
+        setactivepage(1);
+        delay(80);
+        
+        setactivepage(0);
+        drawLoadingScreen(35, "Rendering environment...");
+        setactivepage(1);
+        delay(80);
+        
+        // Vẽ background (phần chậm nhất)
+        drawMenuBackground();
+        
+        setactivepage(0);
+        drawLoadingScreen(75, "Preparing scene...");
+        setactivepage(1);
+        delay(80);
         
         // Lưu lại hình ảnh vào RAM
         unsigned int size = imagesize(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         cachedBackground = malloc(size);
         getimage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cachedBackground);
+        
+        setactivepage(0);
+        drawLoadingScreen(95, "Finalizing...");
+        delay(100);
+        
+        // Hoàn thành loading
+        drawLoadingScreen(100, "Ready!");
+        delay(400);
+        
+        // Hiển thị menu
+        putimage(0, 0, cachedBackground, COPY_PUT);
+        setactivepage(oldPage);
     } else {
         // Chỉ việc đẩy bộ nhớ ra màn hình, siêu nhanh
         putimage(0, 0, cachedBackground, COPY_PUT);
@@ -205,7 +245,7 @@ int showMainMenu() {
             }
         }
         
-        delay(10); // Delay nhỏ để không tốn CPU
+        delay(5); // Delay nhỏ để không tốn CPU
     }
     
     return 3; // Mặc định là thoát
@@ -276,7 +316,7 @@ void showInstructions() {
             char key = getch();
             if(key == 27) break;
         }
-        delay(50);
+        delay(10);
     }
 }
 
@@ -342,7 +382,7 @@ void showScoreboard() {
             char key = getch();
             if(key == 27) break;
         }
-        delay(50);
+        delay(10);
     }
 }
 
@@ -358,10 +398,62 @@ void playGame() {
     int pauseBtnX = SCREEN_WIDTH - 70;
     int pauseBtnY = 20;
 
-    // Vẽ màn hình game một lần duy nhất
+    // Vẽ màn hình game với cache và loading
     cleardevice();
-    drawBackground();
-    drawDarkForest();
+    
+    if (cachedGameBackground == NULL) {
+        // Hiển thị loading
+        drawLoadingScreen(0, "Starting game...");
+        delay(150);
+        
+        // Vẽ vào buffer ẩn
+        int oldPage = getactivepage();
+        setactivepage(1);
+        cleardevice();
+        
+        // Load background
+        setactivepage(0);
+        drawLoadingScreen(20, "Loading world...");
+        setactivepage(1);
+        delay(80);
+        
+        drawBackground();
+        
+        // Load forest
+        setactivepage(0);
+        drawLoadingScreen(55, "Growing forest...");
+        setactivepage(1);
+        delay(80);
+        
+        drawDarkForest();
+        
+        // Lưu vào cache
+        setactivepage(0);
+        drawLoadingScreen(85, "Spawning creatures...");
+        setactivepage(1);
+        delay(80);
+        
+        unsigned int size = imagesize(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        cachedGameBackground = malloc(size);
+        getimage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cachedGameBackground);
+        
+        setactivepage(0);
+        drawLoadingScreen(95, "Almost there...");
+        delay(100);
+        
+        // Hoàn thành
+        drawLoadingScreen(100, "Let's hunt!");
+        delay(400);
+        
+        // Hiển thị game
+        putimage(0, 0, cachedGameBackground, COPY_PUT);
+        setactivepage(oldPage);
+    } else {
+        // Lần sau: dùng cache, siêu nhanh
+        putimage(0, 0, cachedGameBackground, COPY_PUT);
+    }
+    
+    // Vẽ các thành phần động
     drawRhino(950, GROUND_Y + 30);
     drawExplorer(200, GROUND_Y + 30);
     drawGameStats(hp, score);
@@ -396,7 +488,7 @@ void playGame() {
             }
         }
         
-        delay(30);
+        delay(10);
     }
 }
 

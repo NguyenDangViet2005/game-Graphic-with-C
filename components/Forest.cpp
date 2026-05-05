@@ -2,6 +2,7 @@
 #define FOREST_H
 
 #include <graphics.h>
+#include "../algorithms/index.cpp"
 
 // Vẽ rừng tối (kết hợp tầng xa, cây, và bụi cỏ)
 void drawDarkForest() {

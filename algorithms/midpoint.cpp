@@ -1,0 +1,189 @@
+#ifndef MIDPOINT_H
+#define MIDPOINT_H
+
+#include <graphics.h>
+
+// Thuật toán Midpoint vẽ đường tròn
+void midpointCircle(int centerX, int centerY, int radius) {
+    int x = 0;
+    int y = radius;
+    int d = 1 - radius;
+    
+    // Vẽ 8 điểm đối xứng
+    auto plotCirclePoints = [&](int cx, int cy, int x, int y) {
+        putpixel(cx + x, cy + y, getcolor());
+        putpixel(cx - x, cy + y, getcolor());
+        putpixel(cx + x, cy - y, getcolor());
+        putpixel(cx - x, cy - y, getcolor());
+        putpixel(cx + y, cy + x, getcolor());
+        putpixel(cx - y, cy + x, getcolor());
+        putpixel(cx + y, cy - x, getcolor());
+        putpixel(cx - y, cy - x, getcolor());
+    };
+    
+    plotCirclePoints(centerX, centerY, x, y);
+    
+    while (x < y) {
+        x++;
+        if (d < 0) {
+            d += 2 * x + 1;
+        } else {
+            y--;
+            d += 2 * (x - y) + 1;
+        }
+        plotCirclePoints(centerX, centerY, x, y);
+    }
+}
+
+// Thuật toán Midpoint vẽ ellipse
+void midpointEllipse(int centerX, int centerY, int radiusX, int radiusY) {
+    int x = 0;
+    int y = radiusY;
+    
+    // Vẽ 4 điểm đối xứng
+    auto plotEllipsePoints = [&](int cx, int cy, int x, int y) {
+        putpixel(cx + x, cy + y, getcolor());
+        putpixel(cx - x, cy + y, getcolor());
+        putpixel(cx + x, cy - y, getcolor());
+        putpixel(cx - x, cy - y, getcolor());
+    };
+    
+    // Vùng 1: dy/dx < -1
+    int rx2 = radiusX * radiusX;
+    int ry2 = radiusY * radiusY;
+    int twoRx2 = 2 * rx2;
+    int twoRy2 = 2 * ry2;
+    
+    int p1 = ry2 - rx2 * radiusY + (rx2 / 4);
+    int dx = 0;
+    int dy = twoRx2 * y;
+    
+    plotEllipsePoints(centerX, centerY, x, y);
+    
+    // Vùng 1
+    while (dx < dy) {
+        x++;
+        dx = twoRy2 * x;
+        
+        if (p1 < 0) {
+            p1 += dx + ry2;
+        } else {
+            y--;
+            dy = twoRx2 * y;
+            p1 += dx - dy + ry2;
+        }
+        plotEllipsePoints(centerX, centerY, x, y);
+    }
+    
+    // Vùng 2: dy/dx >= -1
+    int p2 = ry2 * (x + 0.5) * (x + 0.5) + rx2 * (y - 1) * (y - 1) - rx2 * ry2;
+    
+    while (y > 0) {
+        y--;
+        dy = twoRx2 * y;
+        
+        if (p2 > 0) {
+            p2 += rx2 - dy;
+        } else {
+            x++;
+            dx = twoRy2 * x;
+            p2 += dx - dy + rx2;
+        }
+        plotEllipsePoints(centerX, centerY, x, y);
+    }
+}
+
+// Vẽ đường tròn với fill
+void midpointFilledCircle(int centerX, int centerY, int radius) {
+    int x = 0;
+    int y = radius;
+    int d = 1 - radius;
+    
+    // Vẽ đường ngang để fill
+    auto drawHorizontalLine = [&](int cx, int cy, int x1, int x2, int y) {
+        for (int i = x1; i <= x2; i++) {
+            putpixel(cx + i, cy + y, getcolor());
+        }
+    };
+    
+    drawHorizontalLine(centerX, centerY, -x, x, y);
+    drawHorizontalLine(centerX, centerY, -x, x, -y);
+    
+    while (x < y) {
+        x++;
+        if (d < 0) {
+            d += 2 * x + 1;
+        } else {
+            y--;
+            d += 2 * (x - y) + 1;
+        }
+        
+        drawHorizontalLine(centerX, centerY, -x, x, y);
+        drawHorizontalLine(centerX, centerY, -x, x, -y);
+        drawHorizontalLine(centerX, centerY, -y, y, x);
+        drawHorizontalLine(centerX, centerY, -y, y, -x);
+    }
+}
+
+// Vẽ ellipse với fill
+void midpointFilledEllipse(int centerX, int centerY, int radiusX, int radiusY) {
+    int x = 0;
+    int y = radiusY;
+    
+    // Vẽ đường ngang để fill
+    auto drawHorizontalLine = [&](int cx, int cy, int x1, int x2, int y) {
+        for (int i = x1; i <= x2; i++) {
+            putpixel(cx + i, cy + y, getcolor());
+        }
+    };
+    
+    // Vùng 1
+    int rx2 = radiusX * radiusX;
+    int ry2 = radiusY * radiusY;
+    int twoRx2 = 2 * rx2;
+    int twoRy2 = 2 * ry2;
+    
+    int p1 = ry2 - rx2 * radiusY + (rx2 / 4);
+    int dx = 0;
+    int dy = twoRx2 * y;
+    
+    drawHorizontalLine(centerX, centerY, -x, x, y);
+    drawHorizontalLine(centerX, centerY, -x, x, -y);
+    
+    while (dx < dy) {
+        x++;
+        dx = twoRy2 * x;
+        
+        if (p1 < 0) {
+            p1 += dx + ry2;
+        } else {
+            y--;
+            dy = twoRx2 * y;
+            p1 += dx - dy + ry2;
+        }
+        
+        drawHorizontalLine(centerX, centerY, -x, x, y);
+        drawHorizontalLine(centerX, centerY, -x, x, -y);
+    }
+    
+    // Vùng 2
+    int p2 = ry2 * (x + 0.5) * (x + 0.5) + rx2 * (y - 1) * (y - 1) - rx2 * ry2;
+    
+    while (y > 0) {
+        y--;
+        dy = twoRx2 * y;
+        
+        if (p2 > 0) {
+            p2 += rx2 - dy;
+        } else {
+            x++;
+            dx = twoRy2 * x;
+            p2 += dx - dy + rx2;
+        }
+        
+        drawHorizontalLine(centerX, centerY, -x, x, y);
+        drawHorizontalLine(centerX, centerY, -x, x, -y);
+    }
+}
+
+#endif

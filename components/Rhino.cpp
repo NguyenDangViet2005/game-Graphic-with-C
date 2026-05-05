@@ -2,6 +2,7 @@
 #define RHINO_H
 
 #include <graphics.h>
+#include "../algorithms/index.cpp"
 
 // Vẽ con tê giác
 void drawRhino(int x, int y) {
@@ -59,15 +60,15 @@ void drawRhino(int x, int y) {
     // === 2. ĐUÔI (Cong mượt hơn) ===
     setcolor(outlineColor);
     setlinestyle(SOLID_LINE, 0, 3);
-    line(x + 40, y - 40, x + 48, y - 26);
-    line(x + 48, y - 26, x + 50, y - 22);
+    algorithmLine(x + 40, y - 40, x + 48, y - 26);
+    algorithmLine(x + 48, y - 26, x + 50, y - 22);
     setfillstyle(SOLID_FILL, outlineColor);
-    fillellipse(x + 50, y - 20, 3, 6); // Chóp lông dài hơn
+    algorithmFillEllipse(x + 50, y - 20, 3, 6); // Chóp lông dài hơn
     // Lông đuôi chi tiết
     setlinestyle(SOLID_LINE, 0, 2);
     setcolor(midShadow);
-    line(x + 49, y - 22, x + 51, y - 18);
-    line(x + 48, y - 23, x + 52, y - 20);
+    algorithmLine(x + 49, y - 22, x + 51, y - 18);
+    algorithmLine(x + 48, y - 23, x + 52, y - 20);
     setlinestyle(SOLID_LINE, 0, 1);
 
     // thân
@@ -246,8 +247,8 @@ void drawRhino(int x, int y) {
     
     // Nếp nhăn da đầu
     setcolor(midShadow);
-    line(x - 52, y - 42, x - 44, y - 42);
-    line(x - 54, y - 38, x - 46, y - 38);
+    algorithmLine(x - 52, y - 42, x - 44, y - 42);
+    algorithmLine(x - 54, y - 38, x - 46, y - 38);
 
     // Sừng
     // Sừng lớn
@@ -399,19 +400,19 @@ void drawRhino(int x, int y) {
     setcolor(outlineColor);
     setlinestyle(SOLID_LINE, 0, 3);
     // Đường gân cong nhẹ từ vai xuống mông
-    line(x + 6, y - 56, x + 6, y - 18);  // Phần thẳng dưới
-    line(x + 4, y - 60, x + 6, y - 56);  // Cong vào chỗ nối
-    line(x + 2, y - 64, x + 4, y - 60);  // Cong lên vai
+    algorithmLine(x + 6, y - 56, x + 6, y - 18);  // Phần thẳng dưới
+    algorithmLine(x + 4, y - 60, x + 6, y - 56);  // Cong vào chỗ nối
+    algorithmLine(x + 2, y - 64, x + 4, y - 60);  // Cong lên vai
     setlinestyle(SOLID_LINE, 0, 1);
     
     // Shadow cho gân (cũng cong)
     setcolor(shadowColor);
-    line(x + 5, y - 56, x + 5, y - 20);
-    line(x + 3, y - 60, x + 5, y - 56);
-    line(x + 1, y - 62, x + 3, y - 60);
-    line(x + 7, y - 56, x + 7, y - 20);
-    line(x + 5, y - 60, x + 7, y - 56);
-    line(x + 3, y - 62, x + 5, y - 60);
+    algorithmLine(x + 5, y - 56, x + 5, y - 20);
+    algorithmLine(x + 3, y - 60, x + 5, y - 56);
+    algorithmLine(x + 1, y - 62, x + 3, y - 60);
+    algorithmLine(x + 7, y - 56, x + 7, y - 20);
+    algorithmLine(x + 5, y - 60, x + 7, y - 56);
+    algorithmLine(x + 3, y - 62, x + 5, y - 60);
 }
 
 #endif 

@@ -2,13 +2,12 @@
 #define MENU_BACKGROUND_H
 
 #include <graphics.h>
+#include "../configs/Config.cpp"
 #include "Cloud.cpp"
 #include "Tree.cpp"
 #include "Bush.cpp"
-#include "Explorer.cpp"
-#include "../configs/Config.cpp"
 
-void drawExplorer(int x, int y, float scale);
+void drawExplorer(int x, int y, float scale = 1.0f);
 
 // Vẽ background chung cho Menu, Hướng dẫn, Bảng điểm
 void drawMenuBackground() {

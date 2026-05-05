@@ -178,7 +178,7 @@ int showPauseMenuOverlay() {
                 return 0;
             }
         }
-        delay(30);
+        delay(10);
     }
     
     putimage(saveX1, saveY1, savedBg, COPY_PUT);
