@@ -4,15 +4,17 @@
 #include <graphics.h>
 #include "../configs/Config.cpp"
 #include "Cloud.cpp"
+#include "Firefly.cpp"
+#include "../algorithms/fractal.cpp"
 
 // Vẽ background (trời, đám mây, đất, cỏ)
 void drawBackground() {
-    //vẽ nền trời Gradient từ đen xanh đậm đến xanh dương nhạt
+    //vẽ nền trời Gradient từ đen xanh đậm đến xanh dương nhạt - tối hơn
     for(int i = 0; i < GROUND_Y; i++) {
         float ratio = (float)i / GROUND_Y;
-        int r = 3 + (int)(ratio * 12);   
-        int g = 5 + (int)(ratio * 15); 
-        int b = 15 + (int)(ratio * 25); 
+        int r = 2 + (int)(ratio * 8);   
+        int g = 3 + (int)(ratio * 10); 
+        int b = 10 + (int)(ratio * 18); 
         setcolor(COLOR(r, g, b));
         line(0, i, SCREEN_WIDTH, i);
     }
@@ -22,33 +24,38 @@ void drawBackground() {
     int moonY = 80;
     int moonRadius = 50;
     
-    // Ánh sáng mặt trăng
-    setcolor(COLOR(40, 45, 65));
-    setfillstyle(SOLID_FILL, COLOR(40, 45, 65));
+    // Ánh sáng mặt trăng - giảm độ sáng
+    setcolor(COLOR(30, 35, 50));
+    setfillstyle(SOLID_FILL, COLOR(30, 35, 50));
     fillellipse(moonX, moonY, moonRadius + 15, moonRadius + 15);
     
-    setcolor(COLOR(60, 65, 85));
-    setfillstyle(SOLID_FILL, COLOR(60, 65, 85));
+    setcolor(COLOR(45, 50, 65));
+    setfillstyle(SOLID_FILL, COLOR(45, 50, 65));
     fillellipse(moonX, moonY, moonRadius + 8, moonRadius + 8);
     
-    // Mặt trăng chính - màu trắng xám nhạt
-    setcolor(COLOR(220, 225, 230));
-    setfillstyle(SOLID_FILL, COLOR(220, 225, 230));
+    // Mặt trăng chính - màu trắng xám nhạt hơn
+    setcolor(COLOR(180, 185, 190));
+    setfillstyle(SOLID_FILL, COLOR(180, 185, 190));
     fillellipse(moonX, moonY, moonRadius, moonRadius);
     
-    // Chi tiết trên mặt trăng
-    setcolor(COLOR(190, 195, 200));
-    setfillstyle(SOLID_FILL, COLOR(190, 195, 200));
+    // Chi tiết trên mặt trăng - tối hơn (vẽ trước)
+    setcolor(COLOR(150, 155, 160));
+    setfillstyle(SOLID_FILL, COLOR(150, 155, 160));
     fillellipse(moonX - 15, moonY - 10, 12, 10);
     fillellipse(moonX + 18, moonY + 5, 10, 8);
     fillellipse(moonX + 5, moonY + 18, 8, 7);
     fillellipse(moonX - 10, moonY + 12, 6, 5);
     
-    // Đám mây
+    
+    // Đám mây (GIỮ NGUYÊN)
     drawCloud(200, 100, 40);
     drawCloud(500, 150, 35);
     drawCloud(850, 80, 45);
     drawCloud(1050, 120, 38);
+    
+    // === THÊM MÂY FRACTAL HUYỀN BÍ ===
+    drawMysticalCloud(350, 130, 60, 25);
+    drawMysticalCloud(700, 110, 55, 22);
     
     // vẽ nền đất và cỏ
     
@@ -103,6 +110,9 @@ void drawBackground() {
     setcolor(BLACK);
     setlinestyle(SOLID_LINE, 0, 3);
     line(0, GROUND_Y, SCREEN_WIDTH, GROUND_Y);
+    
+    // Thêm đom đóm bay lượn
+    drawFireflies();
 }
 
 #endif 

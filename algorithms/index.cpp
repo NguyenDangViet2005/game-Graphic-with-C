@@ -4,6 +4,7 @@
 #include "bresenham.cpp"
 #include "midpoint.cpp"
 #include "polygon_fill.cpp"
+#include "fractal.cpp"
 #include <graphics.h>
 
 // Wrapper functions để thay thế các hàm graphics.h chuẩn

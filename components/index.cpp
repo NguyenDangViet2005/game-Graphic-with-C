@@ -8,7 +8,7 @@
 #include "Background.cpp"
 #include "Forest.cpp"
 #include "Explorer.cpp"
-#include "Rhino.cpp"
+#include "Ghost.cpp"
 #include "Heart.cpp"
 #include "PauseButton.cpp"
 #include "MenuBackground.cpp"

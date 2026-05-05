@@ -454,7 +454,7 @@ void playGame() {
     }
     
     // Vẽ các thành phần động
-    drawRhino(950, GROUND_Y + 30);
+    drawGhost(950, GROUND_Y + 30);
     drawExplorer(200, GROUND_Y + 30);
     drawGameStats(hp, score);
     drawPauseButton(pauseBtnX, pauseBtnY);
