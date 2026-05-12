@@ -15,7 +15,7 @@ void* cachedGameBackground = NULL;  // Cache riêng cho game
 void loadAndDrawBackground() {
     if (cachedBackground == NULL) {
         // Bắt đầu loading
-        drawLoadingScreen(0, "Initializing...");
+        drawLoadingScreen(0, "Vui long cho...");
         delay(150);
         
         // Vẽ vào buffer ẩn trong khi hiển thị progress
@@ -27,12 +27,12 @@ void loadAndDrawBackground() {
         
         // Load từng phần với status text
         setactivepage(0);
-        drawLoadingScreen(15, "Loading assets...");
+        drawLoadingScreen(15, "Dang tai...");
         setactivepage(1);
         delay(80);
         
         setactivepage(0);
-        drawLoadingScreen(35, "Rendering environment...");
+        drawLoadingScreen(35, "Dang tai moi truong...");
         setactivepage(1);
         delay(80);
         
@@ -40,7 +40,7 @@ void loadAndDrawBackground() {
         drawMenuBackground();
         
         setactivepage(0);
-        drawLoadingScreen(75, "Preparing scene...");
+        drawLoadingScreen(75, "Dang tai canh vat");
         setactivepage(1);
         delay(80);
         
@@ -50,11 +50,11 @@ void loadAndDrawBackground() {
         getimage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cachedBackground);
         
         setactivepage(0);
-        drawLoadingScreen(95, "Finalizing...");
+        drawLoadingScreen(95, "Hoan thanh...");
         delay(100);
         
         // Hoàn thành loading
-        drawLoadingScreen(100, "Ready!");
+        drawLoadingScreen(100, "Bat dau!");
         delay(400);
         
         // Hiển thị menu
@@ -113,6 +113,32 @@ void drawMenuButton(int x, int y, int width, int height, const char* text, int i
     int estimatedHeight = 24;
     int textX = x + (width - estimatedWidth) / 2;
     int textY = y + (height - estimatedHeight) / 2;
+    outtextxy(textX, textY, (char*)text);
+}
+
+// Vẽ nút back (nhỏ hơn nút menu chính)
+void drawBackButton(int x, int y, int width, int height, int isHover) {
+    if (isHover) {
+        setfillstyle(SOLID_FILL, COLOR(20, 35, 60));
+        setcolor(COLOR(255, 230, 100));
+    } else {
+        setfillstyle(SOLID_FILL, COLOR(45, 45, 45));
+        setcolor(COLOR(220, 220, 220));
+    }
+
+    bar(x, y, x + width, y + height);
+    setlinestyle(SOLID_LINE, 0, 2);
+    rectangle(x, y, x + width, y + height);
+
+    settextstyle(BOLD_FONT, HORIZ_DIR, 2);
+    setbkcolor(isHover ? COLOR(20, 35, 60) : COLOR(45, 45, 45));
+    setcolor(isHover ? COLOR(255, 230, 100) : COLOR(230, 230, 230));
+
+    const char* text = "Quay lai";
+    int textW = textwidth((char*)text);
+    int textH = 16;
+    int textX = x + (width - textW) / 2;
+    int textY = y + (height - textH) / 2;
     outtextxy(textX, textY, (char*)text);
 }
 
@@ -257,7 +283,7 @@ void showInstructions() {
     loadAndDrawBackground();
     
     // Tiêu đề - căn giữa
-    char title[] = "HUONG DAN";
+    char title[] = "HUONG DAN CHOI GAME";
     settextstyle(BOLD_FONT, HORIZ_DIR, 5); // To thêm chút
     
     // Set màu nền text tiệp với khoảng trời mây
@@ -309,9 +335,37 @@ void showInstructions() {
     // Text ở ngoài khung, dùng màu nền gốc
     setbkcolor(COLOR(10, 15, 30));
     outtextxy(textX, boxY + boxH + 30, backMsg);
+
+    // Nút back để click
+    int backBtnW = 180;
+    int backBtnH = 45;
+    int backBtnX = 20;
+    int backBtnY = 20;
+    int backHover = 0;
+    drawBackButton(backBtnX, backBtnY, backBtnW, backBtnH, backHover);
     
     // Chờ ESC
     while(1) {
+        // Click chuột
+        if(ismouseclick(WM_LBUTTONDOWN)) {
+            int mx, my;
+            getmouseclick(WM_LBUTTONDOWN, mx, my);
+            if(mx >= backBtnX && mx <= backBtnX + backBtnW &&
+               my >= backBtnY && my <= backBtnY + backBtnH) {
+                break;
+            }
+        }
+
+        // Hover effect
+        int mx = mousex();
+        int my = mousey();
+        int isHover = (mx >= backBtnX && mx <= backBtnX + backBtnW &&
+                       my >= backBtnY && my <= backBtnY + backBtnH);
+        if(isHover != backHover) {
+            backHover = isHover;
+            drawBackButton(backBtnX, backBtnY, backBtnW, backBtnH, backHover);
+        }
+
         if(kbhit()) {
             char key = getch();
             if(key == 27) break;
@@ -375,9 +429,37 @@ void showScoreboard() {
     
     setbkcolor(COLOR(10, 15, 30));
     outtextxy(textX, boxY + boxH + 30, backMsg2);
+
+    // Nút back để click
+    int backBtnW = 180;
+    int backBtnH = 45;
+    int backBtnX = 20;
+    int backBtnY = 20;
+    int backHover = 0;
+    drawBackButton(backBtnX, backBtnY, backBtnW, backBtnH, backHover);
     
     // Chờ ESC
     while(1) {
+        // Click chuột
+        if(ismouseclick(WM_LBUTTONDOWN)) {
+            int mx, my;
+            getmouseclick(WM_LBUTTONDOWN, mx, my);
+            if(mx >= backBtnX && mx <= backBtnX + backBtnW &&
+               my >= backBtnY && my <= backBtnY + backBtnH) {
+                break;
+            }
+        }
+
+        // Hover effect
+        int mx = mousex();
+        int my = mousey();
+        int isHover = (mx >= backBtnX && mx <= backBtnX + backBtnW &&
+                       my >= backBtnY && my <= backBtnY + backBtnH);
+        if(isHover != backHover) {
+            backHover = isHover;
+            drawBackButton(backBtnX, backBtnY, backBtnW, backBtnH, backHover);
+        }
+
         if(kbhit()) {
             char key = getch();
             if(key == 27) break;
@@ -403,7 +485,7 @@ void playGame() {
     
     if (cachedGameBackground == NULL) {
         // Hiển thị loading
-        drawLoadingScreen(0, "Starting game...");
+        drawLoadingScreen(0, "Vui long cho...");
         delay(150);
         
         // Vẽ vào buffer ẩn
@@ -413,7 +495,7 @@ void playGame() {
         
         // Load background
         setactivepage(0);
-        drawLoadingScreen(20, "Loading world...");
+        drawLoadingScreen(20, "Dang tai...");
         setactivepage(1);
         delay(80);
         
@@ -421,7 +503,7 @@ void playGame() {
         
         // Load forest
         setactivepage(0);
-        drawLoadingScreen(55, "Growing forest...");
+        drawLoadingScreen(55, "Dang tai khu rung...");
         setactivepage(1);
         delay(80);
         
@@ -429,7 +511,7 @@ void playGame() {
         
         // Lưu vào cache
         setactivepage(0);
-        drawLoadingScreen(85, "Spawning creatures...");
+        drawLoadingScreen(85, "Dang tai quai vat...");
         setactivepage(1);
         delay(80);
         
@@ -438,11 +520,11 @@ void playGame() {
         getimage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cachedGameBackground);
         
         setactivepage(0);
-        drawLoadingScreen(95, "Almost there...");
+        drawLoadingScreen(95, "Hoan thanh...");
         delay(100);
         
         // Hoàn thành
-        drawLoadingScreen(100, "Let's hunt!");
+        drawLoadingScreen(100, "Bat dau!");
         delay(400);
         
         // Hiển thị game

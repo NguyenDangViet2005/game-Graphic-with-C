@@ -7,21 +7,21 @@
 #include "Menu.cpp"
 
 int main() {
-    printf("Initializing graphics...\n");
+    printf("Dang tai...\n");
     
     initwindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Monster Slayer - Dark Forest Theme");
  
     if (graphresult() != grOk) {
-        printf("Graphics initialization failed!\n");
+        printf("Tai that bai!\n");
         return 1;
     }
     
-    printf("Graphics initialized successfully!\n");
-    printf("Starting game loop...\n");
+    printf("Tai thanh cong!\n");
+    printf("Dang chay...\n");
 
     gameLoop(); 
     
-    printf("Game ended, closing graphics...\n");
+    printf("Da thoat, hen gap lai!\n");
     closegraph();
     return 0;
 }
