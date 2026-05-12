@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "configs/Config.cpp"
-#include "Menu.cpp"
+#include "screens/menu/Menu.cpp"
 
 int main() {
     printf("Dang tai...\n");
@@ -13,7 +13,7 @@ int main() {
  
     if (graphresult() != grOk) {
         printf("Tai that bai!\n");
-        return 1;
+        return 1;   
     }
     
     printf("Tai thanh cong!\n");

@@ -8,6 +8,8 @@
 #include "Background.cpp"
 #include "Forest.cpp"
 #include "Explorer.cpp"
+#include "ExplorerMirrored.cpp"
+#include "Fireball.cpp"
 #include "Ghost.cpp"
 #include "Heart.cpp"
 #include "PauseButton.cpp"
