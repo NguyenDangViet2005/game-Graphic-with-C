@@ -115,6 +115,11 @@ int showPauseMenuOverlay() {
     int btnH = 60;
     int startY = boxY + 110;
     int spacing = 20;
+    int bX = boxX + (boxW - btnW) / 2;
+    int bY[2];
+    for (int i = 0; i < numOptions; i++) {
+        bY[i] = startY + i * (btnH + spacing);
+    }
 
     // Lam sạch buffer phím/chuột
     while(kbhit()) getch();
@@ -131,9 +136,7 @@ int showPauseMenuOverlay() {
             getmouseclick(WM_LBUTTONDOWN, mx, my);
             playClick();
             for(int i=0; i<numOptions; i++) {
-                int bX = boxX + (boxW - btnW) / 2;
-                int bY = startY + i * (btnH + spacing);
-                if (mx >= bX && mx <= bX + btnW && my >= bY && my <= bY + btnH) {
+                if (mx >= bX && mx <= bX + btnW && my >= bY[i] && my <= bY[i] + btnH) {
                     putimage(saveX1, saveY1, savedBg, COPY_PUT);
                     free(savedBg);
                     return i;
@@ -144,9 +147,7 @@ int showPauseMenuOverlay() {
         int mx = mousex();
         int my = mousey();
         for(int i=0; i<numOptions; i++) {
-            int bX = boxX + (boxW - btnW) / 2;
-            int bY = startY + i * (btnH + spacing);
-            if (mx >= bX && mx <= bX + btnW && my >= bY && my <= bY + btnH) {
+            if (mx >= bX && mx <= bX + btnW && my >= bY[i] && my <= bY[i] + btnH) {
                 if (currentSelection != i) {
                     drawSinglePauseMenuBtn(currentSelection, 0, boxX, boxY, boxW, btnW, btnH, startY, spacing, options[currentSelection]);
                     currentSelection = i;

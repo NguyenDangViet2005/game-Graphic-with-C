@@ -137,6 +137,7 @@ void playGame() {
         float dt = (now - lastTick) / 1000.0f;
         if (dt > 0.05f) dt = 0.05f;
         lastTick = now;
+        float arrowPulse = (float)sin(now * 0.008f);
 
         if (ismouseclick(WM_LBUTTONDOWN)) {
             int mx, my;
@@ -157,7 +158,8 @@ void playGame() {
             }
         }
 
-        if ((GetAsyncKeyState(VK_UP) & 0x0001) && explorerY >= groundY - 0.5f) {
+        int onGround = (explorerY >= groundY - 0.5f);
+        if ((GetAsyncKeyState(VK_UP) & 0x0001) && onGround) {
             explorerVy = jumpSpeed;
             playJump();
         }
@@ -194,15 +196,20 @@ void playGame() {
             explorerVy = 0.0f;
         }
 
-        if (fabs(explorerVx) > 5.0f && explorerY >= groundY - 0.5f) {
+        float absVx = (float)fabs(explorerVx);
+        if (absVx > 5.0f && onGround) {
             startRunLoop();
         } else {
             stopRunLoop();
         }
 
-        if (fabs(explorerVx) > 5.0f) walkTime += dt;
-        float bob = (float)sin(walkTime * 8.0f) * 0.03f;
-        explorerScale = 1.0f + bob;
+        if (absVx > 5.0f) {
+            walkTime += dt;
+            float bob = (float)sin(walkTime * 8.0f) * 0.03f;
+            explorerScale = 1.0f + bob;
+        } else {
+            explorerScale = 1.0f;
+        }
 
         if (shootCooldown > 0.0f) shootCooldown -= dt;
         if ((GetAsyncKeyState(VK_SPACE) & 0x8000) && shootCooldown <= 0.0f) {
@@ -228,7 +235,7 @@ void playGame() {
             arrows[i].y += arrows[i].vy * dt;
             arrows[i].vy += 40.0f * dt;
             arrows[i].angle = (float)atan2(arrows[i].vy, arrows[i].vx);
-            arrows[i].scale = 1.0f + (float)sin(now * 0.008f) * 0.08f;
+            arrows[i].scale = 1.0f + arrowPulse * 0.08f;
 
             if (arrows[i].x > SCREEN_WIDTH + 50 || arrows[i].y < -50 || arrows[i].y > SCREEN_HEIGHT + 50) {
                 arrows[i].active = 0;

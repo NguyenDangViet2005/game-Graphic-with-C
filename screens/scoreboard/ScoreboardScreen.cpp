@@ -3,7 +3,6 @@
 
 #include <graphics.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "../../configs/Config.cpp"
 #include "../../screens/menu/MenuCache.cpp"

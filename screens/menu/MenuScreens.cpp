@@ -117,6 +117,11 @@ int showMainMenu() {
     
     int currentSelection = 0;
     int totalItems = 4;
+    int buttonX = SCREEN_WIDTH - BUTTON_WIDTH - 150;
+    int buttonY[4];
+    for (int i = 0; i < totalItems; i++) {
+        buttonY[i] = START_Y + i * (BUTTON_HEIGHT + BUTTON_SPACING);
+    }
 
     clearMenuInputState();
     drawMenuScreen(currentSelection, menuItems, totalItems);
@@ -128,10 +133,8 @@ int showMainMenu() {
             playClick();
             
             for(int i = 0; i < totalItems; i++) {
-                int buttonX = SCREEN_WIDTH - BUTTON_WIDTH - 150;
-                int buttonY = START_Y + i * (BUTTON_HEIGHT + BUTTON_SPACING);
                 if(mx >= buttonX && mx <= buttonX + BUTTON_WIDTH &&
-                   my >= buttonY && my <= buttonY + BUTTON_HEIGHT) {
+                   my >= buttonY[i] && my <= buttonY[i] + BUTTON_HEIGHT) {
                     return i;
                 }
             }
@@ -141,17 +144,14 @@ int showMainMenu() {
         int my = mousey();
         
         for(int i = 0; i < totalItems; i++) {
-            int buttonX = SCREEN_WIDTH - BUTTON_WIDTH - 150;
-            int buttonY = START_Y + i * (BUTTON_HEIGHT + BUTTON_SPACING);
             if(mx >= buttonX && mx <= buttonX + BUTTON_WIDTH &&
-               my >= buttonY && my <= buttonY + BUTTON_HEIGHT) {
+               my >= buttonY[i] && my <= buttonY[i] + BUTTON_HEIGHT) {
                 if(currentSelection != i) {
-                    int oldButtonY = START_Y + currentSelection * (BUTTON_HEIGHT + BUTTON_SPACING);
-                    drawMenuButton(buttonX, oldButtonY, BUTTON_WIDTH, BUTTON_HEIGHT, 
+                    drawMenuButton(buttonX, buttonY[currentSelection], BUTTON_WIDTH, BUTTON_HEIGHT, 
                                  menuItems[currentSelection], 0);
                     
                     currentSelection = i;
-                    drawMenuButton(buttonX, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT, 
+                    drawMenuButton(buttonX, buttonY[currentSelection], BUTTON_WIDTH, BUTTON_HEIGHT, 
                                  menuItems[currentSelection], 1);
                 }
                 break;
@@ -174,15 +174,11 @@ int showMainMenu() {
                 }
                 
                 if(newSelection != currentSelection) {
-                    int buttonX = SCREEN_WIDTH - BUTTON_WIDTH - 150;
-                    
-                    int oldButtonY = START_Y + currentSelection * (BUTTON_HEIGHT + BUTTON_SPACING);
-                    drawMenuButton(buttonX, oldButtonY, BUTTON_WIDTH, BUTTON_HEIGHT, 
+                    drawMenuButton(buttonX, buttonY[currentSelection], BUTTON_WIDTH, BUTTON_HEIGHT, 
                                  menuItems[currentSelection], 0);
                     
                     currentSelection = newSelection;
-                    int newButtonY = START_Y + currentSelection * (BUTTON_HEIGHT + BUTTON_SPACING);
-                    drawMenuButton(buttonX, newButtonY, BUTTON_WIDTH, BUTTON_HEIGHT, 
+                    drawMenuButton(buttonX, buttonY[currentSelection], BUTTON_WIDTH, BUTTON_HEIGHT, 
                                  menuItems[currentSelection], 1);
                 }
             }
