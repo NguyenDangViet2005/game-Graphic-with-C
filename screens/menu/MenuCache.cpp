@@ -5,6 +5,7 @@
 
 void loadAndDrawBackground() {
     if (cachedBackground == NULL) {
+        playMusicLoading();
         // Bat dau loading
         drawLoadingScreen(0, "Vui long cho...");
         delay(150);
@@ -47,6 +48,8 @@ void loadAndDrawBackground() {
         // Hoan thanh loading
         drawLoadingScreen(100, "Bat dau!");
         delay(400);
+
+        playMusicBackground();
         
         // Hien thi menu
         putimage(0, 0, cachedBackground, COPY_PUT);

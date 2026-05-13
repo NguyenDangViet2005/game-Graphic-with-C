@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 #include "../configs/Config.cpp"
+#include "../configs/Audio.cpp"
 #include "../components/index.cpp"
 #include "../components/LoadingScreen.cpp"
 #include "GameplayTypes.cpp"
@@ -38,6 +39,7 @@ void playGame() {
     cleardevice();
 
     if (cachedGameBackground == NULL) {
+        playMusicLoading();
         drawLoadingScreen(0, "Vui long cho...");
         delay(150);
 
@@ -77,8 +79,10 @@ void playGame() {
 
         putimage(0, 0, cachedGameBackground, COPY_PUT);
         setactivepage(oldPage);
+        playMusicPlay();
     } else {
         putimage(0, 0, cachedGameBackground, COPY_PUT);
+        playMusicPlay();
     }
 
     float explorerX = 200.0f;
@@ -137,6 +141,7 @@ void playGame() {
         if (ismouseclick(WM_LBUTTONDOWN)) {
             int mx, my;
             getmouseclick(WM_LBUTTONDOWN, mx, my);
+            playClick();
             if (isClickOnPauseButton(mx, my, pauseBtnX, pauseBtnY)) {
                 int choice = showPauseMenuOverlay();
                 if (choice == 1) {
@@ -154,6 +159,7 @@ void playGame() {
 
         if ((GetAsyncKeyState(VK_UP) & 0x0001) && explorerY >= groundY - 0.5f) {
             explorerVy = jumpSpeed;
+            playJump();
         }
 
         int moveDir = 0;
@@ -188,6 +194,12 @@ void playGame() {
             explorerVy = 0.0f;
         }
 
+        if (fabs(explorerVx) > 5.0f && explorerY >= groundY - 0.5f) {
+            startRunLoop();
+        } else {
+            stopRunLoop();
+        }
+
         if (fabs(explorerVx) > 5.0f) walkTime += dt;
         float bob = (float)sin(walkTime * 8.0f) * 0.03f;
         explorerScale = 1.0f + bob;
@@ -204,6 +216,7 @@ void playGame() {
                     arrows[i].angle = facingRight ? 0.0f : 3.1415926f;
                     arrows[i].scale = 1.0f;
                     shootCooldown = 0.2f;
+                    playFire();
                     break;
                 }
             }
@@ -227,9 +240,11 @@ void playGame() {
                 if (isArrowHitGhost(arrows[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
                     arrows[i].active = 0;
                     ghosts[g].hp -= 1;
+                    playDamage();
                     if (ghosts[g].hp <= 0) {
                         ghosts[g].active = 0;
                         score += 100;
+                        playGetScore();
                     }
                     break;
                 }
@@ -298,6 +313,7 @@ void playGame() {
                 if (isExplorerHitGhost(explorerX, explorerY, (int)ghosts[i].x, (int)ghosts[i].y)) {
                     hp -= 1;
                     hurtCooldown = 0.8f;
+                    playExplorerDamage();
                     break;
                 }
             }
@@ -310,6 +326,7 @@ void playGame() {
                     fireballs[i].active = 0;
                     hp -= 1;
                     hurtCooldown = 0.8f;
+                    playExplorerDamage();
                     break;
                 }
             }
@@ -317,6 +334,9 @@ void playGame() {
 
         if (hp <= 0) {
             appendScoreToFile(score);
+            stopRunLoop();
+            stopCurrentMusic();
+            playDeath();
             showGameOverScreen(score);
             break;
         }

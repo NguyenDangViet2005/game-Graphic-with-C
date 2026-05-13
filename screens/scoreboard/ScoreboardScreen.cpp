@@ -92,6 +92,7 @@ void showScoreboard() {
         if(ismouseclick(WM_LBUTTONDOWN)) {
             int mx, my;
             getmouseclick(WM_LBUTTONDOWN, mx, my);
+            playClick();
             if(mx >= backBtnX && mx <= backBtnX + backBtnW &&
                my >= backBtnY && my <= backBtnY + backBtnH) {
                 break;

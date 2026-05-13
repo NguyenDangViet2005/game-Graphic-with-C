@@ -125,6 +125,7 @@ int showMainMenu() {
         if(ismouseclick(WM_LBUTTONDOWN)) {
             int mx, my;
             getmouseclick(WM_LBUTTONDOWN, mx, my);
+            playClick();
             
             for(int i = 0; i < totalItems; i++) {
                 int buttonX = SCREEN_WIDTH - BUTTON_WIDTH - 150;

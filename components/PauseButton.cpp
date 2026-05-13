@@ -3,6 +3,7 @@
 
 #include <graphics.h>
 #include "../configs/Config.cpp"
+#include "../configs/Audio.cpp"
 
 // Vị trí và kích thước nút
 const int PAUSE_BTN_W = 50;
@@ -128,6 +129,7 @@ int showPauseMenuOverlay() {
         if(ismouseclick(WM_LBUTTONDOWN)) {
             int mx, my;
             getmouseclick(WM_LBUTTONDOWN, mx, my);
+            playClick();
             for(int i=0; i<numOptions; i++) {
                 int bX = boxX + (boxW - btnW) / 2;
                 int bY = startY + i * (btnH + spacing);

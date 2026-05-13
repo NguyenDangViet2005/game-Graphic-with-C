@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 #include "../../configs/Config.cpp"
+#include "../../configs/Audio.cpp"
 #include "../../components/index.cpp"
 #include "../../components/LoadingScreen.cpp"
 

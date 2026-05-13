@@ -2,11 +2,11 @@
 #define GAMEPLAY_RENDER_CPP
 
 #include <graphics.h>
-#include <conio.h>
 #include <math.h>
 #include <stdio.h>
 
 #include "../configs/Config.cpp"
+#include "../configs/Audio.cpp"
 #include "GameplayTypes.cpp"
 
 void drawArrowAffine(float x, float y, float angle, float scale) {
@@ -70,6 +70,7 @@ void drawGameOverButton(int x, int y, int width, int height, int isHover) {
 }
 
 void showGameOverScreen(int score) {
+    playGameOver();
     setfillstyle(SOLID_FILL, BLACK);
     bar(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -97,6 +98,7 @@ void showGameOverScreen(int score) {
         if (ismouseclick(WM_LBUTTONDOWN)) {
             int mx, my;
             getmouseclick(WM_LBUTTONDOWN, mx, my);
+            playClick();
             if (mx >= btnX && mx <= btnX + btnW &&
                 my >= btnY && my <= btnY + btnH) {
                 break;

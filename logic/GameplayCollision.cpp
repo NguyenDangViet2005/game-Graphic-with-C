@@ -1,6 +1,8 @@
 #ifndef GAMEPLAY_COLLISION_CPP
 #define GAMEPLAY_COLLISION_CPP
 
+#include "GameplayTypes.cpp"
+
 int isArrowHitGhost(const Arrow& arrow, int ghostX, int ghostY) {
     int pixelSize = 3;
     int ghostLeft = ghostX + 2 * pixelSize;

@@ -5,6 +5,7 @@
 void gameLoop() {
     int running = 1;
     while(running) {
+        playMusicBackground();
         int choice = showMainMenu();
         
         switch(choice) {

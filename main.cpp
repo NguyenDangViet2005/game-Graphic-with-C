@@ -1,9 +1,8 @@
 #include <graphics.h>
-#include <conio.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "configs/Config.cpp"
+#include "configs/Audio.cpp"
 #include "screens/menu/Menu.cpp"
 
 int main() {
@@ -19,9 +18,11 @@ int main() {
     printf("Tai thanh cong!\n");
     printf("Dang chay...\n");
 
+    initAudio();
     gameLoop(); 
     
     printf("Da thoat, hen gap lai!\n");
+    shutdownAudio();
     closegraph();
     return 0;
 }
