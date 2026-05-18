@@ -3,6 +3,7 @@
 
 #include <graphics.h>
 #include <cmath>
+#include "../algorithms/index.cpp"
 
 // Vẽ ngôi mộ pixel art với chữ RIP - phong cách tối
 void drawGravestone(int x, int y, int width, int height) {
@@ -56,9 +57,10 @@ void drawGravestone(int x, int y, int width, int height) {
     
     // Vết nứt
     setcolor(COLOR(60, 60, 70));
-    line(x + 8, y - height / 3, x + 12, y - height / 4);
-    line(x + width - 8, y - height / 2, x + width - 5, y - height / 3);
-    line(x + width / 2 - 5, y - height + 18, x + width / 2 - 2, y - 15);
+    // Bresenham line
+    bresenhamLine(x + 8, y - height / 3, x + 12, y - height / 4);
+    bresenhamLine(x + width - 8, y - height / 2, x + width - 5, y - height / 3);
+    bresenhamLine(x + width / 2 - 5, y - height + 18, x + width / 2 - 2, y - 15);
     
     // Chấm nhỏ (vết thời gian)
     setcolor(COLOR(70, 70, 80));

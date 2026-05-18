@@ -2,6 +2,54 @@
 #define MIDPOINT_H
 
 #include <graphics.h>
+#include <cstdlib>
+
+// Thuật toán Midpoint vẽ đường thẳng (tất cả các octant)
+void midpointLine(int x1, int y1, int x2, int y2) {
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    int sx = (dx >= 0) ? 1 : -1;
+    int sy = (dy >= 0) ? 1 : -1;
+    dx = abs(dx);
+    dy = abs(dy);
+
+    int x = x1;
+    int y = y1;
+
+    putpixel(x, y, getcolor());
+
+    if (dx >= dy) {
+        int d = 2 * dy - dx;
+        int incrE = 2 * dy;
+        int incrNE = 2 * (dy - dx);
+
+        for (int i = 0; i < dx; i++) {
+            x += sx;
+            if (d > 0) {
+                y += sy;
+                d += incrNE;
+            } else {
+                d += incrE;
+            }
+            putpixel(x, y, getcolor());
+        }
+    } else {
+        int d = 2 * dx - dy;
+        int incrE = 2 * dx;
+        int incrNE = 2 * (dx - dy);
+
+        for (int i = 0; i < dy; i++) {
+            y += sy;
+            if (d > 0) {
+                x += sx;
+                d += incrNE;
+            } else {
+                d += incrE;
+            }
+            putpixel(x, y, getcolor());
+        }
+    }
+}
 
 // Thuật toán Midpoint vẽ đường tròn
 void midpointCircle(int centerX, int centerY, int radius) {

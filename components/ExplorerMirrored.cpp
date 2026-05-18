@@ -34,15 +34,15 @@ void drawExplorerMirrored(int x, int y, float scale) {
     // 3 mui ten trong ong
     setcolor(goldLight);
     setlinestyle(SOLID_LINE, 0, thickBold);
-    algorithmLine(quiverX-S(2), quiverY-S(12), quiverX+S(8), quiverY-S(30));
-    algorithmLine(quiverX-S(6), quiverY-S(9), quiverX+S(2), quiverY-S(32));
-    algorithmLine(quiverX-S(10), quiverY-S(6), quiverX-S(4), quiverY-S(28));
+    bresenhamLine(quiverX-S(2), quiverY-S(12), quiverX+S(8), quiverY-S(30));
+    bresenhamLine(quiverX-S(6), quiverY-S(9), quiverX+S(2), quiverY-S(32));
+    bresenhamLine(quiverX-S(10), quiverY-S(6), quiverX-S(4), quiverY-S(28));
     
     // long ten do
     setcolor(gemColor);
-    algorithmLine(quiverX+S(8), quiverY-S(30), quiverX+S(12), quiverY-S(27));
-    algorithmLine(quiverX+S(2), quiverY-S(32), quiverX+S(6), quiverY-S(29));
-    algorithmLine(quiverX-S(4), quiverY-S(28), quiverX, quiverY-S(25));
+    bresenhamLine(quiverX+S(8), quiverY-S(30), quiverX+S(12), quiverY-S(27));
+    bresenhamLine(quiverX+S(2), quiverY-S(32), quiverX+S(6), quiverY-S(29));
+    bresenhamLine(quiverX-S(4), quiverY-S(28), quiverX, quiverY-S(25));
     setlinestyle(SOLID_LINE, 0, thickNormal); 
     setcolor(outlineColor);
 
@@ -72,8 +72,8 @@ void drawExplorerMirrored(int x, int y, float scale) {
     
     // nam tay trai
     setfillstyle(SOLID_FILL, armorMain);
-    algorithmFillEllipse(x + S(24), y - S(12), S(6), S(6));
-    algorithmCircle(x + S(24), y - S(12), S(6));
+    midpointFilledCircle(x + S(24), y - S(12), S(6));
+    midpointCircle(x + S(24), y - S(12), S(6));
 
     // chan phai - dui
     setfillstyle(SOLID_FILL, armorMain);
@@ -86,7 +86,7 @@ void drawExplorerMirrored(int x, int y, float scale) {
     int kneeR[] = {x-S(3), y-S(28), x-S(22), y-S(28), x-S(21), y-S(16), x-S(4), y-S(16)};
     fillpoly(4, kneeR); drawpoly(4, kneeR);
     setcolor(goldMain);
-    algorithmLine(x-S(3), y-S(28), x-S(22), y-S(28));
+    bresenhamLine(x-S(3), y-S(28), x-S(22), y-S(28));
     setcolor(outlineColor);
 
     // ong va ban chan phai
@@ -101,11 +101,11 @@ void drawExplorerMirrored(int x, int y, float scale) {
     int torso[] = {x+S(18), y-S(50), x-S(18), y-S(50), x-S(18), y-S(25), x+S(18), y-S(25)};
     fillpoly(4, torso); drawpoly(4, torso);
     
-    // vien vang chu v tren nguc
+    // vien vang chu v tren nguc (dam va day hon)
     setcolor(goldMain);
-    setlinestyle(SOLID_LINE, 0, thickBold);
-    algorithmLine(x+S(18), y-S(40), x-S(4), y-S(25));
-    algorithmLine(x-S(18), y-S(40), x-S(4), y-S(25));
+    setlinestyle(SOLID_LINE, 0, thickBold + 1);
+    bresenhamLine(x+S(18), y-S(40), x-S(4), y-S(25));
+    bresenhamLine(x-S(18), y-S(40), x-S(4), y-S(25));
     setlinestyle(SOLID_LINE, 0, thickNormal); 
     setcolor(outlineColor);
 
@@ -115,20 +115,22 @@ void drawExplorerMirrored(int x, int y, float scale) {
     rectangle(x+S(18), y-S(25), x-S(18), y-S(15));
 
     // ngoc do tren dai
-    setcolor(outlineColor);
-    setfillstyle(SOLID_FILL, goldMain);
-    algorithmFillEllipse(x-S(4), y-S(20), S(8), S(8)); 
-    algorithmCircle(x-S(4), y-S(20), S(8));
-    setfillstyle(SOLID_FILL, gemColor);
-    algorithmFillEllipse(x-S(4), y-S(20), S(5), S(5));
+    setcolor(BLACK);
+    midpointCircle(x-S(4), y-S(20), S(9));
+    setcolor(goldMain);
+    midpointFilledCircle(x-S(4), y-S(20), S(8)); 
+    setcolor(goldLight);
+    midpointCircle(x-S(4), y-S(20), S(8));
+    setcolor(gemColor);
+    midpointFilledCircle(x-S(4), y-S(20), S(5));
 
     // giap hang
     setfillstyle(SOLID_FILL, armorMain);
     int groin[] = {x+S(10), y-S(15), x-S(14), y-S(15), x-S(10), y-S(5), x+S(2), y-S(5)};
     fillpoly(4, groin); drawpoly(4, groin);
     setcolor(goldMain);
-    algorithmLine(x+S(10), y-S(15), x+S(2), y-S(5));
-    algorithmLine(x-S(14), y-S(15), x-S(10), y-S(5));
+    bresenhamLine(x+S(10), y-S(15), x+S(2), y-S(5));
+    bresenhamLine(x-S(14), y-S(15), x-S(10), y-S(5));
     setcolor(outlineColor);
 
     // tay phai cam cung
@@ -138,8 +140,8 @@ void drawExplorerMirrored(int x, int y, float scale) {
 
     // nam tay phai
     setfillstyle(SOLID_FILL, armorDark);
-    algorithmFillEllipse(x-S(40), y-S(30), S(7), S(7));
-    algorithmCircle(x-S(40), y-S(30), S(7));
+    midpointFilledCircle(x-S(40), y-S(30), S(7));
+    midpointCircle(x-S(40), y-S(30), S(7));
 
     // cung ten
     int bowX = x - S(40);
@@ -156,19 +158,19 @@ void drawExplorerMirrored(int x, int y, float scale) {
     bar(bowX-S(5), bowY-S(6), bowX+S(2), bowY+S(6));
     setcolor(outlineColor);
     rectangle(bowX-S(5), bowY-S(6), bowX+S(2), bowY+S(6));
-    setfillstyle(SOLID_FILL, gemColor);
-    algorithmFillEllipse(bowX-S(1), bowY, S(2), S(2));
+    setcolor(gemColor);
+    midpointFilledCircle(bowX-S(1), bowY, S(2));
 
     // day cung
     setcolor(glowColor);
     setlinestyle(SOLID_LINE, 0, thickNormal); 
-    algorithmLine(bowX + S(4), bowY - S(24), bowX + S(14), bowY);
-    algorithmLine(bowX + S(4), bowY + S(24), bowX + S(14), bowY);
+    bresenhamLine(bowX + S(4), bowY - S(24), bowX + S(14), bowY);
+    bresenhamLine(bowX + S(4), bowY + S(24), bowX + S(14), bowY);
     
     // mui ten nang luong
     setcolor(goldLight);
     setlinestyle(SOLID_LINE, 0, thickBold);
-    algorithmLine(bowX + S(14), bowY, bowX - S(16), bowY);
+    bresenhamLine(bowX + S(14), bowY, bowX - S(16), bowY);
     
     // dau mui ten
     setfillstyle(SOLID_FILL, eyeColor);
@@ -189,14 +191,14 @@ void drawExplorerMirrored(int x, int y, float scale) {
     int shoulderL[] = {x+S(16), y-S(50), x+S(28), y-S(45), x+S(34), y-S(30), x+S(18), y-S(35)};
     fillpoly(4, shoulderL); drawpoly(4, shoulderL);
     setcolor(goldMain);
-    algorithmLine(x+S(28), y-S(45), x+S(34), y-S(30)); 
+    bresenhamLine(x+S(28), y-S(45), x+S(34), y-S(30)); 
     setcolor(outlineColor);
 
     setfillstyle(SOLID_FILL, armorDark);
     int shoulderR[] = {x-S(16), y-S(50), x-S(28), y-S(45), x-S(34), y-S(30), x-S(18), y-S(35)};
     fillpoly(4, shoulderR); drawpoly(4, shoulderR);
     setcolor(goldMain);
-    algorithmLine(x-S(28), y-S(45), x-S(34), y-S(30));
+    bresenhamLine(x-S(28), y-S(45), x-S(34), y-S(30));
     setcolor(outlineColor);
 
     // mu giap chinh
@@ -229,13 +231,13 @@ void drawExplorerMirrored(int x, int y, float scale) {
     int hornL[] = {headX+S(22), headY-S(5), headX+S(38), headY-S(35), headX+S(15), headY-S(22)};
     fillpoly(3, hornL); drawpoly(3, hornL);
     setcolor(armorMain);
-    algorithmLine(headX+S(22), headY-S(5), headX+S(29), headY-S(22)); 
+    bresenhamLine(headX+S(22), headY-S(5), headX+S(29), headY-S(22)); 
     setcolor(outlineColor);
 
     int hornR[] = {headX-S(22), headY-S(5), headX-S(38), headY-S(35), headX-S(15), headY-S(22)};
     fillpoly(3, hornR); drawpoly(3, hornR);
     setcolor(armorMain);
-    algorithmLine(headX-S(22), headY-S(5), headX-S(29), headY-S(22));
+    bresenhamLine(headX-S(22), headY-S(5), headX-S(29), headY-S(22));
     setcolor(outlineColor);
 
     // chop mu co ngoc
@@ -243,10 +245,14 @@ void drawExplorerMirrored(int x, int y, float scale) {
     setfillstyle(SOLID_FILL, armorMain);
     fillpoly(3, crest); drawpoly(3, crest);
 
-    setfillstyle(SOLID_FILL, goldDark);
-    algorithmFillEllipse(headX-S(6), headY - S(18), S(6), S(8));
-    setfillstyle(SOLID_FILL, gemColor);
-    algorithmFillEllipse(headX-S(6), headY - S(18), S(4), S(6));
+    setcolor(BLACK);
+    midpointEllipse(headX-S(6), headY - S(18), S(7), S(9));
+    setcolor(goldMain);
+    midpointFilledEllipse(headX-S(6), headY - S(18), S(6), S(8));
+    setcolor(goldLight);
+    midpointEllipse(headX-S(6), headY - S(18), S(6), S(8));
+    setcolor(gemColor);
+    midpointFilledEllipse(headX-S(6), headY - S(18), S(4), S(6));
 
     // khe nhin
     setfillstyle(SOLID_FILL, BLACK);
@@ -261,13 +267,13 @@ void drawExplorerMirrored(int x, int y, float scale) {
     };
     fillpoly(7, visor);
     
-    // vien khe nhin
-    setcolor(armorMain);
+    // vien khe nhin (xam nhat)
+    setcolor(COLOR(180, 180, 180));
     setlinestyle(SOLID_LINE, 0, thickBold);
     for(int i=0; i<6; i++) {
-        algorithmLine(visor[i*2], visor[i*2+1], visor[i*2+2], visor[i*2+3]);
+        bresenhamLine(visor[i*2], visor[i*2+1], visor[i*2+2], visor[i*2+3]);
     }
-    algorithmLine(visor[12], visor[13], visor[0], visor[1]);
+    bresenhamLine(visor[12], visor[13], visor[0], visor[1]);
     
     // doi mat phat sang
     setcolor(outlineColor);

@@ -31,6 +31,36 @@ void bresenhamLine(int x1, int y1, int x2, int y2) {
     }
 }
 
+// Thuật toán Bresenham vẽ đường tròn
+void bresenhamCircle(int centerX, int centerY, int radius) {
+    int x = 0;
+    int y = radius;
+    int d = 3 - 2 * radius;
+
+    // Vẽ 8 điểm đối xứng
+    auto plotCirclePoints = [&](int cx, int cy, int x, int y) {
+        putpixel(cx + x, cy + y, getcolor());
+        putpixel(cx - x, cy + y, getcolor());
+        putpixel(cx + x, cy - y, getcolor());
+        putpixel(cx - x, cy - y, getcolor());
+        putpixel(cx + y, cy + x, getcolor());
+        putpixel(cx - y, cy + x, getcolor());
+        putpixel(cx + y, cy - x, getcolor());
+        putpixel(cx - y, cy - x, getcolor());
+    };
+
+    while (y >= x) {
+        plotCirclePoints(centerX, centerY, x, y);
+        x++;
+        if (d > 0) {
+            y--;
+            d += 4 * (x - y) + 10;
+        } else {
+            d += 4 * x + 6;
+        }
+    }
+}
+
 // Thuật toán Bresenham vẽ đường thẳng với độ dày
 void bresenhamThickLine(int x1, int y1, int x2, int y2, int thickness) {
     if (thickness <= 1) {

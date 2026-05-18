@@ -6,6 +6,9 @@
 #include "Cloud.cpp"
 #include "Tree.cpp"
 #include "Bush.cpp"
+#include "../algorithms/index.cpp"
+#include "../algorithms/fractal.cpp"
+#include "SummonSigil.cpp"
 
 void drawExplorer(int x, int y, float scale = 1.0f);
 
@@ -18,7 +21,8 @@ void drawMenuBackground() {
         int g = 5 + (int)(ratio * 15);   
         int b = 15 + (int)(ratio * 25); 
         setcolor(COLOR(r, g, b));
-        line(0, i, SCREEN_WIDTH, i);
+        // Bresenham line
+        bresenhamLine(0, i, SCREEN_WIDTH, i);
     }
     
     // mặt trăng lớn 
@@ -55,6 +59,8 @@ void drawMenuBackground() {
     drawCloud(650, 140, 42);
     drawCloud(900, 100, 40);
     drawCloud(1050, 130, 36);
+
+    // Bo chi tiet trang tri tren may
     
     // rừng cây phía sau
     // Cây background
@@ -112,15 +118,22 @@ void drawMenuBackground() {
     setcolor(COLOR(10, 14, 20));
     setfillstyle(SOLID_FILL, COLOR(10, 14, 20));
     bar(0, SCREEN_HEIGHT - 40, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    // Re dragon trang tri sat dat
+    drawDragonRootOrnament(180, SCREEN_HEIGHT - 10, 1);
+    drawDragonRootOrnament(920, SCREEN_HEIGHT - 8, 1);
     
     //  đất
     for(int i = 0; i < SCREEN_WIDTH; i += 60) {
         setcolor(COLOR(8, 12, 18));
-        line(i + 20, SCREEN_HEIGHT - 35, i + 20, SCREEN_HEIGHT);
+        bresenhamLine(i + 20, SCREEN_HEIGHT - 35, i + 20, SCREEN_HEIGHT);
         setcolor(COLOR(12, 16, 22));
-        line(i + 40, SCREEN_HEIGHT - 30, i + 40, SCREEN_HEIGHT);
+        bresenhamLine(i + 40, SCREEN_HEIGHT - 30, i + 40, SCREEN_HEIGHT);
     }
     
+    // Cong trieu hoi lon (dat sau nhan vat, khong de len menu item)
+    drawSummonSigil(280, SCREEN_HEIGHT - 140, 2.6f);
+
     // nhân vật 
     drawExplorer(280, SCREEN_HEIGHT - 25, 2.5f);
 }

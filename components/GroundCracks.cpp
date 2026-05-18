@@ -2,6 +2,7 @@
 #define GROUND_CRACKS_H
 
 #include <graphics.h>
+#include "../algorithms/index.cpp"
 
 // Vẽ vết nứt đất (thay thế rễ cây)
 void drawGroundCracks(int x, int y, int width) {
@@ -18,8 +19,8 @@ void drawGroundCracks(int x, int y, int width) {
     };
     
     for (int i = 0; i < 4; i++) {
-        line(mainCrackPoints[i][0], mainCrackPoints[i][1],
-             mainCrackPoints[i+1][0], mainCrackPoints[i+1][1]);
+           bresenhamLine(mainCrackPoints[i][0], mainCrackPoints[i][1],
+               mainCrackPoints[i+1][0], mainCrackPoints[i+1][1]);
     }
     
     // Vết nứt trái
@@ -31,8 +32,8 @@ void drawGroundCracks(int x, int y, int width) {
     };
     
     for (int i = 0; i < 3; i++) {
-        line(leftCrackPoints[i][0], leftCrackPoints[i][1],
-             leftCrackPoints[i+1][0], leftCrackPoints[i+1][1]);
+           bresenhamLine(leftCrackPoints[i][0], leftCrackPoints[i][1],
+               leftCrackPoints[i+1][0], leftCrackPoints[i+1][1]);
     }
     
     // Vết nứt phải
@@ -44,18 +45,18 @@ void drawGroundCracks(int x, int y, int width) {
     };
     
     for (int i = 0; i < 3; i++) {
-        line(rightCrackPoints[i][0], rightCrackPoints[i][1],
-             rightCrackPoints[i+1][0], rightCrackPoints[i+1][1]);
+           bresenhamLine(rightCrackPoints[i][0], rightCrackPoints[i][1],
+               rightCrackPoints[i+1][0], rightCrackPoints[i+1][1]);
     }
     
     // Vết nứt nhỏ phụ
     setlinestyle(SOLID_LINE, 0, 1);
     setcolor(COLOR(8, 10, 14));
     
-    line(x - 12, y + 10, x - 18, y + 14);
-    line(x + 12, y + 9, x + 16, y + 13);
-    line(x - 5, y + 18, x - 10, y + 22);
-    line(x + 4, y + 20, x + 8, y + 24);
+    bresenhamLine(x - 12, y + 10, x - 18, y + 14);
+    bresenhamLine(x + 12, y + 9, x + 16, y + 13);
+    bresenhamLine(x - 5, y + 18, x - 10, y + 22);
+    bresenhamLine(x + 4, y + 20, x + 8, y + 24);
     
     setlinestyle(SOLID_LINE, 0, 1);
 }

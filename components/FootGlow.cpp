@@ -11,14 +11,14 @@ void drawFootGlow(int x, int y, float scale) {
 
     setlinestyle(SOLID_LINE, 0, scale > 1.5f ? 3 : 2);
     setcolor(goldDark);
-    algorithmEllipse(x, y, 48 * scale, 14 * scale);
+    midpointEllipse(x, y, 48 * scale, 14 * scale);
 
     setlinestyle(SOLID_LINE, 0, scale > 1.5f ? 2 : 1);
     setcolor(goldMain);
-    algorithmEllipse(x, y, 56 * scale, 18 * scale);
+    midpointEllipse(x, y, 56 * scale, 18 * scale);
 
     setcolor(glowColor);
-    algorithmEllipse(x, y, 40 * scale, 10 * scale);
+    midpointEllipse(x, y, 40 * scale, 10 * scale);
 }
 
 #endif

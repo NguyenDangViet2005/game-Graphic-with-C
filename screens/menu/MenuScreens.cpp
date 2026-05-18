@@ -4,6 +4,8 @@
 #include <string.h>
 
 #include "../../configs/Config.cpp"
+#include "../../configs/Audio.cpp"
+#include "../../screens/menu/MenuCache.cpp"
 
 // Ve tieu de game
 void drawTitle() {
@@ -20,16 +22,13 @@ void drawTitle() {
 
 // Ve mot button menu
 void drawMenuButton(int x, int y, int width, int height, const char* text, int isSelected) {
-    if (isSelected) {
-        setfillstyle(SOLID_FILL, COLOR(15, 25, 45));
-        setcolor(COLOR(255, 230, 100));
-    } else {
-        setfillstyle(SOLID_FILL, DARKGRAY);
-        setcolor(WHITE);
-    }
-    
+    int fillColor = isSelected ? COLOR(15, 25, 45) : DARKGRAY;
+    int borderColor = isSelected ? COLOR(255, 230, 100) : WHITE;
+
+    setfillstyle(SOLID_FILL, fillColor);
     bar(x, y, x + width, y + height);
-    
+
+    setcolor(borderColor);
     setlinestyle(SOLID_LINE, 0, 2);
     rectangle(x, y, x + width, y + height);
     
@@ -50,15 +49,13 @@ void drawMenuButton(int x, int y, int width, int height, const char* text, int i
 
 // Ve nut back (nho hon nut menu chinh)
 void drawBackButton(int x, int y, int width, int height, int isHover) {
-    if (isHover) {
-        setfillstyle(SOLID_FILL, COLOR(20, 35, 60));
-        setcolor(COLOR(255, 230, 100));
-    } else {
-        setfillstyle(SOLID_FILL, COLOR(45, 45, 45));
-        setcolor(COLOR(220, 220, 220));
-    }
+    int fillColor = isHover ? COLOR(20, 35, 60) : COLOR(45, 45, 45);
+    int borderColor = isHover ? COLOR(255, 230, 100) : COLOR(220, 220, 220);
 
+    setfillstyle(SOLID_FILL, fillColor);
     bar(x, y, x + width, y + height);
+
+    setcolor(borderColor);
     setlinestyle(SOLID_LINE, 0, 2);
     rectangle(x, y, x + width, y + height);
 

@@ -17,5 +17,6 @@
 #include "Heart.cpp"
 #include "PauseButton.cpp"
 #include "MenuBackground.cpp"
+#include "SummonSigil.cpp"
 
 #endif

@@ -233,13 +233,10 @@ void playGame() {
             explorerScale = 1.0f;
         }
 
-        int downHeld = (GetAsyncKeyState(VK_DOWN) & 0x8000) != 0;
-        int leftHeld = (GetAsyncKeyState(VK_LEFT) & 0x8000) != 0;
-        int rightHeld = (GetAsyncKeyState(VK_RIGHT) & 0x8000) != 0;
         int spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x0001) != 0;
         int skillShot = 0;
-        if (skillReady && downHeld && (leftHeld || rightHeld) && spacePressed) {
-            int dir = leftHeld ? -1 : 1;
+        if (skillReady && shiftDown && spacePressed) {
+            int dir = facingRight ? 1 : -1;
             for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
                 if (!energyWaves[i].active) {
                     energyWaves[i].active = 1;

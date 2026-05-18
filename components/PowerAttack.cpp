@@ -3,6 +3,7 @@
 
 #include <graphics.h>
 #include <math.h>
+#include "../algorithms/index.cpp"
 
 void drawPowerAttack(int left, int right, int y, float phase) {
     if (left > right) {
@@ -32,8 +33,9 @@ void drawPowerAttack(int left, int right, int y, float phase) {
     bar(left, coreTop, right, coreBottom);
 
     setcolor(COLOR(220, 30, 30));
-    line(left, outerTop, right, outerTop);
-    line(left, outerBottom, right, outerBottom);
+    // Bresenham line
+    bresenhamLine(left, outerTop, right, outerTop);
+    bresenhamLine(left, outerBottom, right, outerBottom);
 
     for (int x = left; x < right; x += 12) {
         float t = (float)sin(phase + x * 0.06f);

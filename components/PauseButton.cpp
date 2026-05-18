@@ -4,6 +4,7 @@
 #include <graphics.h>
 #include "../configs/Config.cpp"
 #include "../configs/Audio.cpp"
+#include "../algorithms/polygon_fill.cpp"
 
 // Vị trí và kích thước nút
 const int PAUSE_BTN_W = 50;
@@ -46,17 +47,15 @@ void drawSinglePauseMenuBtn(int index, int selected, int boxX, int boxY, int box
     int bX = boxX + (boxW - btnW) / 2;
     int bY = startY + index * (btnH + spacing);
     
-    if (selected) {
-        setfillstyle(SOLID_FILL, COLOR(30, 45, 75));
-        setcolor(COLOR(255, 255, 0));
-    } else {
-        setfillstyle(SOLID_FILL, COLOR(20, 30, 50));
-        setcolor(WHITE);
-    }
-    
-    bar(bX, bY, bX + btnW, bY + btnH);
+    int borderColor = selected ? COLOR(255, 255, 0) : WHITE;
+    int fillColor = selected ? COLOR(30, 45, 75) : COLOR(20, 30, 50);
+
+    setcolor(borderColor);
     setlinestyle(SOLID_LINE, 0, 2);
     rectangle(bX, bY, bX + btnW, bY + btnH);
+
+    setfillstyle(SOLID_FILL, fillColor);
+    bar(bX + 1, bY + 1, bX + btnW - 1, bY + btnH - 1);
     
     settextstyle(BOLD_FONT, HORIZ_DIR, 3);
     if (selected) setbkcolor(COLOR(30, 45, 75));

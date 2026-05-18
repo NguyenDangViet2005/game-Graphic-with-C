@@ -2,6 +2,7 @@
 #define TALL_GRASS_H
 
 #include <graphics.h>
+#include "../algorithms/index.cpp"
 
 // Vẽ bụi cỏ dại cao
 void drawTallGrass(int x, int y, int height) {
@@ -15,8 +16,9 @@ void drawTallGrass(int x, int y, int height) {
         int midX = offsetX + (i % 2 == 0 ? 3 : -3);
         int midY = y - grassHeight / 2;
         
-        line(offsetX, y, midX, midY);
-        line(midX, midY, offsetX + (i % 2 == 0 ? 2 : -2), y - grassHeight);
+        // Bresenham line
+        bresenhamLine(offsetX, y, midX, midY);
+        bresenhamLine(midX, midY, offsetX + (i % 2 == 0 ? 2 : -2), y - grassHeight);
     }
 }
 

@@ -6,6 +6,8 @@
 #include "Cloud.cpp"
 #include "Firefly.cpp"
 #include "../algorithms/fractal.cpp"
+#include "../algorithms/index.cpp"
+#include "../algorithms/polygon_fill.cpp"
 
 // Vẽ background (trời, đám mây, đất, cỏ)
 void drawBackground() {
@@ -16,7 +18,8 @@ void drawBackground() {
         int g = 3 + (int)(ratio * 10); 
         int b = 10 + (int)(ratio * 18); 
         setcolor(COLOR(r, g, b));
-        line(0, i, SCREEN_WIDTH, i);
+        // Bresenham line
+        bresenhamLine(0, i, SCREEN_WIDTH, i);
     }
     
     // Vẽ mặt trăng ở góc trên bên phải
@@ -53,9 +56,10 @@ void drawBackground() {
     drawCloud(850, 80, 45);
     drawCloud(1050, 120, 38);
     
-    // === THÊM MÂY FRACTAL HUYỀN BÍ ===
-    drawMysticalCloud(350, 130, 60, 25);
-    drawMysticalCloud(700, 110, 55, 22);
+    // Bo chi tiet trang tri tren may
+
+    drawDragonRootOrnament(140, GROUND_Y + 5, 1);
+    drawDragonRootOrnament(980, GROUND_Y + 10, 1);
     
     // vẽ nền đất và cỏ
     
@@ -89,8 +93,8 @@ void drawBackground() {
         
         if(i % 5 == 0) {
             setcolor(COLOR(10, 14, 20));
-            line(i + 10, GROUND_Y + 5, i + 10, GROUND_Y + h - 3);
-            line(i + 25, GROUND_Y + 8, i + 25, GROUND_Y + h - 2);
+            bresenhamLine(i + 10, GROUND_Y + 5, i + 10, GROUND_Y + h - 3);
+            bresenhamLine(i + 25, GROUND_Y + 8, i + 25, GROUND_Y + h - 2);
         }
     }
     
@@ -101,15 +105,28 @@ void drawBackground() {
         
         if(i % 3 == 0) {
             setcolor(COLOR(22, 32, 36));
-            line(gx, gy, gx, gy - 3);
-            line(gx + 1, gy, gx + 1, gy - 4);
+            bresenhamLine(gx, gy, gx, gy - 3);
+            bresenhamLine(gx + 1, gy, gx + 1, gy - 4);
         }
     }
     
     // Border mặt đất
     setcolor(BLACK);
     setlinestyle(SOLID_LINE, 0, 3);
-    line(0, GROUND_Y, SCREEN_WIDTH, GROUND_Y);
+    // Bresenham line (thick)
+    bresenhamThickLine(0, GROUND_Y, SCREEN_WIDTH, GROUND_Y, 3);
+
+    // Trang tri nho bang flood fill de quy (vung rat nho)
+    int decoLeft = 30;
+    int decoTop = GROUND_Y - 18;
+    int decoRight = 42;
+    int decoBottom = GROUND_Y - 6;
+
+    setfillstyle(SOLID_FILL, COLOR(1, 2, 3));
+    bar(decoLeft, decoTop, decoRight, decoBottom);
+
+    setcolor(COLOR(20, 25, 35));
+    algorithmFloodFillRecursive(decoLeft + 2, decoTop + 2, COLOR(20, 25, 35));
     
     // Thêm đom đóm bay lượn
     drawFireflies();

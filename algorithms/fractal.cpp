@@ -119,22 +119,7 @@ void drawThornyGrass(int x, int y, int height) {
         drawKochLine(offsetX, y, topX, topY, 2);
     }
 }
-void drawKochSnowflake(int centerX, int centerY, int size, int depth) {
-    // 3 đỉnh của tam giác đều
-    int x1 = centerX;
-    int y1 = centerY - size;
-    
-    int x2 = centerX - (int)(size * 0.866);
-    int y2 = centerY + size / 2;
-    
-    int x3 = centerX + (int)(size * 0.866);
-    int y3 = centerY + size / 2;
-    
-    // Vẽ 3 cạnh với Koch curve
-    drawKochLine(x1, y1, x2, y2, depth);
-    drawKochLine(x2, y2, x3, y3, depth);
-    drawKochLine(x3, y3, x1, y1, depth);
-}
+
 
 // Thuật toán Dragon Curve (Đường cong Rồng) - cho rễ cây
 void drawDragonCurve(int x1, int y1, int x2, int y2, int depth, int direction) {
@@ -155,130 +140,33 @@ void drawDragonCurve(int x1, int y1, int x2, int y2, int depth, int direction) {
     drawDragonCurve(xm, ym, x2, y2, depth - 1, -1);
 }
 
-// Vẽ rễ cây bằng Dragon Curve - phong cách Dark
-void drawDarkRoots(int x, int y, int width) {
-    setcolor(COLOR(35, 25, 20));
-    setlinestyle(SOLID_LINE, 0, 2);
-    
-    // Rễ trái
-    drawDragonCurve(x - 10, y, x - width, y + 25, 6, 1);
-    
-    // Rễ phải
-    drawDragonCurve(x + 10, y, x + width, y + 25, 6, -1);
-    
-    // Rễ giữa
-    setcolor(COLOR(30, 20, 15));
-    drawDragonCurve(x, y, x + 5, y + 30, 5, 1);
-    
-    setlinestyle(SOLID_LINE, 0, 1);
-}
-
-// Sierpinski Triangle (Tam giác Sierpinski)
-void drawSierpinskiTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int depth) {
+// Thuật toán Levy C-Curve (Đường cong C)
+void drawLevyCCurve(int x1, int y1, int x2, int y2, int depth) {
     if (depth == 0) {
-        // Vẽ tam giác đầy
-        int points[] = {x1, y1, x2, y2, x3, y3};
-        drawpoly(3, points);
+        line(x1, y1, x2, y2);
         return;
     }
-    
-    // Tính điểm giữa các cạnh
-    int x12 = (x1 + x2) / 2;
-    int y12 = (y1 + y2) / 2;
-    
-    int x23 = (x2 + x3) / 2;
-    int y23 = (y2 + y3) / 2;
-    
-    int x31 = (x3 + x1) / 2;
-    int y31 = (y3 + y1) / 2;
-    
-    // Đệ quy vẽ 3 tam giác con
-    drawSierpinskiTriangle(x1, y1, x12, y12, x31, y31, depth - 1);
-    drawSierpinskiTriangle(x12, y12, x2, y2, x23, y23, depth - 1);
-    drawSierpinskiTriangle(x31, y31, x23, y23, x3, y3, depth - 1);
+
+    // Tính điểm giữa xoay 90 độ (Levy C-curve)
+    int xm = (x1 + x2) / 2 + (y1 - y2) / 2;
+    int ym = (y1 + y2) / 2 + (x2 - x1) / 2;
+
+    drawLevyCCurve(x1, y1, xm, ym, depth - 1);
+    drawLevyCCurve(xm, ym, x2, y2, depth - 1);
 }
 
 
-// Mandelbrot Set (Tập Mandelbrot - đơn giản hóa)
-void drawMandelbrotPixel(int screenX, int screenY, int width, int height, 
-                         double xMin, double xMax, double yMin, double yMax) {
-    // Chuyển tọa độ màn hình sang tọa độ phức
-    double x0 = xMin + (xMax - xMin) * screenX / width;
-    double y0 = yMin + (yMax - yMin) * screenY / height;
-    
-    double x = 0, y = 0;
-    int iteration = 0;
-    int maxIteration = 50;
-    
-    // Kiểm tra điểm có thuộc tập Mandelbrot không
-    while (x*x + y*y <= 4 && iteration < maxIteration) {
-        double xtemp = x*x - y*y + x0;
-        y = 2*x*y + y0;
-        x = xtemp;
-        iteration++;
-    }
-    
-    // Tô màu dựa trên số lần lặp
-    if (iteration == maxIteration) {
-        putpixel(screenX, screenY, BLACK);
-    } else {
-        int color = (iteration * 255) / maxIteration;
-        putpixel(screenX, screenY, COLOR(color, color / 2, 255 - color));
-    }
-}
 
-// Vẽ Mandelbrot Set trong vùng cho trước
-void drawMandelbrotSet(int x, int y, int width, int height) {
-    double xMin = -2.5, xMax = 1.0;
-    double yMin = -1.0, yMax = 1.0;
-    
-    for (int i = 0; i < width; i += 2) { // Bỏ qua pixel để nhanh hơn
-        for (int j = 0; j < height; j += 2) {
-            drawMandelbrotPixel(x + i, y + j, width, height, xMin, xMax, yMin, yMax);
-        }
-    }
-}
+// Cụm rễ trang trí bằng Dragon curve (gần mặt đất)
+void drawDragonRootOrnament(int x, int y, int scale) {
+    int dx = 70 * scale;
+    int dy = 26 * scale;
 
-// Fractal Circle Pattern (Họa tiết vòng tròn Fractal)
-void drawFractalCircles(int x, int y, int radius, int depth) {
-    if (depth == 0 || radius < 2) return;
-    
-    // Vẽ vòng tròn chính
-    circle(x, y, radius);
-    
-    // Vẽ 6 vòng tròn con xung quanh
-    int newRadius = radius / 3;
-    double angleStep = 60; // 360/6 = 60 độ
-    
-    for (int i = 0; i < 6; i++) {
-        double angle = i * angleStep * 3.14159 / 180.0;
-        int newX = x + (int)((radius - newRadius) * cos(angle));
-        int newY = y + (int)((radius - newRadius) * sin(angle));
-        
-        drawFractalCircles(newX, newY, newRadius, depth - 1);
-    }
-}
+    setcolor(COLOR(22, 28, 36));
+    drawDragonCurve(x, y, x + dx, y - dy, 8, 1);
 
-// Vẽ mây huyền bí bằng Koch Curve
-void drawMysticalCloud(int x, int y, int width, int height) {
-    setcolor(COLOR(40, 45, 60));
-    
-    // Viền mây bằng Koch Curve
-    int points[][2] = {
-        {x - width/2, y},
-        {x - width/3, y - height/2},
-        {x, y - height},
-        {x + width/3, y - height/2},
-        {x + width/2, y},
-        {x + width/3, y + height/3},
-        {x - width/3, y + height/3}
-    };
-    
-    for (int i = 0; i < 6; i++) {
-        drawKochLine(points[i][0], points[i][1], 
-                     points[i+1][0], points[i+1][1], 2);
-    }
-    drawKochLine(points[6][0], points[6][1], points[0][0], points[0][1], 2);
+    setcolor(COLOR(18, 22, 30));
+    drawDragonCurve(x + dx / 3, y + 4 * scale, x + dx + 14 * scale, y - 10 * scale, 7, -1);
 }
 
 #endif

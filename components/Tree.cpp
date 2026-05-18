@@ -4,6 +4,7 @@
 #include <graphics.h>
 #include <math.h>
 #include "../algorithms/index.cpp"
+#include "../algorithms/polygon_fill.cpp"
 
 // Vẽ tầng cây xa
 // yOffset: 0 cho game (cao), 100 cho menu (thấp)
@@ -61,14 +62,14 @@ void drawFarLayer(int yOffset = 0) {
             tx - bottomW/2, farY
         };
         
-        // Sử dụng thuật toán scanline fill thay vì fillpoly
-        setcolor(COLOR(3, 3, 3));
-        algorithmFillPoly(points, 4);
+        // To mau bang fillpoly de tranh tran stack
+        setfillstyle(SOLID_FILL, COLOR(3, 3, 3));
+        fillpoly(4, points);
         
         // Viền đen sâu
         setcolor(COLOR(1, 1, 1));
-        line(tx - bottomW/2, farY, tx - topW/2, farY - th);
-        line(tx + bottomW/2, farY, tx + topW/2, farY - th);
+        bresenhamLine(tx - bottomW/2, farY, tx - topW/2, farY - th);
+        bresenhamLine(tx + bottomW/2, farY, tx + topW/2, farY - th);
         
         // Kết cây nhỏ (chỉ cây to mới có)
         if(tw >= 18 && i % 2 == 0) {
@@ -102,8 +103,9 @@ void drawDarkTree(int x, int y, int height) {
     setcolor(COLOR(8, 5, 3));
     setfillstyle(SOLID_FILL, COLOR(8, 5, 3));
     
-    // Sử dụng thuật toán scanline fill cho thân cây chính
-    algorithmFillPoly(trunk, 4);
+    // To mau than bang fillpoly de tranh tran stack
+    setfillstyle(SOLID_FILL, COLOR(8, 5, 3));
+    fillpoly(4, trunk);
     
     // Phần thân trên - đậm hơn
     int trunk2[] = {
@@ -115,29 +117,30 @@ void drawDarkTree(int x, int y, int height) {
     setcolor(COLOR(15, 10, 7));
     setfillstyle(SOLID_FILL, COLOR(15, 10, 7));
     
-    // Sử dụng thuật toán scanline fill cho phần thân trên
-    algorithmFillPoly(trunk2, 4);
+    // To mau than tren bang fillpoly de tranh tran stack
+    setfillstyle(SOLID_FILL, COLOR(15, 10, 7));
+    fillpoly(4, trunk2);
     
     // Vẽ vân gỗ dọc - đen đậm
     setcolor(COLOR(8, 5, 3));
     setlinestyle(SOLID_LINE, 0, 1);
     for(int i = 0; i < 8; i++) {
         int yPos = y - (i * height * 0.08);
-        line(x - trunkW/4, yPos, x - trunkW/4, yPos + 15);
-        line(x + trunkW/6, yPos + 7, x + trunkW/6, yPos + 20);
+        bresenhamLine(x - trunkW/4, yPos, x - trunkW/4, yPos + 15);
+        bresenhamLine(x + trunkW/6, yPos + 7, x + trunkW/6, yPos + 20);
     }
     
     // Vân ngang và mắt gỗ
     for(int i = 0; i < 5; i++) {
         int yPos = y - height * 0.15 * i - 10;
-        ellipse(x, yPos, 0, 360, trunkW/3, 3);
+        midpointEllipse(x, yPos, trunkW/3, 3);
     }
     
     // Mắt gỗ và vết nứt - gần đen
     setcolor(COLOR(5, 3, 2));
     fillellipse(x - trunkW/5, y - height * 0.3, 4, 6);
     fillellipse(x + trunkW/7, y - height * 0.5, 3, 5);
-    line(x - trunkW/8, y - height * 0.4, x - trunkW/8 + 2, y - height * 0.4 + 18);
+    bresenhamLine(x - trunkW/8, y - height * 0.4, x - trunkW/8 + 2, y - height * 0.4 + 18);
     
     // Viền thân cây - đen sâu
     setcolor(COLOR(6, 4, 3));
@@ -151,26 +154,26 @@ void drawDarkTree(int x, int y, int height) {
     
     // Nhánh trái
     int branchY1 = y - height * 0.7;
-    line(x - trunkW/4, branchY1, x - trunkW * 2, branchY1 - 30);
-    line(x - trunkW * 2, branchY1 - 30, x - trunkW * 2.3, branchY1 - 35);
+    bresenhamLine(x - trunkW/4, branchY1, x - trunkW * 2, branchY1 - 30);
+    bresenhamLine(x - trunkW * 2, branchY1 - 30, x - trunkW * 2.3, branchY1 - 35);
     
     // Nhánh phải
     int branchY2 = y - height * 0.65;
-    line(x + trunkW/4, branchY2, x + trunkW * 1.8, branchY2 - 25);
-    line(x + trunkW * 1.8, branchY2 - 25, x + trunkW * 2.2, branchY2 - 20);
+    bresenhamLine(x + trunkW/4, branchY2, x + trunkW * 1.8, branchY2 - 25);
+    bresenhamLine(x + trunkW * 1.8, branchY2 - 25, x + trunkW * 2.2, branchY2 - 20);
     
     // Nhánh trái dưới
     int branchY3 = y - height * 0.5;
-    line(x - trunkW/5, branchY3, x - trunkW * 1.5, branchY3 - 15);
+    bresenhamLine(x - trunkW/5, branchY3, x - trunkW * 1.5, branchY3 - 15);
     
     // Nhánh phải dưới
     int branchY4 = y - height * 0.55;
-    line(x + trunkW/6, branchY4, x + trunkW * 1.6, branchY4 - 20);
+    bresenhamLine(x + trunkW/6, branchY4, x + trunkW * 1.6, branchY4 - 20);
     
     // Nhánh nhỏ trên đỉnh
     setlinestyle(SOLID_LINE, 0, 2);
-    line(x, y - height * 0.85, x - trunkW * 0.8, y - height * 0.95);
-    line(x, y - height * 0.85, x + trunkW * 0.7, y - height * 0.97);
+    bresenhamLine(x, y - height * 0.85, x - trunkW * 0.8, y - height * 0.95);
+    bresenhamLine(x, y - height * 0.85, x + trunkW * 0.7, y - height * 0.97);
     
     // Lá cây - nhiều lớp, nhiều chi tiết, gradient từ dưới lên trên
     

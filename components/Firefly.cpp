@@ -2,13 +2,15 @@
 #define FIREFLY_H
 
 #include <graphics.h>
+#include "../algorithms/index.cpp"
 
 // Vẽ đom đóm (firefly)
 void drawFirefly(int x, int y, int brightness) {
     // Thân đom đóm nhỏ
     setcolor(COLOR(80, 80, 60));
     setfillstyle(SOLID_FILL, COLOR(80, 80, 60));
-    fillellipse(x, y, 2, 3);
+    // Midpoint filled ellipse
+    midpointFilledEllipse(x, y, 2, 3);
     
     // Ánh sáng phát ra
     int glowR = 200 + brightness;
@@ -19,13 +21,16 @@ void drawFirefly(int x, int y, int brightness) {
     
     setcolor(COLOR(glowR, glowG, glowB));
     setfillstyle(SOLID_FILL, COLOR(glowR, glowG, glowB));
-    fillellipse(x, y, 4, 4);
+    // Midpoint filled circle
+    midpointFilledCircle(x, y, 4);
     
     // Hào quang ngoài
     setcolor(COLOR(glowR - 50, glowG - 50, glowB - 20));
-    circle(x, y, 8);
+    // Bresenham circle
+    bresenhamCircle(x, y, 8);
     setcolor(COLOR(glowR - 80, glowG - 80, glowB - 40));
-    circle(x, y, 12);
+    // Midpoint circle
+    midpointCircle(x, y, 12);
 }
 
 // Vẽ nhiều đom đóm với vị trí và độ sáng khác nhau

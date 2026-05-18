@@ -2,6 +2,7 @@
 #define HEART_H
 
 #include <graphics.h>
+#include "../algorithms/index.cpp"
 
 // Vẽ trái tim pixel art theo style ảnh tham khảo
 void drawHeart(int x, int y, int scale = 2) {
@@ -48,46 +49,46 @@ void drawHeart(int x, int y, int scale = 2) {
     setlinestyle(SOLID_LINE, 0, 1);
     
     // Phần trên trái
-    line(x + 3*scale, y, x + 5*scale, y);
-    line(x + 3*scale, y, x + 2*scale, y + scale);
-    line(x + 2*scale, y + scale, x + scale, y + 2*scale);
-    line(x + scale, y + 2*scale, x + scale, y + 3*scale);
-    line(x + scale, y + 3*scale, x, y + 4*scale);
+    midpointLine(x + 3*scale, y, x + 5*scale, y);
+    midpointLine(x + 3*scale, y, x + 2*scale, y + scale);
+    midpointLine(x + 2*scale, y + scale, x + scale, y + 2*scale);
+    midpointLine(x + scale, y + 2*scale, x + scale, y + 3*scale);
+    midpointLine(x + scale, y + 3*scale, x, y + 4*scale);
     
     // Cạnh trái xuống
-    line(x, y + 4*scale, x, y + 6*scale);
-    line(x, y + 6*scale, x + scale, y + 7*scale);
-    line(x + scale, y + 7*scale, x + 2*scale, y + 8*scale);
-    line(x + 2*scale, y + 8*scale, x + 3*scale, y + 9*scale);
-    line(x + 3*scale, y + 9*scale, x + 4*scale, y + 10*scale);
-    line(x + 4*scale, y + 10*scale, x + 5*scale, y + 11*scale);
-    line(x + 5*scale, y + 11*scale, x + 6*scale, y + 12*scale);
+    midpointLine(x, y + 4*scale, x, y + 6*scale);
+    midpointLine(x, y + 6*scale, x + scale, y + 7*scale);
+    midpointLine(x + scale, y + 7*scale, x + 2*scale, y + 8*scale);
+    midpointLine(x + 2*scale, y + 8*scale, x + 3*scale, y + 9*scale);
+    midpointLine(x + 3*scale, y + 9*scale, x + 4*scale, y + 10*scale);
+    midpointLine(x + 4*scale, y + 10*scale, x + 5*scale, y + 11*scale);
+    midpointLine(x + 5*scale, y + 11*scale, x + 6*scale, y + 12*scale);
     
     // Đáy (đỉnh tim)
-    line(x + 6*scale, y + 12*scale, x + 7*scale, y + 12*scale);
-    line(x + 7*scale, y + 12*scale, x + 8*scale, y + 12*scale);
+    midpointLine(x + 6*scale, y + 12*scale, x + 7*scale, y + 12*scale);
+    midpointLine(x + 7*scale, y + 12*scale, x + 8*scale, y + 12*scale);
     
     // Cạnh phải lên
-    line(x + 8*scale, y + 12*scale, x + 9*scale, y + 11*scale);
-    line(x + 9*scale, y + 11*scale, x + 10*scale, y + 10*scale);
-    line(x + 10*scale, y + 10*scale, x + 11*scale, y + 9*scale);
-    line(x + 11*scale, y + 9*scale, x + 12*scale, y + 8*scale);
-    line(x + 12*scale, y + 8*scale, x + 13*scale, y + 7*scale);
-    line(x + 13*scale, y + 7*scale, x + 14*scale, y + 6*scale);
-    line(x + 14*scale, y + 6*scale, x + 14*scale, y + 4*scale);
+    midpointLine(x + 8*scale, y + 12*scale, x + 9*scale, y + 11*scale);
+    midpointLine(x + 9*scale, y + 11*scale, x + 10*scale, y + 10*scale);
+    midpointLine(x + 10*scale, y + 10*scale, x + 11*scale, y + 9*scale);
+    midpointLine(x + 11*scale, y + 9*scale, x + 12*scale, y + 8*scale);
+    midpointLine(x + 12*scale, y + 8*scale, x + 13*scale, y + 7*scale);
+    midpointLine(x + 13*scale, y + 7*scale, x + 14*scale, y + 6*scale);
+    midpointLine(x + 14*scale, y + 6*scale, x + 14*scale, y + 4*scale);
     
     // Phần trên phải
-    line(x + 14*scale, y + 4*scale, x + 13*scale, y + 3*scale);
-    line(x + 13*scale, y + 3*scale, x + 13*scale, y + 2*scale);
-    line(x + 13*scale, y + 2*scale, x + 12*scale, y + scale);
-    line(x + 12*scale, y + scale, x + 11*scale, y);
-    line(x + 11*scale, y, x + 9*scale, y);
+    midpointLine(x + 14*scale, y + 4*scale, x + 13*scale, y + 3*scale);
+    midpointLine(x + 13*scale, y + 3*scale, x + 13*scale, y + 2*scale);
+    midpointLine(x + 13*scale, y + 2*scale, x + 12*scale, y + scale);
+    midpointLine(x + 12*scale, y + scale, x + 11*scale, y);
+    midpointLine(x + 11*scale, y, x + 9*scale, y);
     
     // Phần lõm giữa
-    line(x + 9*scale, y, x + 8*scale, y + scale);
-    line(x + 8*scale, y + scale, x + 7*scale, y + scale);
-    line(x + 7*scale, y + scale, x + 6*scale, y);
-    line(x + 6*scale, y, x + 5*scale, y);
+    midpointLine(x + 9*scale, y, x + 8*scale, y + scale);
+    midpointLine(x + 8*scale, y + scale, x + 7*scale, y + scale);
+    midpointLine(x + 7*scale, y + scale, x + 6*scale, y);
+    midpointLine(x + 6*scale, y, x + 5*scale, y);
 }
 
 // Vẽ nhiều trái tim liên tiếp (cho HP)
@@ -110,7 +111,9 @@ static void drawEnergyBar(int x, int y, int mana, int manaMax) {
 
     int fillW = (manaMax > 0) ? (barW * filled) / manaMax : 0;
     if (fillW > 0) {
-        setfillstyle(SOLID_FILL, COLOR(80, 180, 255));
+        int isFull = (manaMax > 0 && filled >= manaMax);
+        int fillColor = isFull ? COLOR(220, 60, 60) : COLOR(80, 180, 255);
+        setfillstyle(SOLID_FILL, fillColor);
         bar(x, y, x + fillW, y + barH);
     }
 
@@ -141,10 +144,7 @@ void drawGameStats(int hp, int score, int mana, int manaMax, int skillReady) {
     outtextxy(20, 78, (char*)"Nang Luong:");
     drawEnergyBar(110, 80, mana, manaMax);
 
-    if (skillReady) {
-        setcolor(COLOR(255, 220, 120));
-        outtextxy(280, 78, (char*)"SAN SANG");
-    }
+    (void)skillReady;
 }
 
 #endif
