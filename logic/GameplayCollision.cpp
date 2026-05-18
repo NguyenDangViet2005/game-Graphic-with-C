@@ -2,6 +2,7 @@
 #define GAMEPLAY_COLLISION_CPP
 
 #include "GameplayTypes.cpp"
+#include "../configs/Config.cpp"
 
 int isArrowHitGhost(const Arrow& arrow, int ghostX, int ghostY) {
     int pixelSize = 3;
@@ -37,6 +38,23 @@ int isExplorerHitFireball(float explorerX, float explorerY, float fireX, float f
     float dx = fireX - explorerX;
     float dy = fireY - (explorerY - 40.0f);
     return (dx * dx + dy * dy) <= 28.0f * 28.0f;
+}
+
+int isEnergyWaveHitGhost(const EnergyWave& wave, int ghostX, int ghostY) {
+    int waveLeft = (wave.dir > 0) ? (int)wave.x : 0;
+    int waveRight = (wave.dir > 0) ? SCREEN_WIDTH : (int)wave.x;
+    int waveHalfH = 11;
+    int waveTop = (int)wave.y - waveHalfH;
+    int waveBottom = (int)wave.y + waveHalfH;
+
+    int pixelSize = 3;
+    int ghostLeft = ghostX + 2 * pixelSize;
+    int ghostTop = ghostY - 46 * pixelSize;
+    int ghostRight = ghostLeft + 26 * pixelSize;
+    int ghostBottom = ghostTop + 46 * pixelSize;
+
+    return !(waveRight < ghostLeft || waveLeft > ghostRight ||
+             waveBottom < ghostTop || waveTop > ghostBottom);
 }
 
 #endif

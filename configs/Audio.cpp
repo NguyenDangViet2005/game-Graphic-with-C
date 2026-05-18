@@ -16,6 +16,7 @@ static const char* kAliasDamage = "sfx_damage";
 static const char* kAliasExplorerDamage = "sfx_explorer_damage";
 static const char* kAliasDeath = "sfx_death";
 static const char* kAliasFire = "sfx_fire";
+static const char* kAliasPowerFirer = "sfx_power_firer";
 static const char* kAliasGameOver = "sfx_gameover";
 static const char* kAliasGetScore = "sfx_getscore";
 static const char* kAliasJump = "sfx_jump";
@@ -29,6 +30,7 @@ static const char* kPathDamage = "sound-effects\\sound-damage.mp3";
 static const char* kPathExplorerDamage = "sound-effects\\sound-explore-damage.mp3";
 static const char* kPathDeath = "sound-effects\\sound-death.mp3";
 static const char* kPathFire = "sound-effects\\sound-fire.mp3";
+static const char* kPathPowerFirer = "sound-effects\\power-firer.mp3";
 static const char* kPathGameOver = "sound-effects\\sound-gameover.mp3";
 static const char* kPathGetScore = "sound-effects\\sound-getscore.mp3";
 static const char* kPathJump = "sound-effects\\sound-jump.mp3";
@@ -111,6 +113,7 @@ void initAudio() {
     openAlias(kAliasExplorerDamage, kPathExplorerDamage);
     openAlias(kAliasDeath, kPathDeath);
     openAlias(kAliasFire, kPathFire);
+    openAlias(kAliasPowerFirer, kPathPowerFirer);
     openAlias(kAliasGameOver, kPathGameOver);
     openAlias(kAliasGetScore, kPathGetScore);
     openAlias(kAliasJump, kPathJump);
@@ -126,6 +129,7 @@ void initAudio() {
     setAliasVolume(kAliasExplorerDamage, 800);
     setAliasVolume(kAliasDeath, 850);
     setAliasVolume(kAliasFire, 760);
+    setAliasVolume(kAliasPowerFirer, 820);
     setAliasVolume(kAliasGetScore, 820);
     setAliasVolume(kAliasJump, 720);
     setAliasVolume(kAliasRun, 600);
@@ -146,6 +150,7 @@ void shutdownAudio() {
     closeAlias(kAliasExplorerDamage);
     closeAlias(kAliasDeath);
     closeAlias(kAliasFire);
+    closeAlias(kAliasPowerFirer);
     closeAlias(kAliasGameOver);
     closeAlias(kAliasGetScore);
     closeAlias(kAliasJump);
@@ -178,6 +183,7 @@ void playDamage() { playAliasOnce(kAliasDamage); }
 void playExplorerDamage() { playAliasOnce(kAliasExplorerDamage); }
 void playDeath() { playAliasOnce(kAliasDeath); }
 void playFire() { playAliasOnce(kAliasFire); }
+void playPowerFirer() { playAliasOnce(kAliasPowerFirer); }
 void playGameOver() { playAliasOnce(kAliasGameOver); }
 void playGetScore() { playAliasOnce(kAliasGetScore); }
 void playJump() { playAliasOnce(kAliasJump); }

@@ -98,8 +98,28 @@ void drawHearts(int x, int y, int count, int scale = 2, int spacing = 5) {
     }
 }
 
-// Vẽ text HP và điểm
-void drawGameStats(int hp, int score) {
+static void drawEnergyBar(int x, int y, int mana, int manaMax) {
+    int barW = 120;
+    int barH = 10;
+    int filled = mana;
+    if (filled < 0) filled = 0;
+    if (filled > manaMax) filled = manaMax;
+
+    setfillstyle(SOLID_FILL, COLOR(25, 40, 70));
+    bar(x, y, x + barW, y + barH);
+
+    int fillW = (manaMax > 0) ? (barW * filled) / manaMax : 0;
+    if (fillW > 0) {
+        setfillstyle(SOLID_FILL, COLOR(80, 180, 255));
+        bar(x, y, x + fillW, y + barH);
+    }
+
+    setcolor(COLOR(10, 10, 10));
+    rectangle(x, y, x + barW, y + barH);
+}
+
+// Vẽ text HP, điểm, năng lượng
+void drawGameStats(int hp, int score, int mana, int manaMax, int skillReady) {
     // Text HP
     setcolor(WHITE);
     settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
@@ -114,6 +134,17 @@ void drawGameStats(int hp, int score) {
     char scoreText[50];
     sprintf(scoreText, "Diem: %d", score);
     outtextxy(20, 50, scoreText);
+
+    // Nang luong bar
+    setcolor(COLOR(160, 200, 255));
+    settextstyle(DEFAULT_FONT, HORIZ_DIR, 1);
+    outtextxy(20, 78, (char*)"Nang Luong:");
+    drawEnergyBar(110, 80, mana, manaMax);
+
+    if (skillReady) {
+        setcolor(COLOR(255, 220, 120));
+        outtextxy(280, 78, (char*)"SAN SANG");
+    }
 }
 
 #endif

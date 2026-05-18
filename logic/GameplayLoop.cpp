@@ -30,6 +30,9 @@ static void appendScoreToFile(int score) {
 void playGame() {
     int hp = 3;
     int score = 0;
+    int mana = 0;
+    int manaMax = 10;
+    int skillReady = 0;
 
     int gameRunning = 1;
 
@@ -121,6 +124,11 @@ void playGame() {
         fireballs[i].active = 0;
     }
 
+    EnergyWave energyWaves[MAX_ENERGY_WAVES];
+    for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+        energyWaves[i].active = 0;
+    }
+
     int page = 0;
     setactivepage(page);
     setvisualpage(page);
@@ -138,6 +146,7 @@ void playGame() {
         if (dt > 0.05f) dt = 0.05f;
         lastTick = now;
         float arrowPulse = (float)sin(now * 0.008f);
+        float wavePhase = now * 0.02f;
 
         if (ismouseclick(WM_LBUTTONDOWN)) {
             int mx, my;
@@ -159,8 +168,11 @@ void playGame() {
         }
 
         int onGround = (explorerY >= groundY - 0.5f);
-        if ((GetAsyncKeyState(VK_UP) & 0x0001) && onGround) {
-            explorerVy = jumpSpeed;
+        int shiftDown = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+        int ctrlDown = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+        if ((GetAsyncKeyState(VK_UP) & 0x0001) && onGround && !ctrlDown) {
+            float jumpMultiplier = shiftDown ? 1.5f : 1.0f;
+            explorerVy = jumpSpeed * jumpMultiplier;
             playJump();
         }
 
@@ -171,16 +183,26 @@ void playGame() {
         if (moveDir < 0) facingRight = 0;
         if (moveDir > 0) facingRight = 1;
 
+        float speedMultiplier = 1.0f;
+        if (ctrlDown) {
+            speedMultiplier = 0.5f;
+        } else if (shiftDown) {
+            speedMultiplier = 2.0f;
+        }
+        float effectiveSpeed = explorerSpeed * speedMultiplier;
+        float effectiveAccel = explorerAccel * speedMultiplier;
+        float effectiveFriction = explorerFriction * speedMultiplier;
+
         if (moveDir != 0) {
-            explorerVx += moveDir * explorerAccel * dt;
-            if (explorerVx > explorerSpeed) explorerVx = explorerSpeed;
-            if (explorerVx < -explorerSpeed) explorerVx = -explorerSpeed;
+            explorerVx += moveDir * effectiveAccel * dt;
+            if (explorerVx > effectiveSpeed) explorerVx = effectiveSpeed;
+            if (explorerVx < -effectiveSpeed) explorerVx = -effectiveSpeed;
         } else {
             if (explorerVx > 0.0f) {
-                explorerVx -= explorerFriction * dt;
+                explorerVx -= effectiveFriction * dt;
                 if (explorerVx < 0.0f) explorerVx = 0.0f;
             } else if (explorerVx < 0.0f) {
-                explorerVx += explorerFriction * dt;
+                explorerVx += effectiveFriction * dt;
                 if (explorerVx > 0.0f) explorerVx = 0.0f;
             }
         }
@@ -211,8 +233,31 @@ void playGame() {
             explorerScale = 1.0f;
         }
 
+        int downHeld = (GetAsyncKeyState(VK_DOWN) & 0x8000) != 0;
+        int leftHeld = (GetAsyncKeyState(VK_LEFT) & 0x8000) != 0;
+        int rightHeld = (GetAsyncKeyState(VK_RIGHT) & 0x8000) != 0;
+        int spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x0001) != 0;
+        int skillShot = 0;
+        if (skillReady && downHeld && (leftHeld || rightHeld) && spacePressed) {
+            int dir = leftHeld ? -1 : 1;
+            for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+                if (!energyWaves[i].active) {
+                    energyWaves[i].active = 1;
+                    energyWaves[i].x = explorerX + (dir > 0 ? 40.0f : -40.0f);
+                    energyWaves[i].y = explorerY - 30.0f;
+                    energyWaves[i].dir = dir;
+                    energyWaves[i].life = 1.0f;
+                    mana = 0;
+                    skillReady = 0;
+                    playPowerFirer();
+                    skillShot = 1;
+                    break;
+                }
+            }
+        }
+
         if (shootCooldown > 0.0f) shootCooldown -= dt;
-        if ((GetAsyncKeyState(VK_SPACE) & 0x8000) && shootCooldown <= 0.0f) {
+        if (!skillShot && (GetAsyncKeyState(VK_SPACE) & 0x8000) && shootCooldown <= 0.0f) {
             for (int i = 0; i < MAX_ARROWS; i++) {
                 if (!arrows[i].active) {
                     arrows[i].active = 1;
@@ -251,9 +296,34 @@ void playGame() {
                     if (ghosts[g].hp <= 0) {
                         ghosts[g].active = 0;
                         score += 100;
+                        mana += 1;
+                        if (mana > manaMax) mana = manaMax;
+                        if (mana >= manaMax) skillReady = 1;
                         playGetScore();
                     }
                     break;
+                }
+            }
+        }
+
+        for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+            if (!energyWaves[i].active) continue;
+            energyWaves[i].life -= dt;
+            if (energyWaves[i].life <= 0.0f) {
+                energyWaves[i].active = 0;
+                continue;
+            }
+
+            for (int g = 0; g < MAX_GHOSTS; g++) {
+                if (!ghosts[g].active) continue;
+                if (isEnergyWaveHitGhost(energyWaves[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
+                    ghosts[g].hp = 0;
+                    ghosts[g].active = 0;
+                    score += 100;
+                    mana += 1;
+                    if (mana > manaMax) mana = manaMax;
+                    if (mana >= manaMax) skillReady = 1;
+                    playGetScore();
                 }
             }
         }
@@ -354,6 +424,9 @@ void playGame() {
             if (!ghosts[i].active) continue;
             drawGhost((int)ghosts[i].x, (int)ghosts[i].y);
         }
+        if (skillReady) {
+            drawFootGlow((int)explorerX, (int)explorerY, explorerScale);
+        }
         if (facingRight) {
             drawExplorer((int)explorerX, (int)explorerY, explorerScale);
         } else {
@@ -367,7 +440,13 @@ void playGame() {
             if (!fireballs[i].active) continue;
             drawFireball(fireballs[i].x, fireballs[i].y);
         }
-        drawGameStats(hp, score);
+        for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+            if (!energyWaves[i].active) continue;
+            int left = (energyWaves[i].dir > 0) ? (int)energyWaves[i].x : 0;
+            int right = (energyWaves[i].dir > 0) ? SCREEN_WIDTH : (int)energyWaves[i].x;
+            drawPowerAttack(left, right, (int)energyWaves[i].y, wavePhase);
+        }
+        drawGameStats(hp, score, mana, manaMax, skillReady);
         drawPauseButton(pauseBtnX, pauseBtnY);
 
         setvisualpage(page);

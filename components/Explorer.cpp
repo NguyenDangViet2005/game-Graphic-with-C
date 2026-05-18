@@ -22,18 +22,6 @@ void drawExplorer(int x, int y, float scale) {
     int thickNormal = scale > 1.5f ? 2 : 1;
     int thickBold = scale > 1.5f ? 3 : 2;
 
-    setlinestyle(SOLID_LINE, 0, thickNormal); 
-    
-    // quầng sáng dưới chân
-    setcolor(goldDark);
-    setlinestyle(SOLID_LINE, 0, thickBold);
-    algorithmEllipse(x, y, 48 * scale, 14 * scale);
-    setcolor(goldMain);
-    setlinestyle(SOLID_LINE, 0, thickNormal);
-    algorithmEllipse(x, y, 56 * scale, 18 * scale);
-    setcolor(glowColor);
-    algorithmEllipse(x, y, 40 * scale, 10 * scale);
-
     setlinestyle(SOLID_LINE, 0, thickNormal);
 
     // ống đựng tên sau lưng
