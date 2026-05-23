@@ -126,7 +126,10 @@ void drawBackground() {
     bar(decoLeft, decoTop, decoRight, decoBottom);
 
     setcolor(COLOR(20, 25, 35));
-    algorithmFloodFillRecursive(decoLeft + 2, decoTop + 2, COLOR(20, 25, 35));
+    int decoOldColor = getpixel(decoLeft + 2, decoTop + 2);
+    if (decoOldColor != COLOR(20, 25, 35)) {
+        recursiveFloodFill(decoLeft + 2, decoTop + 2, COLOR(20, 25, 35), decoOldColor);
+    }
     
     // Thêm đom đóm bay lượn
     drawFireflies();

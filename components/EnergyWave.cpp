@@ -14,7 +14,7 @@ void drawEnergyWave(int left, int right, int y) {
     setcolor(WHITE);
     rectangle(left, top, right, bottom);
     setcolor(WHITE);
-    algorithmBoundaryFillRecursive(left + 1, top + 1, WHITE);
+    recursiveBoundaryFill(left + 1, top + 1, getcolor(), WHITE);
 
     setcolor(COLOR(220, 40, 40));
     // Bresenham line (thick)

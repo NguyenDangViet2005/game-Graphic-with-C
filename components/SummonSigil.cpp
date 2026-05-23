@@ -37,16 +37,16 @@ void drawSummonSigil(int x, int y, float scale = 1.0f) {
     auto p0 = polar(90, ringR2);
     auto p1 = polar(210, ringR2);
     auto p2 = polar(330, ringR2);
-    bresenhamLine(p0.first, p0.second, p1.first, p1.second);
-    bresenhamLine(p1.first, p1.second, p2.first, p2.second);
-    bresenhamLine(p2.first, p2.second, p0.first, p0.second);
+    midpointLine(p0.first, p0.second, p1.first, p1.second);
+    midpointLine(p1.first, p1.second, p2.first, p2.second);
+    midpointLine(p2.first, p2.second, p0.first, p0.second);
 
     auto q0 = polar(270, ringR2);
     auto q1 = polar(30, ringR2);
     auto q2 = polar(150, ringR2);
-    bresenhamLine(q0.first, q0.second, q1.first, q1.second);
-    bresenhamLine(q1.first, q1.second, q2.first, q2.second);
-    bresenhamLine(q2.first, q2.second, q0.first, q0.second);
+    midpointLine(q0.first, q0.second, q1.first, q1.second);
+    midpointLine(q1.first, q1.second, q2.first, q2.second);
+    midpointLine(q2.first, q2.second, q0.first, q0.second);
 
     // Vong trong va tam
     setcolor(COLOR(200, 70, 70));

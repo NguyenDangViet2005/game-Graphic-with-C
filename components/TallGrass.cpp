@@ -17,8 +17,8 @@ void drawTallGrass(int x, int y, int height) {
         int midY = y - grassHeight / 2;
         
         // Bresenham line
-        bresenhamLine(offsetX, y, midX, midY);
-        bresenhamLine(midX, midY, offsetX + (i % 2 == 0 ? 2 : -2), y - grassHeight);
+        midpointLine(offsetX, y, midX, midY);
+        midpointLine(midX, midY, offsetX + (i % 2 == 0 ? 2 : -2), y - grassHeight);
     }
 }
 

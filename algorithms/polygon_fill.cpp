@@ -50,19 +50,4 @@ void recursiveBoundaryFill(int x, int y, int fillColor, int boundaryColor) {
     recursiveBoundaryFill(x, y - 1, fillColor, boundaryColor);
 }
 
-
-// Wrapper de thay the floodfill() trong graphics.h
-inline void algorithmFloodFillRecursive(int x, int y, int newColor) {
-    int oldColor = getpixel(x, y);
-    if (oldColor != newColor) {
-        recursiveFloodFill(x, y, newColor, oldColor);
-    }
-}
-
-// Wrapper de thay the boundary fill
-inline void algorithmBoundaryFillRecursive(int x, int y, int boundaryColor) {
-    recursiveBoundaryFill(x, y, getcolor(), boundaryColor);
-}
-
-
 #endif

@@ -68,8 +68,8 @@ void drawFarLayer(int yOffset = 0) {
         
         // Viền đen sâu
         setcolor(COLOR(1, 1, 1));
-        bresenhamLine(tx - bottomW/2, farY, tx - topW/2, farY - th);
-        bresenhamLine(tx + bottomW/2, farY, tx + topW/2, farY - th);
+        midpointLine(tx - bottomW/2, farY, tx - topW/2, farY - th);
+        midpointLine(tx + bottomW/2, farY, tx + topW/2, farY - th);
         
         // Kết cây nhỏ (chỉ cây to mới có)
         if(tw >= 18 && i % 2 == 0) {
@@ -126,8 +126,8 @@ void drawDarkTree(int x, int y, int height) {
     setlinestyle(SOLID_LINE, 0, 1);
     for(int i = 0; i < 8; i++) {
         int yPos = y - (i * height * 0.08);
-        bresenhamLine(x - trunkW/4, yPos, x - trunkW/4, yPos + 15);
-        bresenhamLine(x + trunkW/6, yPos + 7, x + trunkW/6, yPos + 20);
+        midpointLine(x - trunkW/4, yPos, x - trunkW/4, yPos + 15);
+        midpointLine(x + trunkW/6, yPos + 7, x + trunkW/6, yPos + 20);
     }
     
     // Vân ngang và mắt gỗ
@@ -140,7 +140,7 @@ void drawDarkTree(int x, int y, int height) {
     setcolor(COLOR(5, 3, 2));
     fillellipse(x - trunkW/5, y - height * 0.3, 4, 6);
     fillellipse(x + trunkW/7, y - height * 0.5, 3, 5);
-    bresenhamLine(x - trunkW/8, y - height * 0.4, x - trunkW/8 + 2, y - height * 0.4 + 18);
+    midpointLine(x - trunkW/8, y - height * 0.4, x - trunkW/8 + 2, y - height * 0.4 + 18);
     
     // Viền thân cây - đen sâu
     setcolor(COLOR(6, 4, 3));
@@ -154,26 +154,26 @@ void drawDarkTree(int x, int y, int height) {
     
     // Nhánh trái
     int branchY1 = y - height * 0.7;
-    bresenhamLine(x - trunkW/4, branchY1, x - trunkW * 2, branchY1 - 30);
-    bresenhamLine(x - trunkW * 2, branchY1 - 30, x - trunkW * 2.3, branchY1 - 35);
+    midpointLine(x - trunkW/4, branchY1, x - trunkW * 2, branchY1 - 30);
+    midpointLine(x - trunkW * 2, branchY1 - 30, x - trunkW * 2.3, branchY1 - 35);
     
     // Nhánh phải
     int branchY2 = y - height * 0.65;
-    bresenhamLine(x + trunkW/4, branchY2, x + trunkW * 1.8, branchY2 - 25);
-    bresenhamLine(x + trunkW * 1.8, branchY2 - 25, x + trunkW * 2.2, branchY2 - 20);
+    midpointLine(x + trunkW/4, branchY2, x + trunkW * 1.8, branchY2 - 25);
+    midpointLine(x + trunkW * 1.8, branchY2 - 25, x + trunkW * 2.2, branchY2 - 20);
     
     // Nhánh trái dưới
     int branchY3 = y - height * 0.5;
-    bresenhamLine(x - trunkW/5, branchY3, x - trunkW * 1.5, branchY3 - 15);
+    midpointLine(x - trunkW/5, branchY3, x - trunkW * 1.5, branchY3 - 15);
     
     // Nhánh phải dưới
     int branchY4 = y - height * 0.55;
-    bresenhamLine(x + trunkW/6, branchY4, x + trunkW * 1.6, branchY4 - 20);
+    midpointLine(x + trunkW/6, branchY4, x + trunkW * 1.6, branchY4 - 20);
     
     // Nhánh nhỏ trên đỉnh
     setlinestyle(SOLID_LINE, 0, 2);
-    bresenhamLine(x, y - height * 0.85, x - trunkW * 0.8, y - height * 0.95);
-    bresenhamLine(x, y - height * 0.85, x + trunkW * 0.7, y - height * 0.97);
+    midpointLine(x, y - height * 0.85, x - trunkW * 0.8, y - height * 0.95);
+    midpointLine(x, y - height * 0.85, x + trunkW * 0.7, y - height * 0.97);
     
     // Lá cây - nhiều lớp, nhiều chi tiết, gradient từ dưới lên trên
     
