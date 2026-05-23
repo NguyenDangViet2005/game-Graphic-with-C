@@ -120,6 +120,36 @@ void drawThornyGrass(int x, int y, int height) {
     }
 }
 
+// Vẽ cỏ gai với hiệu ứng nghiêng (affine quay quanh gốc)
+void drawThornyGrassAffine(int x, int y, int height, float angle) {
+    setcolor(COLOR(30, 50, 35));
+
+    float cosA = (float)cos(angle);
+    float sinA = (float)sin(angle);
+
+    for (int i = 0; i < 3; i++) {
+        int baseX = x + (i - 1) * 8;
+        int baseY = y;
+        int midX = baseX + (i % 2 == 0 ? 2 : -2);
+        int midY = y - height / 2 - i;
+        int topX = baseX + (i % 2 == 0 ? 5 : -5);
+        int topY = y - height - (i * 3);
+
+        float midDx = (float)(midX - baseX);
+        float midDy = (float)(midY - baseY);
+        float topDx = (float)(topX - baseX);
+        float topDy = (float)(topY - baseY);
+
+        int midXr = baseX + (int)(midDx * cosA - midDy * sinA);
+        int midYr = baseY + (int)(midDx * sinA + midDy * cosA);
+        int topXr = baseX + (int)(topDx * cosA - topDy * sinA);
+        int topYr = baseY + (int)(topDx * sinA + topDy * cosA);
+
+        line(baseX, baseY, midXr, midYr);
+        line(midXr, midYr, topXr, topYr);
+    }
+}
+
 
 // Thuật toán Dragon Curve (Đường cong Rồng) - cho rễ cây
 void drawDragonCurve(int x1, int y1, int x2, int y2, int depth, int direction) {

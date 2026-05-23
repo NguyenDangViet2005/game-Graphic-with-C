@@ -145,6 +145,7 @@ void playGame() {
         float dt = (now - lastTick) / 1000.0f;
         if (dt > 0.05f) dt = 0.05f;
         lastTick = now;
+        float timeSec = now * 0.001f;
         float arrowPulse = (float)sin(now * 0.008f);
         float wavePhase = now * 0.02f;
 
@@ -427,6 +428,8 @@ void playGame() {
 
         setactivepage(page);
         putimage(0, 0, cachedGameBackground, COPY_PUT);
+        drawForestSway(timeSec);
+        drawFirefliesAnimated(timeSec);
         for (int i = 0; i < MAX_GHOSTS; i++) {
             if (!ghosts[i].active) continue;
             drawGhost((int)ghosts[i].x, (int)ghosts[i].y);

@@ -2,6 +2,7 @@
 #define FOREST_H
 
 #include <graphics.h>
+#include <math.h>
 #include "../algorithms/index.cpp"
 #include "Gravestone.cpp"
 #include "TallGrass.cpp"
@@ -72,18 +73,7 @@ void drawDarkForest() {
     drawSpiderWeb(920, GROUND_Y - 88, 19);
     drawSpiderWeb(1120, GROUND_Y - 75, 17);
     
-    // Cỏ dại cao (GIỮ NGUYÊN)
-    drawTallGrass(200, GROUND_Y, 35);
-    drawTallGrass(320, GROUND_Y, 40);
-    drawTallGrass(550, GROUND_Y, 38);
-    drawTallGrass(780, GROUND_Y, 42);
-    drawTallGrass(900, GROUND_Y, 36);
-    drawTallGrass(1050, GROUND_Y, 39);
-    
-    // === CỎ GAI KOCH CURVE ===
-    drawThornyGrass(400, GROUND_Y, 30);
-    drawThornyGrass(650, GROUND_Y, 28);
-    drawThornyGrass(1000, GROUND_Y, 32);
+    // Cỏ dại và cỏ gai sẽ được vẽ động ở layer foreground
     
     // === CÂY FRACTAL KHÔ CẰN TO (vẽ sau cùng để hiển thị trên cây thường) ===
     setcolor(COLOR(25, 20, 15));  // Màu tối hơn nhiều
@@ -93,6 +83,19 @@ void drawDarkForest() {
     drawDarkFractalTree(580, GROUND_Y, 90, 9, 90);
     drawDarkFractalTree(820, GROUND_Y, 90, 10, 100);
     drawDarkFractalTree(1050, GROUND_Y, 90, 9, 88);
+}
+
+// Vẽ lớp cỏ tiền cảnh với hiệu ứng đong đưa
+void drawForestSway(float timeSec) {
+    float swayBase = (float)sin(timeSec * 1.6f) * 0.12f;
+
+    drawTallGrassAffine(220, GROUND_Y, 36, swayBase + 0.03f);
+    drawTallGrassAffine(520, GROUND_Y, 40, swayBase - 0.02f);
+    drawTallGrassAffine(820, GROUND_Y, 38, swayBase + 0.04f);
+    drawTallGrassAffine(1040, GROUND_Y, 39, swayBase - 0.03f);
+
+    drawThornyGrassAffine(420, GROUND_Y, 30, swayBase + 0.05f);
+    drawThornyGrassAffine(920, GROUND_Y, 32, swayBase - 0.04f);
 }
 
 #endif

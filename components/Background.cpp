@@ -131,8 +131,7 @@ void drawBackground() {
         recursiveFloodFill(decoLeft + 2, decoTop + 2, COLOR(20, 25, 35), decoOldColor);
     }
     
-    // Thêm đom đóm bay lượn
-    drawFireflies();
+    // Đom đóm được vẽ động ở layer foreground
 }
 
 #endif 
