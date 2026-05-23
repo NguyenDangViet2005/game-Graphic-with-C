@@ -4,7 +4,7 @@
 #include <graphics.h>
 #include <cmath>
 
-// Thuật toán Bresenham vẽ đường thẳng
+// Thuật toán Bresenham vẽ đường thẳng áp dụng cho cả 4 trường hợp (0<=m<=1, m>1, -1<=m<0, m<-1)
 void bresenhamLine(int x1, int y1, int x2, int y2) {
     int dx = abs(x2 - x1);
     int dy = abs(y2 - y1);
@@ -28,6 +28,8 @@ void bresenhamLine(int x1, int y1, int x2, int y2) {
             err += dx;
             y += sy;
         }
+        // - sx, sy xu ly 4 huong (trai/phai, tren/duoi)
+        // - Ket hop hai if tren bao phu day du 8 goc (octants)
     }
 }
 
@@ -39,6 +41,7 @@ void bresenhamCircle(int centerX, int centerY, int radius) {
 
     // Vẽ 8 điểm đối xứng
     auto plotCirclePoints = [&](int cx, int cy, int x, int y) {
+        // 8 truong hop doi xung theo 4 phan tu va 4 duong cheo
         putpixel(cx + x, cy + y, getcolor());
         putpixel(cx - x, cy + y, getcolor());
         putpixel(cx + x, cy - y, getcolor());
@@ -53,9 +56,11 @@ void bresenhamCircle(int centerX, int centerY, int radius) {
         plotCirclePoints(centerX, centerY, x, y);
         x++;
         if (d > 0) {
+            // Truong hop diem ke tiep nam ngoai duong tron
             y--;
             d += 4 * (x - y) + 10;
         } else {
+            // Truong hop diem ke tiep nam trong/gan duong tron
             d += 4 * x + 6;
         }
     }

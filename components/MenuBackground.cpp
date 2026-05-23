@@ -10,7 +10,7 @@
 #include "../algorithms/fractal.cpp"
 #include "SummonSigil.cpp"
 
-void drawExplorer(int x, int y, float scale = 1.0f);
+void drawExplorer(int x, int y, float scale = 1.0f, float armAngle = 0.0f, float headAngle = 0.0f);
 
 // Vẽ background chung cho Menu, Hướng dẫn, Bảng điểm
 void drawMenuBackground() {

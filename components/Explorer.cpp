@@ -2,11 +2,27 @@
 #define EXPLORER_H
 
 #include <graphics.h>
+#include <math.h>
 #include "../algorithms/index.cpp"
 
 #define S(val) ((int)((val) * scale)) // macro scale tọa độ
 
-void drawExplorer(int x, int y, float scale) {
+static void rotatePoint(float x, float y, float cx, float cy, float cosA, float sinA, int& outX, int& outY) {
+    float tx = x - cx;
+    float ty = y - cy;
+    float rx = tx * cosA - ty * sinA;
+    float ry = tx * sinA + ty * cosA;
+    outX = (int)(rx + cx);
+    outY = (int)(ry + cy);
+}
+
+static void buildRotatedPoly(const int* pts, int count, float cx, float cy, float cosA, float sinA, int* outPts) {
+    for (int i = 0; i < count; i++) {
+        rotatePoint((float)pts[i * 2], (float)pts[i * 2 + 1], cx, cy, cosA, sinA, outPts[i * 2], outPts[i * 2 + 1]);
+    }
+}
+
+void drawExplorer(int x, int y, float scale, float armAngle, float headAngle) {
     // Bảng màu nhân vật
     int armorDark = COLOR(45, 50, 70);      // Giáp tối
     int armorMain = COLOR(80, 90, 110);     // Giáp sáng
@@ -133,51 +149,75 @@ void drawExplorer(int x, int y, float scale) {
     bresenhamLine(x+S(14), y-S(15), x+S(10), y-S(5));
     setcolor(outlineColor);
 
-    // tay phải cầm cung
+    // tay phải cầm cung (xoay quanh khop)
+    float armCos = (float)cos(armAngle);
+    float armSin = (float)sin(armAngle);
+    float armPivotX = (float)(x + S(25));
+    float armPivotY = (float)(y - S(35));
     setfillstyle(SOLID_FILL, armorMain);
     int armR[] = {x+S(15), y-S(40), x+S(30), y-S(40), x+S(40), y-S(30), x+S(25), y-S(30)};
-    fillpoly(4, armR); drawpoly(4, armR);
+    int armRRot[8];
+    buildRotatedPoly(armR, 4, armPivotX, armPivotY, armCos, armSin, armRRot);
+    fillpoly(4, armRRot); drawpoly(4, armRRot);
 
     // nắm tay phải
     setfillstyle(SOLID_FILL, armorDark);
-    midpointFilledCircle(x+S(40), y-S(30), S(7));
-    midpointCircle(x+S(40), y-S(30), S(7));
+    int handX = 0;
+    int handY = 0;
+    rotatePoint((float)(x + S(40)), (float)(y - S(30)), armPivotX, armPivotY, armCos, armSin, handX, handY);
+    midpointFilledCircle(handX, handY, S(7));
+    midpointCircle(handX, handY, S(7));
 
     // cung tên
     int bowX = x + S(40);
     int bowY = y - S(30);
+    int bowXr = 0;
+    int bowYr = 0;
+    rotatePoint((float)bowX, (float)bowY, armPivotX, armPivotY, armCos, armSin, bowXr, bowYr);
+    float bowAngleOffset = armAngle * 180.0f / 3.1415926f;
     setlinestyle(SOLID_LINE, 0, thickBold);
     
     setcolor(goldMain);
-    arc(bowX - S(10), bowY, 280, 80, S(25));
+    arc(bowXr - S(10), bowYr, (int)(280 + bowAngleOffset), (int)(80 + bowAngleOffset), S(25));
     setcolor(armorDark);
-    arc(bowX - S(12), bowY, 285, 75, S(23));
+    arc(bowXr - S(12), bowYr, (int)(285 + bowAngleOffset), (int)(75 + bowAngleOffset), S(23));
     
     // tay cầm cung
     setfillstyle(SOLID_FILL, armorDark);
-    bar(bowX-S(2), bowY-S(6), bowX+S(5), bowY+S(6));
+    bar(bowXr-S(2), bowYr-S(6), bowXr+S(5), bowYr+S(6));
     setcolor(outlineColor);
-    rectangle(bowX-S(2), bowY-S(6), bowX+S(5), bowY+S(6));
+    rectangle(bowXr-S(2), bowYr-S(6), bowXr+S(5), bowYr+S(6));
     setcolor(gemColor);
-    midpointFilledCircle(bowX+S(1), bowY, S(2));
+    midpointFilledCircle(bowXr+S(1), bowYr, S(2));
 
     // dây cung
     setcolor(glowColor);
     setlinestyle(SOLID_LINE, 0, thickNormal); 
-    bresenhamLine(bowX - S(4), bowY - S(24), bowX - S(14), bowY);
-    bresenhamLine(bowX - S(4), bowY + S(24), bowX - S(14), bowY);
+    int lineA0x = 0, lineA0y = 0, lineA1x = 0, lineA1y = 0;
+    int lineB0x = 0, lineB0y = 0, lineB1x = 0, lineB1y = 0;
+    rotatePoint((float)(bowX - S(4)), (float)(bowY - S(24)), armPivotX, armPivotY, armCos, armSin, lineA0x, lineA0y);
+    rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineA1x, lineA1y);
+    rotatePoint((float)(bowX - S(4)), (float)(bowY + S(24)), armPivotX, armPivotY, armCos, armSin, lineB0x, lineB0y);
+    rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineB1x, lineB1y);
+    bresenhamLine(lineA0x, lineA0y, lineA1x, lineA1y);
+    bresenhamLine(lineB0x, lineB0y, lineB1x, lineB1y);
     
     // mũi tên năng lượng
     setcolor(goldLight);
     setlinestyle(SOLID_LINE, 0, thickBold);
-    bresenhamLine(bowX - S(14), bowY, bowX + S(16), bowY);
+    int arrowLx = 0, arrowLy = 0, arrowRx = 0, arrowRy = 0;
+    rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowLx, arrowLy);
+    rotatePoint((float)(bowX + S(16)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowRx, arrowRy);
+    bresenhamLine(arrowLx, arrowLy, arrowRx, arrowRy);
     
     // đầu mũi tên
     setfillstyle(SOLID_FILL, eyeColor);
     int arrowHead[] = {bowX+S(16), bowY, bowX+S(10), bowY-S(4), bowX+S(13), bowY, bowX+S(10), bowY+S(4)};
-    fillpoly(4, arrowHead);
+    int arrowHeadRot[8];
+    buildRotatedPoly(arrowHead, 4, armPivotX, armPivotY, armCos, armSin, arrowHeadRot);
+    fillpoly(4, arrowHeadRot);
     setcolor(glowColor);
-    drawpoly(4, arrowHead);
+    drawpoly(4, arrowHeadRot);
 
     setlinestyle(SOLID_LINE, 0, thickNormal); 
     setcolor(outlineColor);
@@ -185,6 +225,10 @@ void drawExplorer(int x, int y, float scale) {
     // đầu và mũ
     int headX = x;
     int headY = y - S(65);
+    float headCos = (float)cos(headAngle);
+    float headSin = (float)sin(headAngle);
+    float headPivotX = (float)headX;
+    float headPivotY = (float)headY;
 
     // giáp vai
     setfillstyle(SOLID_FILL, armorDark);
@@ -213,7 +257,9 @@ void drawExplorer(int x, int y, float scale) {
         headX + S(10), headY + S(25),
         headX - S(10), headY + S(25)
     };
-    fillpoly(8, helmet); drawpoly(8, helmet);
+    int helmetRot[16];
+    buildRotatedPoly(helmet, 8, headPivotX, headPivotY, headCos, headSin, helmetRot);
+    fillpoly(8, helmetRot); drawpoly(8, helmetRot);
 
     // giáp cằm
     int helmetBottom[] = {
@@ -224,35 +270,51 @@ void drawExplorer(int x, int y, float scale) {
         headX + S(10), headY + S(25),
         headX - S(10), headY + S(25)
     };
-    fillpoly(6, helmetBottom); drawpoly(6, helmetBottom);
+    int helmetBottomRot[12];
+    buildRotatedPoly(helmetBottom, 6, headPivotX, headPivotY, headCos, headSin, helmetBottomRot);
+    fillpoly(6, helmetBottomRot); drawpoly(6, helmetBottomRot);
 
     // cặp sừng
     setfillstyle(SOLID_FILL, armorDark);
     int hornL[] = {headX-S(22), headY-S(5), headX-S(38), headY-S(35), headX-S(15), headY-S(22)};
-    fillpoly(3, hornL); drawpoly(3, hornL);
+    int hornLRot[6];
+    buildRotatedPoly(hornL, 3, headPivotX, headPivotY, headCos, headSin, hornLRot);
+    fillpoly(3, hornLRot); drawpoly(3, hornLRot);
     setcolor(armorMain);
-    bresenhamLine(headX-S(22), headY-S(5), headX-S(29), headY-S(22)); 
+    int hornLL0x = 0, hornLL0y = 0, hornLL1x = 0, hornLL1y = 0;
+    rotatePoint((float)(headX-S(22)), (float)(headY-S(5)), headPivotX, headPivotY, headCos, headSin, hornLL0x, hornLL0y);
+    rotatePoint((float)(headX-S(29)), (float)(headY-S(22)), headPivotX, headPivotY, headCos, headSin, hornLL1x, hornLL1y);
+    bresenhamLine(hornLL0x, hornLL0y, hornLL1x, hornLL1y); 
     setcolor(outlineColor);
 
     int hornR[] = {headX+S(22), headY-S(5), headX+S(38), headY-S(35), headX+S(15), headY-S(22)};
-    fillpoly(3, hornR); drawpoly(3, hornR);
+    int hornRRot[6];
+    buildRotatedPoly(hornR, 3, headPivotX, headPivotY, headCos, headSin, hornRRot);
+    fillpoly(3, hornRRot); drawpoly(3, hornRRot);
     setcolor(armorMain);
-    bresenhamLine(headX+S(22), headY-S(5), headX+S(29), headY-S(22));
+    int hornRL0x = 0, hornRL0y = 0, hornRL1x = 0, hornRL1y = 0;
+    rotatePoint((float)(headX+S(22)), (float)(headY-S(5)), headPivotX, headPivotY, headCos, headSin, hornRL0x, hornRL0y);
+    rotatePoint((float)(headX+S(29)), (float)(headY-S(22)), headPivotX, headPivotY, headCos, headSin, hornRL1x, hornRL1y);
+    bresenhamLine(hornRL0x, hornRL0y, hornRL1x, hornRL1y);
     setcolor(outlineColor);
 
     // chóp mũ có ngọc
     int crest[] = {headX-S(2), headY-S(23), headX+S(10), headY-S(42), headX+S(14), headY-S(23)};
     setfillstyle(SOLID_FILL, armorMain);
-    fillpoly(3, crest); drawpoly(3, crest);
+    int crestRot[6];
+    buildRotatedPoly(crest, 3, headPivotX, headPivotY, headCos, headSin, crestRot);
+    fillpoly(3, crestRot); drawpoly(3, crestRot);
 
     setcolor(BLACK);
-    midpointEllipse(headX+S(6), headY - S(18), S(7), S(9));
+    int gemX1 = 0, gemY1 = 0;
+    rotatePoint((float)(headX+S(6)), (float)(headY - S(18)), headPivotX, headPivotY, headCos, headSin, gemX1, gemY1);
+    midpointEllipse(gemX1, gemY1, S(7), S(9));
     setcolor(goldMain);
-    midpointFilledEllipse(headX+S(6), headY - S(18), S(6), S(8));
+    midpointFilledEllipse(gemX1, gemY1, S(6), S(8));
     setcolor(goldLight);
-    midpointEllipse(headX+S(6), headY - S(18), S(6), S(8));
+    midpointEllipse(gemX1, gemY1, S(6), S(8));
     setcolor(gemColor);
-    midpointFilledEllipse(headX+S(6), headY - S(18), S(4), S(6));
+    midpointFilledEllipse(gemX1, gemY1, S(4), S(6));
 
     // khe nhìn
     setfillstyle(SOLID_FILL, BLACK);
@@ -265,15 +327,17 @@ void drawExplorer(int x, int y, float scale) {
         headX + S(25), headY + S(8),
         headX + S(22), headY
     };
-    fillpoly(7, visor);
+    int visorRot[14];
+    buildRotatedPoly(visor, 7, headPivotX, headPivotY, headCos, headSin, visorRot);
+    fillpoly(7, visorRot);
     
     // viền khe nhìn (xám nhạt)
     setcolor(COLOR(180, 180, 180));
     setlinestyle(SOLID_LINE, 0, thickBold);
     for(int i=0; i<6; i++) {
-        bresenhamLine(visor[i*2], visor[i*2+1], visor[i*2+2], visor[i*2+3]);
+        bresenhamLine(visorRot[i*2], visorRot[i*2+1], visorRot[i*2+2], visorRot[i*2+3]);
     }
-    bresenhamLine(visor[12], visor[13], visor[0], visor[1]);
+    bresenhamLine(visorRot[12], visorRot[13], visorRot[0], visorRot[1]);
     
     // đôi mắt phát sáng
     setcolor(outlineColor);
@@ -281,14 +345,18 @@ void drawExplorer(int x, int y, float scale) {
     setfillstyle(SOLID_FILL, eyeColor);
     
     int eyeL[] = {headX - S(5), headY + S(6), headX + S(4), headY + S(8), headX, headY + S(12)};
-    fillpoly(3, eyeL);
+    int eyeLRot[6];
+    buildRotatedPoly(eyeL, 3, headPivotX, headPivotY, headCos, headSin, eyeLRot);
+    fillpoly(3, eyeLRot);
     
     int eyeR[] = {headX + S(23), headY + S(6), headX + S(15), headY + S(8), headX + S(19), headY + S(11)};
-    fillpoly(3, eyeR);
+    int eyeRRot[6];
+    buildRotatedPoly(eyeR, 3, headPivotX, headPivotY, headCos, headSin, eyeRRot);
+    fillpoly(3, eyeRRot);
 
     setcolor(glowColor);
-    drawpoly(3, eyeL);
-    drawpoly(3, eyeR);
+    drawpoly(3, eyeLRot);
+    drawpoly(3, eyeRRot);
 
     setlinestyle(SOLID_LINE, 0, 1);
 }

@@ -5,6 +5,7 @@
 #include <math.h>
 #include "../algorithms/index.cpp"
 #include "../algorithms/polygon_fill.cpp"
+#include "../configs/Config.cpp"
 
 // Vẽ tầng cây xa
 // yOffset: 0 cho game (cao), 100 cho menu (thấp)

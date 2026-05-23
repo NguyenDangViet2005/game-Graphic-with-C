@@ -56,6 +56,8 @@ void midpointCircle(int centerX, int centerY, int radius) {
     int x = 0;
     int y = radius;
     int d = 1 - radius;
+    int incrE = 3;                // 2*x + 3, bat dau khi x=0
+    int incrSE = -2 * radius + 5; // 2*(x - y) + 5, bat dau khi x=0, y=radius
     
     // Vẽ 8 điểm đối xứng
     auto plotCirclePoints = [&](int cx, int cy, int x, int y) {
@@ -74,11 +76,14 @@ void midpointCircle(int centerX, int centerY, int radius) {
     while (x < y) {
         x++;
         if (d < 0) {
-            d += 2 * x + 1;
+            d += incrE;
+            incrSE += 2;
         } else {
             y--;
-            d += 2 * (x - y) + 1;
+            d += incrSE;
+            incrSE += 4;
         }
+        incrE += 2;
         plotCirclePoints(centerX, centerY, x, y);
     }
 }

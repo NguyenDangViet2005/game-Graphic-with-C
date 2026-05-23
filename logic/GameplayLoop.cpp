@@ -185,7 +185,7 @@ void playGame() {
 
         float speedMultiplier = 1.0f;
         if (ctrlDown) {
-            speedMultiplier = 0.5f;
+            speedMultiplier = 0.3f;
         } else if (shiftDown) {
             speedMultiplier = 2.0f;
         }
@@ -225,12 +225,22 @@ void playGame() {
             stopRunLoop();
         }
 
+        float armSwing = 0.0f;
+        float headSway = 0.0f;
         if (absVx > 5.0f) {
             walkTime += dt;
-            float bob = (float)sin(walkTime * 8.0f) * 0.03f;
+            float bob = (float)sin(walkTime * 8.0f) * 0.08f;
             explorerScale = 1.0f + bob;
+            armSwing = (float)sin(walkTime * 7.0f) * 0.25f;
+            headSway = (float)sin(walkTime * 4.0f) * 0.12f;
         } else {
             explorerScale = 1.0f;
+            armSwing = (float)sin(now * 0.003f) * 0.06f;
+            headSway = (float)sin(now * 0.002f) * 0.05f;
+        }
+        if (!facingRight) {
+            armSwing = -armSwing;
+            headSway = -headSway;
         }
 
         int spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x0001) != 0;
@@ -264,7 +274,7 @@ void playGame() {
                     arrows[i].vy = -30.0f;
                     arrows[i].angle = facingRight ? 0.0f : 3.1415926f;
                     arrows[i].scale = 1.0f;
-                    shootCooldown = 0.2f;
+                    shootCooldown = 0.35f;
                     playFire();
                     break;
                 }
@@ -425,9 +435,9 @@ void playGame() {
             drawFootGlow((int)explorerX, (int)explorerY, explorerScale);
         }
         if (facingRight) {
-            drawExplorer((int)explorerX, (int)explorerY, explorerScale);
+            drawExplorer((int)explorerX, (int)explorerY, explorerScale, armSwing, headSway);
         } else {
-            drawExplorerMirrored((int)explorerX, (int)explorerY, explorerScale);
+            drawExplorerMirrored((int)explorerX, (int)explorerY, explorerScale, armSwing, headSway);
         }
         for (int i = 0; i < MAX_ARROWS; i++) {
             if (!arrows[i].active) continue;
