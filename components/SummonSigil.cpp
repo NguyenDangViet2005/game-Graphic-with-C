@@ -56,16 +56,16 @@ void drawSummonSigil(int x, int y, float scale = 1.0f) {
 
     // Dragon curve nhu dong nang luong
     setcolor(COLOR(90, 40, 55));
-    drawDragonCurve(x - ringR2 + 6, y + 6, x + ringR2 - 6, y - 8, 9, 1);
+    drawDragonCurve(x - ringR2 + 6, y + 6, x + ringR2 - 6, y - 8, 7, 1);
     setcolor(COLOR(90, 40, 55));
-    drawDragonCurve(x + ringR2 - 6, y + 6, x - ringR2 + 6, y - 8, 9, -1);
+    drawDragonCurve(x + ringR2 - 6, y + 6, x - ringR2 + 6, y - 8, 7, -1);
 
     // C-curve nhu rune nhe
     setcolor(COLOR(170, 70, 70));
-    drawLevyCCurve(x - ringR1 + 8, y - 4, x - ringR2 + 4, y - 16, 7);
-    drawLevyCCurve(x + ringR2 - 4, y - 16, x + ringR1 - 8, y - 4, 7);
-    drawLevyCCurve(x - ringR2 + 4, y + 16, x - ringR1 + 8, y + 4, 7);
-    drawLevyCCurve(x + ringR1 - 8, y + 4, x + ringR2 - 4, y + 16, 7);
+    drawLevyCCurve(x - ringR1 + 8, y - 4, x - ringR2 + 4, y - 16, 5);
+    drawLevyCCurve(x + ringR2 - 4, y - 16, x + ringR1 - 8, y - 4, 5);
+    drawLevyCCurve(x - ringR2 + 4, y + 16, x - ringR1 + 8, y + 4, 5);
+    drawLevyCCurve(x + ringR1 - 8, y + 4, x + ringR2 - 4, y + 16, 5);
 
     // Rune cham nho quanh ring
     setcolor(COLOR(200, 80, 80));

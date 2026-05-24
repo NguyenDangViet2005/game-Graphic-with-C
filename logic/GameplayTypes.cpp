@@ -39,6 +39,14 @@ struct EnergyWave {
     int dir;
     float life;
     int active;
+    int hitBoss;
+};
+
+struct BossAttack {
+    float x;
+    float y;
+    float life;
+    int active;
 };
 
 static const int MAX_ARROWS = 6;

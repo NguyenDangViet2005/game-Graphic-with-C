@@ -54,10 +54,9 @@ static void drawMiniGhost(int gx, int gy, float scale, float timeSec, int faceRi
     fillellipse(gx - S(4), gy - S(2), S(3), S(5));
     fillellipse(gx + S(3), gy - S(2), S(3), S(5));
     
-    // Đồng tử nhỏ màu xanh lá sáng phát quang bên trong hốc mắt
-    setfillstyle(SOLID_FILL, COLOR(200, 255, 180));
-    fillellipse(gx - S(4), gy - S(1), S(1), S(1));
-    fillellipse(gx + S(3), gy - S(1), S(1), S(1));
+    // Đồng tử nhỏ màu xanh lá sáng phát quang bên trong hốc mắt (Tối ưu bằng putpixel)
+    putpixel(gx - S(4), gy - S(1), COLOR(200, 255, 180));
+    putpixel(gx + S(3), gy - S(1), COLOR(200, 255, 180));
     
     // Miệng há hốc dài gào thét u ám
     setfillstyle(SOLID_FILL, eyeColor);
@@ -110,23 +109,13 @@ void drawReaperBoss(int x, int y, float scale, float timeSec) {
         line(rx + S(2), ry - S(2), rx - S(2), ry + S(2));
     }
     
-    // --- 2. Vẽ các linh hồn gào thét bay xung quanh ---
+    // --- 2. Vẽ các linh hồn gào thét bay xung quanh (Tối ưu từ 4 xuống 2 linh hồn để giảm lag) ---
     // Linh hồn 1: Phía trên bên trái
     int g1x = bx - S(105) + (int)(cos(timeSec * 1.6f) * S(18));
     int g1y = by - S(70) + (int)(sin(timeSec * 2.0f) * S(20));
     drawMiniGhost(g1x, g1y, scale, timeSec, 0);
     
-    // Linh hồn 2: Phía dưới bên trái
-    int g2x = bx - S(125) + (int)(sin(timeSec * 1.3f) * S(15));
-    int g2y = by + S(30) + (int)(cos(timeSec * 1.8f) * S(18));
-    drawMiniGhost(g2x, g2y, scale, timeSec, 0);
-
-    // Linh hồn 3: Phía trên bên phải
-    int g3x = bx + S(110) + (int)(sin(timeSec * 1.9f) * S(18));
-    int g3y = by - S(65) + (int)(cos(timeSec * 1.5f) * S(22));
-    drawMiniGhost(g3x, g3y, scale, timeSec, 1);
-
-    // Linh hồn 4: Phía dưới bên phải
+    // Linh hồn 2: Phía dưới bên phải
     int g4x = bx + S(120) + (int)(cos(timeSec * 1.7f) * S(14));
     int g4y = by + S(25) + (int)(sin(timeSec * 1.4f) * S(16));
     drawMiniGhost(g4x, g4y, scale, timeSec, 1);
@@ -254,8 +243,8 @@ void drawReaperBoss(int x, int y, float scale, float timeSec) {
         setcolor(boneWhite);
         line(fx2, fy2, fx3, fy3);
         
-        setfillstyle(SOLID_FILL, COLOR(190, 195, 200));
-        fillellipse(fx2, fy2, S(2), S(2));
+        // Tối ưu khớp ngón tay từ fillellipse thành putpixel
+        putpixel(fx2, fy2, COLOR(190, 195, 200));
     }
 
     // --- 8. Vẽ đầu và mũ trùm Spooky Hood - ĐỈNH MŨ HƯỚNG VỀ PHÍA SAU (BÊN PHẢI) ---
@@ -339,15 +328,13 @@ void drawReaperBoss(int x, int y, float scale, float timeSec) {
     setlinestyle(SOLID_LINE, 0, 1);
     line(bx + S(0), by - S(53), bx - S(3), by - S(50));
 
-    // Đuôi lửa tâm linh bay từ đuôi mắt dịch về phía trái
+    // Đuôi lửa tâm linh bay từ đuôi mắt dịch về phía trái (Tối ưu bằng putpixel tránh lag)
     int trailW1 = (int)(sin(timeSec * 15.0f) * S(3));
     int trailW2 = (int)(cos(timeSec * 12.0f) * S(3));
-    setfillstyle(SOLID_FILL, eyeRed);
-    setcolor(eyeRed);
-    fillellipse(bx - S(18) + trailW1, by - S(60), S(2), S(2));
-    fillellipse(bx - S(22) + trailW2, by - S(65), S(1), S(1));
-    fillellipse(bx + S(12) - trailW1, by - S(60), S(2), S(2));
-    fillellipse(bx + S(14) - trailW2, by - S(65), S(1), S(1));
+    putpixel(bx - S(18) + trailW1, by - S(60), eyeRed);
+    putpixel(bx - S(22) + trailW2, by - S(65), eyeRed);
+    putpixel(bx + S(12) - trailW1, by - S(60), eyeRed);
+    putpixel(bx + S(14) - trailW2, by - S(65), eyeRed);
 
     // --- 11. Cánh tay nâng cán lưỡi hái (Right Arm) - QUAY TRÁI (Đặt bên phải nâng cán hái) ---
     int armRPts[] = {
@@ -426,6 +413,39 @@ void drawReaperBoss(int x, int y, float scale, float timeSec) {
         }
     }
     
+    setlinestyle(SOLID_LINE, 0, 1);
+}
+
+void drawBossScytheSlash(int bossX, int bossY, float progress) {
+    int cx = bossX - 40 - (int)(progress * (bossX + 100.0f));
+    int cy = bossY - 40;
+    
+    int size = 65 + (int)(progress * 25);
+    int colors[] = { COLOR(80, 0, 40), COLOR(210, 15, 30), COLOR(255, 140, 140) };
+    int thicknesses[] = { 6, 4, 2 };
+    int radii[] = { size, size - 8, size - 16 };
+    
+    for (int i = 0; i < 3; i++) {
+        if (radii[i] <= 0) continue;
+        setcolor(colors[i]);
+        setlinestyle(SOLID_LINE, 0, thicknesses[i]);
+        // Vẽ cung từ 100 độ đến 260 độ tạo thành vòng cung lớn quét sang trái
+        arc(cx, cy, 100, 260, radii[i]);
+        arc(cx - 6, cy, 100, 260, radii[i]);
+        
+        if (i == 1) {
+            // Vẽ các tia lửa/vết nứt năng lượng quét ra phía trước
+            setlinestyle(SOLID_LINE, 0, 2);
+            for (int j = 0; j < 6; j++) {
+                float angle = (110 + j * 26) * 3.1415926f / 180.0f;
+                int sx = cx + (int)(cos(angle) * radii[i]);
+                int sy = cy + (int)(sin(angle) * radii[i]);
+                int ex = sx + (int)(cos(angle) * (18.0f * (1.0f + progress)));
+                int ey = sy + (int)(sin(angle) * (18.0f * (1.0f + progress)));
+                line(sx, sy, ex, ey);
+            }
+        }
+    }
     setlinestyle(SOLID_LINE, 0, 1);
 }
 

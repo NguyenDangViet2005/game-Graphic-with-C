@@ -154,9 +154,7 @@ void midpointFilledCircle(int centerX, int centerY, int radius) {
     
     // Vẽ đường ngang để fill
     auto drawHorizontalLine = [&](int cx, int cy, int x1, int x2, int y) {
-        for (int i = x1; i <= x2; i++) {
-            putpixel(cx + i, cy + y, getcolor());
-        }
+        line(cx + x1, cy + y, cx + x2, cy + y);
     };
     
     drawHorizontalLine(centerX, centerY, -x, x, y);
@@ -185,9 +183,7 @@ void midpointFilledEllipse(int centerX, int centerY, int radiusX, int radiusY) {
     
     // Vẽ đường ngang để fill
     auto drawHorizontalLine = [&](int cx, int cy, int x1, int x2, int y) {
-        for (int i = x1; i <= x2; i++) {
-            putpixel(cx + i, cy + y, getcolor());
-        }
+        line(cx + x1, cy + y, cx + x2, cy + y);
     };
     
     // Vùng 1

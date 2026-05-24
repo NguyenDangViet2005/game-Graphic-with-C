@@ -2,6 +2,7 @@
 #define HEART_H
 
 #include <graphics.h>
+#include <stdio.h>
 #include "../algorithms/index.cpp"
 
 // Vẽ trái tim pixel art theo style ảnh tham khảo
@@ -119,6 +120,54 @@ static void drawEnergyBar(int x, int y, int mana, int manaMax) {
 
     setcolor(COLOR(10, 10, 10));
     rectangle(x, y, x + barW, y + barH);
+}
+
+void drawBossHealthBar(int hp, int maxHp) {
+    int screenW = 1200;
+    int barW = 600;
+    int barH = 16;
+    int x = (screenW - barW) / 2;
+    int y = 40;
+
+    // Vẽ khung viền hộp đen bảo vệ bên ngoài
+    setfillstyle(SOLID_FILL, COLOR(15, 10, 10));
+    bar(x - 4, y - 4, x + barW + 4, y + barH + 4);
+    
+    // Vẽ viền ngoài kiểu gothic đỏ tối
+    setcolor(COLOR(139, 0, 0));
+    setlinestyle(SOLID_LINE, 0, 2);
+    rectangle(x - 4, y - 4, x + barW + 4, y + barH + 4);
+    
+    // Vẽ nền thanh máu rỗng (màu đỏ tối đậm)
+    setfillstyle(SOLID_FILL, COLOR(50, 10, 10));
+    bar(x, y, x + barW, y + barH);
+
+    // Vẽ thanh máu còn lại (màu đỏ tươi rực rỡ)
+    if (hp > 0) {
+        if (hp > maxHp) hp = maxHp;
+        int fillW = (barW * hp) / maxHp;
+        setfillstyle(SOLID_FILL, COLOR(210, 20, 30));
+        bar(x, y, x + fillW, y + barH);
+
+        // Highlight viền sáng trên đỉnh
+        setcolor(COLOR(255, 120, 120));
+        setlinestyle(SOLID_LINE, 0, 1);
+        line(x, y + 2, x + fillW, y + 2);
+    }
+
+    // Viền trong ngăn chia
+    setcolor(COLOR(10, 10, 10));
+    setlinestyle(SOLID_LINE, 0, 1);
+    rectangle(x, y, x + barW, y + barH);
+
+    // Vẽ tên Boss
+    setcolor(COLOR(230, 40, 40));
+    settextstyle(BOLD_FONT, HORIZ_DIR, 2);
+    setbkcolor(COLOR(15, 10, 10)); // Tránh nhiễu chữ
+    char bossName[64];
+    sprintf(bossName, "REAPER BOSS: %d / %d", hp, maxHp);
+    int textW = textwidth(bossName);
+    outtextxy(x + (barW - textW) / 2, y - 28, bossName);
 }
 
 // Vẽ text HP, điểm, năng lượng

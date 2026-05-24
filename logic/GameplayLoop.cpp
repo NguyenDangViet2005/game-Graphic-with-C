@@ -129,6 +129,19 @@ void playGame() {
         energyWaves[i].active = 0;
     }
 
+    // --- ReaperBoss variables ---
+    int bossState = 0; // 0: None, 1: Warning, 2: Summoning, 3: Active
+    float bossWarningTimer = 0.0f;
+    float bossSummonTimer = 0.0f;
+    float bossX = 0.0f;
+    float bossY = 0.0f;
+    int bossHp = 30;
+    int bossMaxHp = 30;
+    int nextBossScore = 3000;
+    float bossAttackCooldown = 3.0f;
+    float bossAttackChargeTimer = 0.0f;
+    float bossAttackActiveTimer = 0.0f;
+
     int page = 0;
     setactivepage(page);
     setvisualpage(page);
@@ -255,6 +268,7 @@ void playGame() {
                     energyWaves[i].y = explorerY - 30.0f;
                     energyWaves[i].dir = dir;
                     energyWaves[i].life = 1.0f;
+                    energyWaves[i].hitBoss = 0;
                     mana = 0;
                     skillReady = 0;
                     playPowerFirer();
@@ -295,6 +309,15 @@ void playGame() {
                 continue;
             }
 
+            if (bossState == 3) {
+                if (isArrowHitBoss(arrows[i], (int)bossX, (int)bossY)) {
+                    arrows[i].active = 0;
+                    bossHp -= 1;
+                    playDamage();
+                    continue;
+                }
+            }
+
             for (int g = 0; g < MAX_GHOSTS; g++) {
                 if (!ghosts[g].active) continue;
                 if (isArrowHitGhost(arrows[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
@@ -320,6 +343,14 @@ void playGame() {
             if (energyWaves[i].life <= 0.0f) {
                 energyWaves[i].active = 0;
                 continue;
+            }
+
+            if (bossState == 3 && !energyWaves[i].hitBoss) {
+                if (isEnergyWaveHitBoss(energyWaves[i], (int)bossX, (int)bossY)) {
+                    energyWaves[i].hitBoss = 1;
+                    bossHp -= 6;
+                    playDamage();
+                }
             }
 
             for (int g = 0; g < MAX_GHOSTS; g++) {
@@ -417,6 +448,66 @@ void playGame() {
             }
         }
 
+        // --- ReaperBoss Update Logic ---
+        if (bossState == 0 && score >= nextBossScore) {
+            bossState = 1;
+            bossWarningTimer = 3.0f;
+        }
+
+        if (bossState == 1) {
+            bossWarningTimer -= dt;
+            if (bossWarningTimer <= 0.0f) {
+                bossState = 2;
+                bossSummonTimer = 2.5f;
+                bossX = SCREEN_WIDTH - 220.0f;
+                bossY = GROUND_Y + 30.0f;
+                bossHp = 30;
+            }
+        } else if (bossState == 2) {
+            bossSummonTimer -= dt;
+            if (bossSummonTimer <= 0.0f) {
+                bossState = 3;
+                bossAttackCooldown = 3.0f;
+                bossAttackChargeTimer = 0.0f;
+                bossAttackActiveTimer = 0.0f;
+            }
+        } else if (bossState == 3) {
+            // Hover horizontally
+            bossX = (SCREEN_WIDTH - 250.0f) + (float)sin(timeSec * 1.0f) * 80.0f;
+
+            // Attack cycle
+            if (bossAttackChargeTimer > 0.0f) {
+                bossAttackChargeTimer -= dt;
+                if (bossAttackChargeTimer <= 0.0f) {
+                    bossAttackActiveTimer = 0.4f;
+                    playPowerFirer();
+                }
+            } else if (bossAttackActiveTimer > 0.0f) {
+                bossAttackActiveTimer -= dt;
+                if (isExplorerHitBossAttack(explorerX, explorerY, bossX, bossY)) {
+                    hp = 0; // Instant defeat
+                }
+            } else {
+                bossAttackCooldown -= dt;
+                if (bossAttackCooldown <= 0.0f) {
+                    bossAttackChargeTimer = 1.2f;
+                    bossAttackCooldown = 5.0f;
+                }
+            }
+
+            // Defeat check
+            if (bossHp <= 0) {
+                bossState = 0;
+                score += 1000;
+                playDeath();
+                if (nextBossScore == 3000) {
+                    nextBossScore = 10000;
+                } else {
+                    nextBossScore = nextBossScore + 10000;
+                }
+            }
+        }
+
         if (hp <= 0) {
             appendScoreToFile(score);
             stopRunLoop();
@@ -456,6 +547,67 @@ void playGame() {
             int right = (energyWaves[i].dir > 0) ? SCREEN_WIDTH : (int)energyWaves[i].x;
             drawPowerAttack(left, right, (int)energyWaves[i].y, wavePhase);
         }
+
+        // --- ReaperBoss Render Logic ---
+        if (bossState == 1) { // Warning State
+            if (((int)(timeSec * 4.0f)) % 2 == 0) {
+                setcolor(COLOR(255, 30, 30));
+                settextstyle(BOLD_FONT, HORIZ_DIR, 4);
+                char warnText[] = "CANH BAO: REAPER BOSS SAP XUAT HIEN!";
+                int wText = textwidth(warnText);
+                int bx1 = (SCREEN_WIDTH - wText) / 2 - 20;
+                int by1 = SCREEN_HEIGHT / 2 - 60;
+                int bx2 = (SCREEN_WIDTH + wText) / 2 + 20;
+                int by2 = SCREEN_HEIGHT / 2 + 10;
+                setfillstyle(SOLID_FILL, COLOR(20, 5, 5));
+                bar(bx1, by1, bx2, by2);
+                setcolor(COLOR(200, 20, 20));
+                rectangle(bx1, by1, bx2, by2);
+                setcolor(COLOR(255, 50, 50));
+                setbkcolor(COLOR(20, 5, 5));
+                outtextxy((SCREEN_WIDTH - wText) / 2, SCREEN_HEIGHT / 2 - 45, warnText);
+                setbkcolor(BLACK); // Restore bkcolor
+            }
+        } else if (bossState == 2) { // Summoning State
+            drawSummonSigil((int)bossX, (int)(GROUND_Y - 80), 2.2f);
+            float ratio = 1.0f - (bossSummonTimer / 2.5f);
+            if (ratio < 0.0f) ratio = 0.0f;
+            if (ratio > 1.0f) ratio = 1.0f;
+            drawReaperBoss((int)bossX, (int)(GROUND_Y + 30), ratio, timeSec);
+        } else if (bossState == 3) { // Active State
+            drawReaperBoss((int)bossX, (int)bossY, 1.0f, timeSec);
+            drawBossHealthBar(bossHp, bossMaxHp);
+
+            // Warning indicators for active attack charge
+            if (bossAttackChargeTimer > 0.0f) {
+                setcolor(COLOR(255, 0, 0));
+                setlinestyle(DOTTED_LINE, 0, 2);
+                int rx1 = 0;
+                int rx2 = (int)(bossX - 40);
+                int ry1 = (int)(GROUND_Y - 90);
+                int ry2 = (int)(GROUND_Y + 30);
+                rectangle(rx1, ry1, rx2, ry2);
+                line(rx1, ry1, rx2, ry2);
+                line(rx1, ry2, rx2, ry1);
+                setlinestyle(SOLID_LINE, 0, 1);
+                
+                if (((int)(timeSec * 5.0f)) % 2 == 0) {
+                    setcolor(COLOR(255, 80, 80));
+                    settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
+                    setbkcolor(COLOR(20, 5, 5));
+                    char chargeText[] = "NE DON!";
+                    outtextxy((int)(explorerX - 30), (int)(explorerY - 130), chargeText);
+                    setbkcolor(BLACK); // Restore bkcolor
+                }
+            }
+
+            // Draw active attack slash
+            if (bossAttackActiveTimer > 0.0f) {
+                float progress = (0.4f - bossAttackActiveTimer) / 0.4f;
+                drawBossScytheSlash((int)bossX, (int)bossY, progress);
+            }
+        }
+
         drawGameStats(hp, score, mana, manaMax, skillReady);
         drawPauseButton(pauseBtnX, pauseBtnY);
 

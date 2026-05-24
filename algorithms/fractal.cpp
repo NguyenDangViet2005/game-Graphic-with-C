@@ -4,6 +4,71 @@
 #include <graphics.h>
 #include <cmath>
 
+
+// Thuật toán Koch Snowflake (Bông tuyết Koch)
+void drawKochLine(int x1, int y1, int x2, int y2, int depth) {
+    if (depth == 0) {
+        line(x1, y1, x2, y2);
+        return;
+    }
+    
+    // Chia đoạn thẳng thành 3 phần
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    
+    int x3 = x1 + dx / 3;
+    int y3 = y1 + dy / 3;
+    
+    int x5 = x1 + 2 * dx / 3;
+    int y5 = y1 + 2 * dy / 3;
+    
+    // Tính điểm đỉnh tam giác đều
+    double angle = atan2(dy, dx);
+    int len = (int)sqrt(dx * dx + dy * dy) / 3;
+    int x4 = x3 + (int)(len * cos(angle + 3.14159 / 3.0));
+    int y4 = y3 + (int)(len * sin(angle + 3.14159 / 3.0));
+    
+    // Đệ quy vẽ 4 đoạn
+    drawKochLine(x1, y1, x3, y3, depth - 1);
+    drawKochLine(x3, y3, x4, y4, depth - 1);
+    drawKochLine(x4, y4, x5, y5, depth - 1);
+    drawKochLine(x5, y5, x2, y2, depth - 1);
+}
+
+// Thuật toán Dragon Curve (Đường cong Rồng) - cho rễ cây
+void drawDragonCurve(int x1, int y1, int x2, int y2, int depth, int direction) {
+    if (depth == 0) {
+        line(x1, y1, x2, y2);
+        return;
+    }
+    
+    // Tính điểm giữa và xoay 90 độ
+    int dx = x2 - x1;
+    int dy = y2 - y1;
+    
+    int xm = (x1 + x2) / 2 + direction * (dy) / 2;
+    int ym = (y1 + y2) / 2 - direction * (dx) / 2;
+    
+    // Đệ quy vẽ 2 nửa
+    drawDragonCurve(x1, y1, xm, ym, depth - 1, 1);
+    drawDragonCurve(xm, ym, x2, y2, depth - 1, -1);
+}
+
+// Thuật toán Levy C-Curve (Đường cong C)
+void drawLevyCCurve(int x1, int y1, int x2, int y2, int depth) {
+    if (depth == 0) {
+        line(x1, y1, x2, y2);
+        return;
+    }
+
+    // Tính điểm giữa xoay 90 độ (Levy C-curve)
+    int xm = (x1 + x2) / 2 + (y1 - y2) / 2;
+    int ym = (y1 + y2) / 2 + (x2 - x1) / 2;
+
+    drawLevyCCurve(x1, y1, xm, ym, depth - 1);
+    drawLevyCCurve(xm, ym, x2, y2, depth - 1);
+}
+
 // Thuật toán Fractal Tree (Cây phân nhánh đệ quy) - phiên bản Dark Forest
 void drawDarkFractalTree(int x, int y, double angle, int depth, int length) {
     if (depth == 0) return;
@@ -45,35 +110,7 @@ void drawDarkFractalTree(int x, int y, double angle, int depth, int length) {
     setlinestyle(SOLID_LINE, 0, 1);
 }
 
-// Thuật toán Koch Snowflake (Bông tuyết Koch)
-void drawKochLine(int x1, int y1, int x2, int y2, int depth) {
-    if (depth == 0) {
-        line(x1, y1, x2, y2);
-        return;
-    }
-    
-    // Chia đoạn thẳng thành 3 phần
-    int dx = x2 - x1;
-    int dy = y2 - y1;
-    
-    int x3 = x1 + dx / 3;
-    int y3 = y1 + dy / 3;
-    
-    int x5 = x1 + 2 * dx / 3;
-    int y5 = y1 + 2 * dy / 3;
-    
-    // Tính điểm đỉnh tam giác đều
-    double angle = atan2(dy, dx);
-    int len = (int)sqrt(dx * dx + dy * dy) / 3;
-    int x4 = x3 + (int)(len * cos(angle + 3.14159 / 3.0));
-    int y4 = y3 + (int)(len * sin(angle + 3.14159 / 3.0));
-    
-    // Đệ quy vẽ 4 đoạn
-    drawKochLine(x1, y1, x3, y3, depth - 1);
-    drawKochLine(x3, y3, x4, y4, depth - 1);
-    drawKochLine(x4, y4, x5, y5, depth - 1);
-    drawKochLine(x5, y5, x2, y2, depth - 1);
-}
+
 
 // Vẽ mạng nhện bằng Koch Curve
 void drawSpiderWeb(int centerX, int centerY, int radius) {
@@ -149,43 +186,6 @@ void drawThornyGrassAffine(int x, int y, int height, float angle) {
         line(midXr, midYr, topXr, topYr);
     }
 }
-
-
-// Thuật toán Dragon Curve (Đường cong Rồng) - cho rễ cây
-void drawDragonCurve(int x1, int y1, int x2, int y2, int depth, int direction) {
-    if (depth == 0) {
-        line(x1, y1, x2, y2);
-        return;
-    }
-    
-    // Tính điểm giữa và xoay 90 độ
-    int dx = x2 - x1;
-    int dy = y2 - y1;
-    
-    int xm = (x1 + x2) / 2 + direction * (dy) / 2;
-    int ym = (y1 + y2) / 2 - direction * (dx) / 2;
-    
-    // Đệ quy vẽ 2 nửa
-    drawDragonCurve(x1, y1, xm, ym, depth - 1, 1);
-    drawDragonCurve(xm, ym, x2, y2, depth - 1, -1);
-}
-
-// Thuật toán Levy C-Curve (Đường cong C)
-void drawLevyCCurve(int x1, int y1, int x2, int y2, int depth) {
-    if (depth == 0) {
-        line(x1, y1, x2, y2);
-        return;
-    }
-
-    // Tính điểm giữa xoay 90 độ (Levy C-curve)
-    int xm = (x1 + x2) / 2 + (y1 - y2) / 2;
-    int ym = (y1 + y2) / 2 + (x2 - x1) / 2;
-
-    drawLevyCCurve(x1, y1, xm, ym, depth - 1);
-    drawLevyCCurve(xm, ym, x2, y2, depth - 1);
-}
-
-
 
 // Cụm rễ trang trí bằng Dragon curve (gần mặt đất)
 void drawDragonRootOrnament(int x, int y, int scale) {

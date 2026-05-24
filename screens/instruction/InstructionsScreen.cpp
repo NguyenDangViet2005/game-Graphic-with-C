@@ -17,10 +17,10 @@ void showInstructions() {
     int titleWidth = textwidth(title);
     outtextxy((SCREEN_WIDTH - titleWidth) / 2, 80, title);
 
-    int boxX = SCREEN_WIDTH / 2 - 20;
+    int boxW = 750;
+    int boxH = 340;
+    int boxX = 410;
     int boxY = 160;
-    int boxW = 550;
-    int boxH = 400;
 
     setfillstyle(SOLID_FILL, COLOR(15, 20, 35));
     bar(boxX, boxY, boxX + boxW, boxY + boxH);
@@ -43,11 +43,11 @@ void showInstructions() {
     y += 50;
     outtextxy(textX, y, (char*)"- Phim SPACE  : Tan cong");
     y += 50;
-    outtextxy(textX, y, (char*)"- Thu thap diem va ne tranh");
+    outtextxy(textX, y, (char*)"- Phim SHIFT + MUI TEN: Di chuyen nhanh");
     y += 50;
-    outtextxy(textX, y, (char*)"  tat ca cac ke thu tren duong");
+    outtextxy(textX, y, (char*)"- Phim CTRL + MUI TEN: Di chuyen cham");
     y += 50;
-    outtextxy(textX, y, (char*)"- Phim ESC    : Tam dung / Thoat");
+    outtextxy(textX, y, (char*)"- Phim SHIFT + SPACE : Power Attack");
 
     char backMsg[] = "Nhan ESC de quay lai menu";
     setcolor(COLOR(255, 255, 0));
