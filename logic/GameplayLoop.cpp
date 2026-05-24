@@ -27,20 +27,73 @@ static void appendScoreToFile(int score) {
     fclose(fp);
 }
 
-void playGame() {
-    int hp = 3;
-    int score = 0;
-    int mana = 0;
-    int manaMax = 10;
-    int skillReady = 0;
+static void initGameState(GameState& state) {
+    state.hp = 3;
+    state.score = 0;
+    state.mana = 0;
+    state.manaMax = 10;
+    state.skillReady = 0;
+    state.gameRunning = 1;
+    state.pauseBtnX = SCREEN_WIDTH - 70;
+    state.pauseBtnY = 20;
 
-    int gameRunning = 1;
+    state.explorerX = 200.0f;
+    state.explorerY = (float)(GROUND_Y + 30);
+    state.explorerVy = 0.0f;
+    state.explorerSpeed = 280.0f;
+    state.explorerVx = 0.0f;
+    state.explorerAccel = 1600.0f;
+    state.explorerFriction = 1400.0f;
+    state.jumpSpeed = -620.0f;
+    state.gravity = 1400.0f;
+    state.groundY = (float)(GROUND_Y + 30);
+    state.explorerScale = 1.0f;
+    state.walkTime = 0.0f;
+    state.armSwing = 0.0f;
+    state.headSway = 0.0f;
+    state.shootCooldown = 0.0f;
+    state.hurtCooldown = 0.0f;
+    state.facingRight = 1;
 
-    int pauseBtnX = SCREEN_WIDTH - 70;
-    int pauseBtnY = 20;
+    state.ghostBaseY = (float)(GROUND_Y + 30);
+    state.ghostSpawnTimer = 1.6f;
+    state.ghostSpawnMin = 1.6f;
+    state.ghostSpawnMax = 2.6f;
 
-    cleardevice();
+    for (int i = 0; i < MAX_ARROWS; i++) {
+        state.arrows[i].active = 0;
+    }
+    for (int i = 0; i < MAX_GHOSTS; i++) {
+        state.ghosts[i].active = 0;
+    }
+    for (int i = 0; i < MAX_FIREBALLS; i++) {
+        state.fireballs[i].active = 0;
+    }
+    for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+        state.energyWaves[i].active = 0;
+    }
 
+    state.bossState = 0;
+    state.bossWarningTimer = 0.0f;
+    state.bossSummonTimer = 0.0f;
+    state.bossX = 0.0f;
+    state.bossY = 0.0f;
+    state.bossLevel = 1;
+    state.bossHp = 30;
+    state.bossMaxHp = 30;
+    state.nextBossScore = 3000;
+    state.bossAttackCooldown = 3.0f;
+    state.bossAttackChargeTimer = 0.0f;
+    state.bossAttackActiveTimer = 0.0f;
+
+    state.dt = 0.0f;
+    state.timeSec = 0.0f;
+    state.arrowPulse = 0.0f;
+    state.wavePhase = 0.0f;
+    state.page = 0;
+}
+
+static void initGameBackground() {
     if (cachedGameBackground == NULL) {
         playMusicLoading();
         drawLoadingScreen(0, gCurrentLanguage->loading_wait);
@@ -87,67 +140,487 @@ void playGame() {
         putimage(0, 0, cachedGameBackground, COPY_PUT);
         playMusicPlay();
     }
+}
 
-    float explorerX = 200.0f;
-    float explorerY = (float)(GROUND_Y + 30);
-    float explorerVy = 0.0f;
-    float explorerSpeed = 280.0f;
-    float explorerVx = 0.0f;
-    float explorerAccel = 1600.0f;
-    float explorerFriction = 1400.0f;
-    float jumpSpeed = -620.0f;
-    float gravity = 1400.0f;
-    float groundY = (float)(GROUND_Y + 30);
-    float explorerScale = 1.0f;
-    float walkTime = 0.0f;
-    float armSwing = 0.0f;
-    float headSway = 0.0f;
-    float shootCooldown = 0.0f;
-    float hurtCooldown = 0.0f;
-    int facingRight = 1;
+static void handleGameEvents(GameState& state) {
+    if (ismouseclick(WM_LBUTTONDOWN)) {
+        int mx, my;
+        getmouseclick(WM_LBUTTONDOWN, mx, my);
+        playClick();
+        if (isClickOnPauseButton(mx, my, state.pauseBtnX, state.pauseBtnY)) {
+            int choice = showPauseMenuOverlay();
+            if (choice == 1) {
+                state.gameRunning = 0;
+            }
+        }
+    }
 
-    float ghostBaseY = (float)(GROUND_Y + 30);
-    float ghostSpawnTimer = 1.6f;
-    float ghostSpawnMin = 1.6f;
-    float ghostSpawnMax = 2.6f;
+    if (GetAsyncKeyState(VK_ESCAPE) & 0x0001) {
+        int choice = showPauseMenuOverlay();
+        if (choice == 1) {
+            state.gameRunning = 0;
+        }
+    }
+}
 
-    Arrow arrows[MAX_ARROWS];
+static void updateExplorer(GameState& state) {
+    int onGround = (state.explorerY >= state.groundY - 0.5f);
+    int shiftDown = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+    int ctrlDown = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+    if ((GetAsyncKeyState(VK_UP) & 0x0001) && onGround && !ctrlDown) {
+        float jumpMultiplier = shiftDown ? 1.5f : 1.0f;
+        state.explorerVy = state.jumpSpeed * jumpMultiplier;
+        playJump();
+    }
+
+    int moveDir = 0;
+    if (GetAsyncKeyState(VK_LEFT) & 0x8000) moveDir -= 1;
+    if (GetAsyncKeyState(VK_RIGHT) & 0x8000) moveDir += 1;
+
+    if (moveDir < 0) state.facingRight = 0;
+    if (moveDir > 0) state.facingRight = 1;
+
+    float speedMultiplier = 1.0f;
+    if (ctrlDown) {
+        speedMultiplier = 0.3f;
+    } else if (shiftDown) {
+        speedMultiplier = 2.0f;
+    }
+    float effectiveSpeed = state.explorerSpeed * speedMultiplier;
+    float effectiveAccel = state.explorerAccel * speedMultiplier;
+    float effectiveFriction = state.explorerFriction * speedMultiplier;
+
+    if (moveDir != 0) {
+        state.explorerVx += moveDir * effectiveAccel * state.dt;
+        if (state.explorerVx > effectiveSpeed) state.explorerVx = effectiveSpeed;
+        if (state.explorerVx < -effectiveSpeed) state.explorerVx = -effectiveSpeed;
+    } else {
+        if (state.explorerVx > 0.0f) {
+            state.explorerVx -= effectiveFriction * state.dt;
+            if (state.explorerVx < 0.0f) state.explorerVx = 0.0f;
+        } else if (state.explorerVx < 0.0f) {
+            state.explorerVx += effectiveFriction * state.dt;
+            if (state.explorerVx > 0.0f) state.explorerVx = 0.0f;
+        }
+    }
+
+    state.explorerX += state.explorerVx * state.dt;
+    if (state.explorerX < 80.0f) state.explorerX = 80.0f;
+    if (state.explorerX > SCREEN_WIDTH - 80.0f) state.explorerX = (float)SCREEN_WIDTH - 80.0f;
+
+    state.explorerVy += state.gravity * state.dt;
+    state.explorerY += state.explorerVy * state.dt;
+    if (state.explorerY > state.groundY) {
+        state.explorerY = state.groundY;
+        state.explorerVy = 0.0f;
+    }
+
+    float absVx = (float)fabs(state.explorerVx);
+    if (absVx > 5.0f && onGround) {
+        startRunLoop();
+    } else {
+        stopRunLoop();
+    }
+
+    state.armSwing = 0.0f;
+    state.headSway = 0.0f;
+    if (absVx > 5.0f) {
+        state.walkTime += state.dt;
+        float bob = (float)sin(state.walkTime * 8.0f) * 0.08f;
+        state.explorerScale = 1.0f + bob;
+        state.armSwing = (float)sin(state.walkTime * 7.0f) * 0.25f;
+        state.headSway = (float)sin(state.walkTime * 4.0f) * 0.12f;
+    } else {
+        state.explorerScale = 1.0f;
+        DWORD now = GetTickCount();
+        state.armSwing = (float)sin(now * 0.003f) * 0.06f;
+        state.headSway = (float)sin(now * 0.002f) * 0.05f;
+    }
+    if (!state.facingRight) {
+        state.armSwing = -state.armSwing;
+        state.headSway = -state.headSway;
+    }
+}
+
+static void updateProjectiles(GameState& state) {
+    int shiftDown = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+    int spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x0001) != 0;
+    int skillShot = 0;
+
+    if (state.skillReady && shiftDown && spacePressed) {
+        int dir = state.facingRight ? 1 : -1;
+        for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+            if (!state.energyWaves[i].active) {
+                state.energyWaves[i].active = 1;
+                state.energyWaves[i].x = state.explorerX + (dir > 0 ? 40.0f : -40.0f);
+                state.energyWaves[i].y = state.explorerY - 30.0f;
+                state.energyWaves[i].dir = dir;
+                state.energyWaves[i].life = 1.0f;
+                state.energyWaves[i].hitBoss = 0;
+                state.mana = 0;
+                state.skillReady = 0;
+                playPowerFirer();
+                skillShot = 1;
+                break;
+            }
+        }
+    }
+
+    if (state.shootCooldown > 0.0f) state.shootCooldown -= state.dt;
+    if (!skillShot && (GetAsyncKeyState(VK_SPACE) & 0x8000) && state.shootCooldown <= 0.0f) {
+        for (int i = 0; i < MAX_ARROWS; i++) {
+            if (!state.arrows[i].active) {
+                state.arrows[i].active = 1;
+                state.arrows[i].x = state.explorerX + (state.facingRight ? 52.0f : -52.0f);
+                state.arrows[i].y = state.explorerY - 30.0f;
+                state.arrows[i].vx = state.facingRight ? 620.0f : -620.0f;
+                state.arrows[i].vy = -30.0f;
+                state.arrows[i].angle = state.facingRight ? 0.0f : 3.1415926f;
+                state.arrows[i].scale = 1.0f;
+                state.shootCooldown = 0.35f;
+                playFire();
+                break;
+            }
+        }
+    }
+
     for (int i = 0; i < MAX_ARROWS; i++) {
-        arrows[i].active = 0;
+        if (!state.arrows[i].active) continue;
+        state.arrows[i].x += state.arrows[i].vx * state.dt;
+        state.arrows[i].y += state.arrows[i].vy * state.dt;
+        state.arrows[i].vy += 40.0f * state.dt;
+        state.arrows[i].angle = (float)atan2(state.arrows[i].vy, state.arrows[i].vx);
+        state.arrows[i].scale = 1.0f + state.arrowPulse * 0.08f;
+
+        if (state.arrows[i].x > SCREEN_WIDTH + 50 || state.arrows[i].y < -50 || state.arrows[i].y > SCREEN_HEIGHT + 50) {
+            state.arrows[i].active = 0;
+            continue;
+        }
+
+        if (state.bossState == 3) {
+            if (isArrowHitBoss(state.arrows[i], (int)state.bossX, (int)state.bossY)) {
+                state.arrows[i].active = 0;
+                state.bossHp -= 1;
+                playDamage();
+                continue;
+            }
+        }
+
+        for (int g = 0; g < MAX_GHOSTS; g++) {
+            if (!state.ghosts[g].active) continue;
+            if (isArrowHitGhost(state.arrows[i], (int)state.ghosts[g].x, (int)state.ghosts[g].y)) {
+                state.arrows[i].active = 0;
+                state.ghosts[g].hp -= 1;
+                playDamage();
+                if (state.ghosts[g].hp <= 0) {
+                    state.ghosts[g].active = 0;
+                    state.score += 100;
+                    state.mana += 1;
+                    if (state.mana > state.manaMax) state.mana = state.manaMax;
+                    if (state.mana >= state.manaMax) state.skillReady = 1;
+                    playGetScore();
+                }
+                break;
+            }
+        }
     }
 
-    GhostEnemy ghosts[MAX_GHOSTS];
-    for (int i = 0; i < MAX_GHOSTS; i++) {
-        ghosts[i].active = 0;
-    }
-
-    Fireball fireballs[MAX_FIREBALLS];
-    for (int i = 0; i < MAX_FIREBALLS; i++) {
-        fireballs[i].active = 0;
-    }
-
-    EnergyWave energyWaves[MAX_ENERGY_WAVES];
     for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
-        energyWaves[i].active = 0;
+        if (!state.energyWaves[i].active) continue;
+        state.energyWaves[i].life -= state.dt;
+        if (state.energyWaves[i].life <= 0.0f) {
+            state.energyWaves[i].active = 0;
+            continue;
+        }
+
+        if (state.bossState == 3 && !state.energyWaves[i].hitBoss) {
+            if (isEnergyWaveHitBoss(state.energyWaves[i], (int)state.bossX, (int)state.bossY)) {
+                state.energyWaves[i].hitBoss = 1;
+                state.bossHp -= 6;
+                playDamage();
+            }
+        }
+
+        for (int g = 0; g < MAX_GHOSTS; g++) {
+            if (!state.ghosts[g].active) continue;
+            if (isEnergyWaveHitGhost(state.energyWaves[i], (int)state.ghosts[g].x, (int)state.ghosts[g].y)) {
+                state.ghosts[g].hp = 0;
+                state.ghosts[g].active = 0;
+                state.score += 100;
+                state.mana += 1;
+                if (state.mana > state.manaMax) state.mana = state.manaMax;
+                if (state.mana >= state.manaMax) state.skillReady = 1;
+                playGetScore();
+            }
+        }
+    }
+}
+
+static void updateGhostsAndHazards(GameState& state) {
+    state.ghostSpawnTimer -= state.dt;
+    if (state.ghostSpawnTimer <= 0.0f) {
+        for (int i = 0; i < MAX_GHOSTS; i++) {
+            if (!state.ghosts[i].active) {
+                state.ghosts[i].active = 1;
+                state.ghosts[i].x = (float)SCREEN_WIDTH + 120.0f;
+                state.ghosts[i].y = state.ghostBaseY;
+                state.ghosts[i].vx = -90.0f - (float)(rand() % 40);
+                state.ghosts[i].shootTimer = 4.0f;
+                state.ghosts[i].hp = 2;
+                state.ghostSpawnTimer = state.ghostSpawnMin + ((float)rand() / (float)RAND_MAX) * (state.ghostSpawnMax - state.ghostSpawnMin);
+                break;
+            }
+        }
     }
 
-    // --- ReaperBoss variables ---
-    int bossState = 0; // 0: None, 1: Warning, 2: Summoning, 3: Active
-    float bossWarningTimer = 0.0f;
-    float bossSummonTimer = 0.0f;
-    float bossX = 0.0f;
-    float bossY = 0.0f;
-    int bossLevel = 1;
-    int bossHp = 30;
-    int bossMaxHp = 30;
-    int nextBossScore = 3000;
-    float bossAttackCooldown = 3.0f;
-    float bossAttackChargeTimer = 0.0f;
-    float bossAttackActiveTimer = 0.0f;
+    for (int i = 0; i < MAX_GHOSTS; i++) {
+        if (!state.ghosts[i].active) continue;
+        state.ghosts[i].x += state.ghosts[i].vx * state.dt;
+        state.ghosts[i].shootTimer -= state.dt;
 
-    int page = 0;
-    setactivepage(page);
-    setvisualpage(page);
+        if (state.ghosts[i].shootTimer <= 0.0f) {
+            for (int f = 0; f < MAX_FIREBALLS; f++) {
+                if (!state.fireballs[f].active) {
+                    float dx = state.explorerX - state.ghosts[i].x;
+                    float dy = (state.explorerY - 30.0f) - state.ghosts[i].y;
+                    float len = (float)sqrt(dx * dx + dy * dy);
+                    if (len < 1.0f) len = 1.0f;
+                    float speed = 240.0f;
+                    state.fireballs[f].active = 1;
+                    state.fireballs[f].x = state.ghosts[i].x - 20.0f;
+                    state.fireballs[f].y = state.ghosts[i].y - 20.0f;
+                    state.fireballs[f].vx = (dx / len) * speed;
+                    state.fireballs[f].vy = (dy / len) * speed;
+                    state.ghosts[i].shootTimer = 4.0f;
+                    break;
+                }
+            }
+        }
+
+        if (state.ghosts[i].x < -120.0f) {
+            state.ghosts[i].active = 0;
+        }
+    }
+
+    for (int i = 0; i < MAX_FIREBALLS; i++) {
+        if (!state.fireballs[i].active) continue;
+        state.fireballs[i].x += state.fireballs[i].vx * state.dt;
+        state.fireballs[i].y += state.fireballs[i].vy * state.dt;
+        if (state.fireballs[i].x < -50.0f || state.fireballs[i].x > SCREEN_WIDTH + 50.0f ||
+            state.fireballs[i].y < -50.0f || state.fireballs[i].y > SCREEN_HEIGHT + 50.0f) {
+            state.fireballs[i].active = 0;
+        }
+    }
+
+    if (state.hurtCooldown > 0.0f) state.hurtCooldown -= state.dt;
+    if (state.hurtCooldown <= 0.0f) {
+        for (int i = 0; i < MAX_GHOSTS; i++) {
+            if (!state.ghosts[i].active) continue;
+            if (isExplorerHitGhost(state.explorerX, state.explorerY, (int)state.ghosts[i].x, (int)state.ghosts[i].y)) {
+                state.hp -= 1;
+                state.hurtCooldown = 0.8f;
+                playExplorerDamage();
+                break;
+            }
+        }
+    }
+
+    if (state.hurtCooldown <= 0.0f) {
+        for (int i = 0; i < MAX_FIREBALLS; i++) {
+            if (!state.fireballs[i].active) continue;
+            if (isExplorerHitFireball(state.explorerX, state.explorerY, state.fireballs[i].x, state.fireballs[i].y)) {
+                state.fireballs[i].active = 0;
+                state.hp -= 1;
+                state.hurtCooldown = 0.8f;
+                playExplorerDamage();
+                break;
+            }
+        }
+    }
+}
+
+static void updateBoss(GameState& state) {
+    if (state.bossState == 0 && state.score >= state.nextBossScore) {
+        state.bossState = 1;
+        state.bossWarningTimer = 3.0f;
+        state.explorerVx = 0.0f;
+        state.explorerVy = 0.0f;
+        stopRunLoop();
+    }
+
+    if (state.bossState == 1) {
+        state.bossWarningTimer -= state.dt;
+        if (state.bossWarningTimer <= 0.0f) {
+            state.bossState = 2;
+            state.bossSummonTimer = 2.5f;
+            state.bossX = SCREEN_WIDTH - 220.0f;
+            state.bossY = GROUND_Y + 30.0f;
+            state.bossHp = state.bossMaxHp;
+        }
+    } else if (state.bossState == 2) {
+        state.bossSummonTimer -= state.dt;
+        if (state.bossSummonTimer <= 0.0f) {
+            state.bossState = 3;
+            state.bossAttackCooldown = 3.0f;
+            state.bossAttackChargeTimer = 0.0f;
+            state.bossAttackActiveTimer = 0.0f;
+        }
+    } else if (state.bossState == 3) {
+        state.bossX = (SCREEN_WIDTH - 250.0f) + (float)sin(state.timeSec * 1.0f) * 80.0f;
+
+        if (state.bossAttackChargeTimer > 0.0f) {
+            state.bossAttackChargeTimer -= state.dt;
+            if (state.bossAttackChargeTimer <= 0.0f) {
+                state.bossAttackActiveTimer = 0.4f;
+                playPowerFirer();
+            }
+        } else if (state.bossAttackActiveTimer > 0.0f) {
+            state.bossAttackActiveTimer -= state.dt;
+            float progress = (0.4f - state.bossAttackActiveTimer) / 0.4f;
+            if (isExplorerHitBossAttack(state.explorerX, state.explorerY, state.bossX, state.bossY, progress)) {
+                state.hp = 0;
+            }
+        } else {
+            state.bossAttackCooldown -= state.dt;
+            if (state.bossAttackCooldown <= 0.0f) {
+                state.bossAttackChargeTimer = 1.2f;
+                state.bossAttackCooldown = 5.0f;
+            }
+        }
+
+        if (state.bossHp <= 0) {
+            state.bossState = 0;
+            state.score += 1000;
+            playDeath();
+            state.bossLevel++;
+            if (state.bossLevel == 2) {
+                state.nextBossScore = 10000;
+                state.bossMaxHp = 50;
+            } else if (state.bossLevel == 3) {
+                state.nextBossScore = 15000;
+                state.bossMaxHp = 60;
+            } else if (state.bossLevel == 4) {
+                state.nextBossScore = 20000;
+                state.bossMaxHp = 100;
+            } else {
+                state.nextBossScore += 10000;
+                state.bossMaxHp = 100;
+            }
+        }
+    }
+}
+
+static void drawGameplay(const GameState& state) {
+    setactivepage(state.page);
+    putimage(0, 0, cachedGameBackground, COPY_PUT);
+    drawForestSway(state.timeSec);
+    drawFirefliesAnimated(state.timeSec);
+    for (int i = 0; i < MAX_GHOSTS; i++) {
+        if (!state.ghosts[i].active) continue;
+        drawGhost((int)state.ghosts[i].x, (int)state.ghosts[i].y);
+    }
+    if (state.skillReady) {
+        drawFootGlow((int)state.explorerX, (int)state.explorerY, state.explorerScale);
+    }
+    if (state.facingRight) {
+        drawExplorer((int)state.explorerX, (int)state.explorerY, state.explorerScale, state.armSwing, state.headSway);
+    } else {
+        drawExplorerMirrored((int)state.explorerX, (int)state.explorerY, state.explorerScale, state.armSwing, state.headSway);
+    }
+    for (int i = 0; i < MAX_ARROWS; i++) {
+        if (!state.arrows[i].active) continue;
+        drawArrowAffine(state.arrows[i].x, state.arrows[i].y, state.arrows[i].angle, state.arrows[i].scale);
+    }
+    for (int i = 0; i < MAX_FIREBALLS; i++) {
+        if (!state.fireballs[i].active) continue;
+        drawFireball(state.fireballs[i].x, state.fireballs[i].y);
+    }
+    for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+        if (!state.energyWaves[i].active) continue;
+        int left = (state.energyWaves[i].dir > 0) ? (int)state.energyWaves[i].x : 0;
+        int right = (state.energyWaves[i].dir > 0) ? SCREEN_WIDTH : (int)state.energyWaves[i].x;
+        drawPowerAttack(left, right, (int)state.energyWaves[i].y, state.wavePhase);
+    }
+
+    if (state.bossState == 1 || state.bossState == 2) {
+        char ditherPattern[] = { (char)0x55, (char)0xAA, (char)0x55, (char)0xAA, (char)0x55, (char)0xAA, (char)0x55, (char)0xAA };
+        setfillpattern(ditherPattern, BLACK);
+        bar(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
+
+    if (state.bossState == 1) {
+        if (((int)(state.timeSec * 4.0f)) % 2 == 0) {
+            setcolor(COLOR(255, 30, 30));
+            settextstyle(BOLD_FONT, HORIZ_DIR, 4);
+            const char* warnText = gCurrentLanguage->boss_warning;
+            int wText = textwidth((char*)warnText);
+            int bx1 = (SCREEN_WIDTH - wText) / 2 - 20;
+            int by1 = SCREEN_HEIGHT / 2 - 60;
+            int bx2 = (SCREEN_WIDTH + wText) / 2 + 20;
+            int by2 = SCREEN_HEIGHT / 2 + 10;
+            setfillstyle(SOLID_FILL, COLOR(20, 5, 5));
+            bar(bx1, by1, bx2, by2);
+            setcolor(COLOR(200, 20, 20));
+            rectangle(bx1, by1, bx2, by2);
+            setcolor(COLOR(255, 50, 50));
+            setbkcolor(COLOR(20, 5, 5));
+            outtextxy((SCREEN_WIDTH - wText) / 2, SCREEN_HEIGHT / 2 - 45, (char*)warnText);
+            setbkcolor(BLACK);
+        }
+    } else if (state.bossState == 2) {
+        drawSummonSigil((int)state.bossX, (int)(GROUND_Y - 80), 2.2f);
+        float ratio = 1.0f - (state.bossSummonTimer / 2.5f);
+        if (ratio < 0.0f) ratio = 0.0f;
+        if (ratio > 1.0f) ratio = 1.0f;
+        drawReaperBoss((int)state.bossX, (int)(GROUND_Y + 30), ratio, state.timeSec);
+    } else if (state.bossState == 3) {
+        drawReaperBoss((int)state.bossX, (int)state.bossY, 1.0f, state.timeSec);
+        drawBossHealthBar(state.bossHp, state.bossMaxHp);
+
+        if (state.bossAttackChargeTimer > 0.0f) {
+            setcolor(COLOR(255, 0, 0));
+            setlinestyle(DOTTED_LINE, 0, 2);
+            int rx1 = 0;
+            int rx2 = (int)(state.bossX - 40);
+            int ry1 = (int)(GROUND_Y - 90);
+            int ry2 = (int)(GROUND_Y + 30);
+            rectangle(rx1, ry1, rx2, ry2);
+            line(rx1, ry1, rx2, ry2);
+            line(rx1, ry2, rx2, ry1);
+            setlinestyle(SOLID_LINE, 0, 1);
+            
+            if (((int)(state.timeSec * 5.0f)) % 2 == 0) {
+                setcolor(COLOR(255, 80, 80));
+                settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
+                setbkcolor(COLOR(20, 5, 5));
+                const char* chargeText = gCurrentLanguage->boss_dodge;
+                outtextxy((int)(state.explorerX - 30), (int)(state.explorerY - 130), (char*)chargeText);
+                setbkcolor(BLACK);
+            }
+        }
+
+        if (state.bossAttackActiveTimer > 0.0f) {
+            float progress = (0.4f - state.bossAttackActiveTimer) / 0.4f;
+            drawBossScytheSlash((int)state.bossX, (int)state.bossY, progress);
+        }
+    }
+
+    drawGameStats(state.hp, state.score, state.mana, state.manaMax, state.skillReady);
+    drawPauseButton(state.pauseBtnX, state.pauseBtnY);
+
+    setvisualpage(state.page);
+}
+
+void playGame() {
+    cleardevice();
+
+    initGameBackground();
+
+    GameState state;
+    initGameState(state);
+
+    setactivepage(state.page);
+    setvisualpage(state.page);
 
     DWORD lastTick = GetTickCount();
 
@@ -156,489 +629,39 @@ void playGame() {
     while (kbhit()) getch();
     while (ismouseclick(WM_LBUTTONDOWN)) clearmouseclick(WM_LBUTTONDOWN);
 
-    while (gameRunning) {
+    while (state.gameRunning) {
         DWORD now = GetTickCount();
         float dt = (now - lastTick) / 1000.0f;
         if (dt > 0.05f) dt = 0.05f;
         lastTick = now;
-        float timeSec = now * 0.001f;
-        float arrowPulse = (float)sin(now * 0.008f);
-        float wavePhase = now * 0.02f;
 
-        if (ismouseclick(WM_LBUTTONDOWN)) {
-            int mx, my;
-            getmouseclick(WM_LBUTTONDOWN, mx, my);
-            playClick();
-            if (isClickOnPauseButton(mx, my, pauseBtnX, pauseBtnY)) {
-                int choice = showPauseMenuOverlay();
-                if (choice == 1) {
-                    gameRunning = 0;
-                }
-            }
-        }
+        state.dt = dt;
+        state.timeSec = now * 0.001f;
+        state.arrowPulse = (float)sin(now * 0.008f);
+        state.wavePhase = now * 0.02f;
 
-        if (GetAsyncKeyState(VK_ESCAPE) & 0x0001) {
-            int choice = showPauseMenuOverlay();
-            if (choice == 1) {
-                gameRunning = 0;
-            }
-        }
+        handleGameEvents(state);
 
-        int isBossSpawning = (bossState == 1 || bossState == 2);
+        int isBossSpawning = (state.bossState == 1 || state.bossState == 2);
         if (!isBossSpawning) {
-            int onGround = (explorerY >= groundY - 0.5f);
-            int shiftDown = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-            int ctrlDown = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
-            if ((GetAsyncKeyState(VK_UP) & 0x0001) && onGround && !ctrlDown) {
-                float jumpMultiplier = shiftDown ? 1.5f : 1.0f;
-                explorerVy = jumpSpeed * jumpMultiplier;
-                playJump();
-            }
-
-            int moveDir = 0;
-            if (GetAsyncKeyState(VK_LEFT) & 0x8000) moveDir -= 1;
-            if (GetAsyncKeyState(VK_RIGHT) & 0x8000) moveDir += 1;
-
-            if (moveDir < 0) facingRight = 0;
-            if (moveDir > 0) facingRight = 1;
-
-            float speedMultiplier = 1.0f;
-            if (ctrlDown) {
-                speedMultiplier = 0.3f;
-            } else if (shiftDown) {
-                speedMultiplier = 2.0f;
-            }
-            float effectiveSpeed = explorerSpeed * speedMultiplier;
-            float effectiveAccel = explorerAccel * speedMultiplier;
-            float effectiveFriction = explorerFriction * speedMultiplier;
-
-            if (moveDir != 0) {
-                explorerVx += moveDir * effectiveAccel * dt;
-                if (explorerVx > effectiveSpeed) explorerVx = effectiveSpeed;
-                if (explorerVx < -effectiveSpeed) explorerVx = -effectiveSpeed;
-            } else {
-                if (explorerVx > 0.0f) {
-                    explorerVx -= effectiveFriction * dt;
-                    if (explorerVx < 0.0f) explorerVx = 0.0f;
-                } else if (explorerVx < 0.0f) {
-                    explorerVx += effectiveFriction * dt;
-                    if (explorerVx > 0.0f) explorerVx = 0.0f;
-                }
-            }
-
-            explorerX += explorerVx * dt;
-            if (explorerX < 80.0f) explorerX = 80.0f;
-            if (explorerX > SCREEN_WIDTH - 80.0f) explorerX = (float)SCREEN_WIDTH - 80.0f;
-
-            explorerVy += gravity * dt;
-            explorerY += explorerVy * dt;
-            if (explorerY > groundY) {
-                explorerY = groundY;
-                explorerVy = 0.0f;
-            }
-
-            float absVx = (float)fabs(explorerVx);
-            if (absVx > 5.0f && onGround) {
-                startRunLoop();
-            } else {
-                stopRunLoop();
-            }
-
-            armSwing = 0.0f;
-            headSway = 0.0f;
-            if (absVx > 5.0f) {
-                walkTime += dt;
-                float bob = (float)sin(walkTime * 8.0f) * 0.08f;
-                explorerScale = 1.0f + bob;
-                armSwing = (float)sin(walkTime * 7.0f) * 0.25f;
-                headSway = (float)sin(walkTime * 4.0f) * 0.12f;
-            } else {
-                explorerScale = 1.0f;
-                armSwing = (float)sin(now * 0.003f) * 0.06f;
-                headSway = (float)sin(now * 0.002f) * 0.05f;
-            }
-            if (!facingRight) {
-                armSwing = -armSwing;
-                headSway = -headSway;
-            }
-
-            int spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x0001) != 0;
-            int skillShot = 0;
-            if (skillReady && shiftDown && spacePressed) {
-                int dir = facingRight ? 1 : -1;
-                for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
-                    if (!energyWaves[i].active) {
-                        energyWaves[i].active = 1;
-                        energyWaves[i].x = explorerX + (dir > 0 ? 40.0f : -40.0f);
-                        energyWaves[i].y = explorerY - 30.0f;
-                        energyWaves[i].dir = dir;
-                        energyWaves[i].life = 1.0f;
-                        energyWaves[i].hitBoss = 0;
-                        mana = 0;
-                        skillReady = 0;
-                        playPowerFirer();
-                        skillShot = 1;
-                        break;
-                    }
-                }
-            }
-
-            if (shootCooldown > 0.0f) shootCooldown -= dt;
-            if (!skillShot && (GetAsyncKeyState(VK_SPACE) & 0x8000) && shootCooldown <= 0.0f) {
-                for (int i = 0; i < MAX_ARROWS; i++) {
-                    if (!arrows[i].active) {
-                        arrows[i].active = 1;
-                        arrows[i].x = explorerX + (facingRight ? 52.0f : -52.0f);
-                        arrows[i].y = explorerY - 30.0f;
-                        arrows[i].vx = facingRight ? 620.0f : -620.0f;
-                        arrows[i].vy = -30.0f;
-                        arrows[i].angle = facingRight ? 0.0f : 3.1415926f;
-                        arrows[i].scale = 1.0f;
-                        shootCooldown = 0.35f;
-                        playFire();
-                        break;
-                    }
-                }
-            }
-
-            for (int i = 0; i < MAX_ARROWS; i++) {
-                if (!arrows[i].active) continue;
-                arrows[i].x += arrows[i].vx * dt;
-                arrows[i].y += arrows[i].vy * dt;
-                arrows[i].vy += 40.0f * dt;
-                arrows[i].angle = (float)atan2(arrows[i].vy, arrows[i].vx);
-                arrows[i].scale = 1.0f + arrowPulse * 0.08f;
-
-                if (arrows[i].x > SCREEN_WIDTH + 50 || arrows[i].y < -50 || arrows[i].y > SCREEN_HEIGHT + 50) {
-                    arrows[i].active = 0;
-                    continue;
-                }
-
-                if (bossState == 3) {
-                    if (isArrowHitBoss(arrows[i], (int)bossX, (int)bossY)) {
-                        arrows[i].active = 0;
-                        bossHp -= 1;
-                        playDamage();
-                        continue;
-                    }
-                }
-
-                for (int g = 0; g < MAX_GHOSTS; g++) {
-                    if (!ghosts[g].active) continue;
-                    if (isArrowHitGhost(arrows[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
-                        arrows[i].active = 0;
-                        ghosts[g].hp -= 1;
-                        playDamage();
-                        if (ghosts[g].hp <= 0) {
-                            ghosts[g].active = 0;
-                            score += 100;
-                            mana += 1;
-                            if (mana > manaMax) mana = manaMax;
-                            if (mana >= manaMax) skillReady = 1;
-                            playGetScore();
-                        }
-                        break;
-                    }
-                }
-            }
-
-            for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
-                if (!energyWaves[i].active) continue;
-                energyWaves[i].life -= dt;
-                if (energyWaves[i].life <= 0.0f) {
-                    energyWaves[i].active = 0;
-                    continue;
-                }
-
-                if (bossState == 3 && !energyWaves[i].hitBoss) {
-                    if (isEnergyWaveHitBoss(energyWaves[i], (int)bossX, (int)bossY)) {
-                        energyWaves[i].hitBoss = 1;
-                        bossHp -= 6;
-                        playDamage();
-                    }
-                }
-
-                for (int g = 0; g < MAX_GHOSTS; g++) {
-                    if (!ghosts[g].active) continue;
-                    if (isEnergyWaveHitGhost(energyWaves[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
-                        ghosts[g].hp = 0;
-                        ghosts[g].active = 0;
-                        score += 100;
-                        mana += 1;
-                        if (mana > manaMax) mana = manaMax;
-                        if (mana >= manaMax) skillReady = 1;
-                        playGetScore();
-                    }
-                }
-            }
-
-            ghostSpawnTimer -= dt;
-            if (ghostSpawnTimer <= 0.0f) {
-                for (int i = 0; i < MAX_GHOSTS; i++) {
-                    if (!ghosts[i].active) {
-                        ghosts[i].active = 1;
-                        ghosts[i].x = (float)SCREEN_WIDTH + 120.0f;
-                        ghosts[i].y = ghostBaseY;
-                        ghosts[i].vx = -90.0f - (float)(rand() % 40);
-                        ghosts[i].shootTimer = 4.0f;
-                        ghosts[i].hp = 2;
-                        ghostSpawnTimer = ghostSpawnMin + ((float)rand() / (float)RAND_MAX) * (ghostSpawnMax - ghostSpawnMin);
-                        break;
-                    }
-                }
-            }
-
-            for (int i = 0; i < MAX_GHOSTS; i++) {
-                if (!ghosts[i].active) continue;
-                ghosts[i].x += ghosts[i].vx * dt;
-                ghosts[i].shootTimer -= dt;
-
-                if (ghosts[i].shootTimer <= 0.0f) {
-                    for (int f = 0; f < MAX_FIREBALLS; f++) {
-                        if (!fireballs[f].active) {
-                            float dx = explorerX - ghosts[i].x;
-                            float dy = (explorerY - 30.0f) - ghosts[i].y;
-                            float len = (float)sqrt(dx * dx + dy * dy);
-                            if (len < 1.0f) len = 1.0f;
-                            float speed = 240.0f;
-                            fireballs[f].active = 1;
-                            fireballs[f].x = ghosts[i].x - 20.0f;
-                            fireballs[f].y = ghosts[i].y - 20.0f;
-                            fireballs[f].vx = (dx / len) * speed;
-                            fireballs[f].vy = (dy / len) * speed;
-                            ghosts[i].shootTimer = 4.0f;
-                            break;
-                        }
-                    }
-                }
-
-                if (ghosts[i].x < -120.0f) {
-                    ghosts[i].active = 0;
-                }
-            }
-
-            for (int i = 0; i < MAX_FIREBALLS; i++) {
-                if (!fireballs[i].active) continue;
-                fireballs[i].x += fireballs[i].vx * dt;
-                fireballs[i].y += fireballs[i].vy * dt;
-                if (fireballs[i].x < -50.0f || fireballs[i].x > SCREEN_WIDTH + 50.0f ||
-                    fireballs[i].y < -50.0f || fireballs[i].y > SCREEN_HEIGHT + 50.0f) {
-                    fireballs[i].active = 0;
-                }
-            }
-
-            if (hurtCooldown > 0.0f) hurtCooldown -= dt;
-            if (hurtCooldown <= 0.0f) {
-                for (int i = 0; i < MAX_GHOSTS; i++) {
-                    if (!ghosts[i].active) continue;
-                    if (isExplorerHitGhost(explorerX, explorerY, (int)ghosts[i].x, (int)ghosts[i].y)) {
-                        hp -= 1;
-                        hurtCooldown = 0.8f;
-                        playExplorerDamage();
-                        break;
-                    }
-                }
-            }
-
-            if (hurtCooldown <= 0.0f) {
-                for (int i = 0; i < MAX_FIREBALLS; i++) {
-                    if (!fireballs[i].active) continue;
-                    if (isExplorerHitFireball(explorerX, explorerY, fireballs[i].x, fireballs[i].y)) {
-                        fireballs[i].active = 0;
-                        hp -= 1;
-                        hurtCooldown = 0.8f;
-                        playExplorerDamage();
-                        break;
-                    }
-                }
-            }
+            updateExplorer(state);
+            updateProjectiles(state);
+            updateGhostsAndHazards(state);
         }
 
-        // --- ReaperBoss Update Logic ---
-        if (bossState == 0 && score >= nextBossScore) {
-            bossState = 1;
-            bossWarningTimer = 3.0f;
-            explorerVx = 0.0f;
-            explorerVy = 0.0f;
-            stopRunLoop();
-        }
+        updateBoss(state);
 
-        if (bossState == 1) {
-            bossWarningTimer -= dt;
-            if (bossWarningTimer <= 0.0f) {
-                bossState = 2;
-                bossSummonTimer = 2.5f;
-                bossX = SCREEN_WIDTH - 220.0f;
-                bossY = GROUND_Y + 30.0f;
-                bossHp = bossMaxHp;
-            }
-        } else if (bossState == 2) {
-            bossSummonTimer -= dt;
-            if (bossSummonTimer <= 0.0f) {
-                bossState = 3;
-                bossAttackCooldown = 3.0f;
-                bossAttackChargeTimer = 0.0f;
-                bossAttackActiveTimer = 0.0f;
-            }
-        } else if (bossState == 3) {
-            // Hover horizontally
-            bossX = (SCREEN_WIDTH - 250.0f) + (float)sin(timeSec * 1.0f) * 80.0f;
-
-            // Attack cycle
-            if (bossAttackChargeTimer > 0.0f) {
-                bossAttackChargeTimer -= dt;
-                if (bossAttackChargeTimer <= 0.0f) {
-                    bossAttackActiveTimer = 0.4f;
-                    playPowerFirer();
-                }
-            } else if (bossAttackActiveTimer > 0.0f) {
-                bossAttackActiveTimer -= dt;
-                float progress = (0.4f - bossAttackActiveTimer) / 0.4f;
-                if (isExplorerHitBossAttack(explorerX, explorerY, bossX, bossY, progress)) {
-                    hp = 0; // Instant defeat
-                }
-            } else {
-                bossAttackCooldown -= dt;
-                if (bossAttackCooldown <= 0.0f) {
-                    bossAttackChargeTimer = 1.2f;
-                    bossAttackCooldown = 5.0f;
-                }
-            }
-
-            // Defeat check
-            if (bossHp <= 0) {
-                bossState = 0;
-                score += 1000;
-                playDeath();
-                bossLevel++;
-                if (bossLevel == 2) {
-                    nextBossScore = 10000;
-                    bossMaxHp = 50;
-                } else if (bossLevel == 3) {
-                    nextBossScore = 15000;
-                    bossMaxHp = 60;
-                } else if (bossLevel == 4) {
-                    nextBossScore = 20000;
-                    bossMaxHp = 100;
-                } else {
-                    nextBossScore += 10000;
-                    bossMaxHp = 100;
-                }
-            }
-        }
-
-        if (hp <= 0) {
-            appendScoreToFile(score);
+        if (state.hp <= 0) {
+            appendScoreToFile(state.score);
             stopRunLoop();
             stopCurrentMusic();
             playDeath();
-            showGameOverScreen(score);
+            showGameOverScreen(state.score);
             break;
         }
 
-        setactivepage(page);
-        putimage(0, 0, cachedGameBackground, COPY_PUT);
-        drawForestSway(timeSec);
-        drawFirefliesAnimated(timeSec);
-        for (int i = 0; i < MAX_GHOSTS; i++) {
-            if (!ghosts[i].active) continue;
-            drawGhost((int)ghosts[i].x, (int)ghosts[i].y);
-        }
-        if (skillReady) {
-            drawFootGlow((int)explorerX, (int)explorerY, explorerScale);
-        }
-        if (facingRight) {
-            drawExplorer((int)explorerX, (int)explorerY, explorerScale, armSwing, headSway);
-        } else {
-            drawExplorerMirrored((int)explorerX, (int)explorerY, explorerScale, armSwing, headSway);
-        }
-        for (int i = 0; i < MAX_ARROWS; i++) {
-            if (!arrows[i].active) continue;
-            drawArrowAffine(arrows[i].x, arrows[i].y, arrows[i].angle, arrows[i].scale);
-        }
-        for (int i = 0; i < MAX_FIREBALLS; i++) {
-            if (!fireballs[i].active) continue;
-            drawFireball(fireballs[i].x, fireballs[i].y);
-        }
-        for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
-            if (!energyWaves[i].active) continue;
-            int left = (energyWaves[i].dir > 0) ? (int)energyWaves[i].x : 0;
-            int right = (energyWaves[i].dir > 0) ? SCREEN_WIDTH : (int)energyWaves[i].x;
-            drawPowerAttack(left, right, (int)energyWaves[i].y, wavePhase);
-        }
-
-        // --- Darken screen during Boss warning and summoning ---
-        if (bossState == 1 || bossState == 2) {
-            char ditherPattern[] = { (char)0x55, (char)0xAA, (char)0x55, (char)0xAA, (char)0x55, (char)0xAA, (char)0x55, (char)0xAA };
-            setfillpattern(ditherPattern, BLACK);
-            bar(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        }
-
-        // --- ReaperBoss Render Logic ---
-        if (bossState == 1) { // Warning State
-            if (((int)(timeSec * 4.0f)) % 2 == 0) {
-                setcolor(COLOR(255, 30, 30));
-                settextstyle(BOLD_FONT, HORIZ_DIR, 4);
-                const char* warnText = gCurrentLanguage->boss_warning;
-                int wText = textwidth((char*)warnText);
-                int bx1 = (SCREEN_WIDTH - wText) / 2 - 20;
-                int by1 = SCREEN_HEIGHT / 2 - 60;
-                int bx2 = (SCREEN_WIDTH + wText) / 2 + 20;
-                int by2 = SCREEN_HEIGHT / 2 + 10;
-                setfillstyle(SOLID_FILL, COLOR(20, 5, 5));
-                bar(bx1, by1, bx2, by2);
-                setcolor(COLOR(200, 20, 20));
-                rectangle(bx1, by1, bx2, by2);
-                setcolor(COLOR(255, 50, 50));
-                setbkcolor(COLOR(20, 5, 5));
-                outtextxy((SCREEN_WIDTH - wText) / 2, SCREEN_HEIGHT / 2 - 45, (char*)warnText);
-                setbkcolor(BLACK); // Restore bkcolor
-            }
-        } else if (bossState == 2) { // Summoning State
-            drawSummonSigil((int)bossX, (int)(GROUND_Y - 80), 2.2f);
-            float ratio = 1.0f - (bossSummonTimer / 2.5f);
-            if (ratio < 0.0f) ratio = 0.0f;
-            if (ratio > 1.0f) ratio = 1.0f;
-            drawReaperBoss((int)bossX, (int)(GROUND_Y + 30), ratio, timeSec);
-        } else if (bossState == 3) { // Active State
-            drawReaperBoss((int)bossX, (int)bossY, 1.0f, timeSec);
-            drawBossHealthBar(bossHp, bossMaxHp);
-
-            // Warning indicators for active attack charge
-            if (bossAttackChargeTimer > 0.0f) {
-                setcolor(COLOR(255, 0, 0));
-                setlinestyle(DOTTED_LINE, 0, 2);
-                int rx1 = 0;
-                int rx2 = (int)(bossX - 40);
-                int ry1 = (int)(GROUND_Y - 90);
-                int ry2 = (int)(GROUND_Y + 30);
-                rectangle(rx1, ry1, rx2, ry2);
-                line(rx1, ry1, rx2, ry2);
-                line(rx1, ry2, rx2, ry1);
-                setlinestyle(SOLID_LINE, 0, 1);
-                
-                if (((int)(timeSec * 5.0f)) % 2 == 0) {
-                    setcolor(COLOR(255, 80, 80));
-                    settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
-                    setbkcolor(COLOR(20, 5, 5));
-                    const char* chargeText = gCurrentLanguage->boss_dodge;
-                    outtextxy((int)(explorerX - 30), (int)(explorerY - 130), (char*)chargeText);
-                    setbkcolor(BLACK); // Restore bkcolor
-                }
-            }
-
-            // Draw active attack slash
-            if (bossAttackActiveTimer > 0.0f) {
-                float progress = (0.4f - bossAttackActiveTimer) / 0.4f;
-                drawBossScytheSlash((int)bossX, (int)bossY, progress);
-            }
-        }
-
-        drawGameStats(hp, score, mana, manaMax, skillReady);
-        drawPauseButton(pauseBtnX, pauseBtnY);
-
-        setvisualpage(page);
-        page = 1 - page;
+        drawGameplay(state);
+        state.page = 1 - state.page;
         delay(10);
     }
 }
