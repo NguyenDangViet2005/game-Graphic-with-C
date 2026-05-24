@@ -66,11 +66,61 @@ void drawSinglePauseMenuBtn(int index, int selected, int boxX, int boxY, int box
     outtextxy(bX + (btnW - tw)/2, bY + (btnH - th)/2, (char*)text);
 }
 
+// Helper to get option text dynamically for pause menu
+static void getPauseOptionText(int idx, char* outBuf) {
+    if (idx == 0) {
+        sprintf(outBuf, "%s", gCurrentLanguage->pause_resume);
+    } else if (idx == 1) {
+        sprintf(outBuf, "%s: %s", 
+            gCurrentLanguage->settings_sound, 
+            gSoundEnabled ? gCurrentLanguage->settings_sound_on : gCurrentLanguage->settings_sound_off
+        );
+    } else if (idx == 2) {
+        sprintf(outBuf, "%s: %s", 
+            gCurrentLanguage->settings_language, 
+            gLanguage == 0 ? "Tieng Viet" : "English"
+        );
+    } else {
+        sprintf(outBuf, "%s", gCurrentLanguage->pause_exit_to_menu);
+    }
+}
+
+// Redraw Pause screen contents
+static void drawPauseMenuContent(int currentSelection, int boxX, int boxY, int boxW, int boxH,
+                                 int buttonX, int buttonY[], int btnW, int btnH, int totalItems, int startY, int spacing) {
+    // Nền khung menu
+    setfillstyle(SOLID_FILL, COLOR(15, 25, 45)); // màu menu
+    bar(boxX, boxY, boxX + boxW, boxY + boxH);
+    
+    // Viền khung
+    setcolor(COLOR(255, 230, 100));
+    setlinestyle(SOLID_LINE, 0, 3);
+    rectangle(boxX, boxY, boxX + boxW, boxY + boxH);
+    setlinestyle(SOLID_LINE, 0, 1);
+    setcolor(COLOR(100, 120, 150));
+    rectangle(boxX + 5, boxY + 5, boxX + boxW - 5, boxY + boxH - 5);
+    
+    // Tiêu đề
+    const char* title = gCurrentLanguage->pause_title;
+    settextstyle(BOLD_FONT, HORIZ_DIR, 5);
+    setcolor(COLOR(255, 230, 100));
+    setbkcolor(COLOR(15, 25, 45));
+    int titleWidth = textwidth((char*)title);
+    outtextxy(boxX + (boxW - titleWidth) / 2, boxY + 25, (char*)title);
+
+    // Draw buttons
+    char textBuf[128];
+    for (int i = 0; i < totalItems; i++) {
+        getPauseOptionText(i, textBuf);
+        drawSinglePauseMenuBtn(i, i == currentSelection, boxX, boxY, boxW, btnW, btnH, startY, spacing, textBuf);
+    }
+}
+
 // Vẽ menu Pause (overlay đè lên màn hình hiện tại)
 // Trả về: 0 = Tiếp tục, 1 = Thoát ra menu chính
 int showPauseMenuOverlay() {
     int boxW = 400;
-    int boxH = 300;
+    int boxH = 400;
     int boxX = (SCREEN_WIDTH - boxW) / 2;
     int boxY = (SCREEN_HEIGHT - boxH) / 2;
     
@@ -85,37 +135,15 @@ int showPauseMenuOverlay() {
     void* savedBg = malloc(overlaySize);
     getimage(saveX1, saveY1, saveX2, saveY2, savedBg);
     
-    // Nền khung menu
-    setfillstyle(SOLID_FILL, COLOR(15, 25, 45)); // màu menu
-    bar(boxX, boxY, boxX + boxW, boxY + boxH);
-    
-    // Viền khung
-    setcolor(COLOR(255, 230, 100));
-    setlinestyle(SOLID_LINE, 0, 3);
-    rectangle(boxX, boxY, boxX + boxW, boxY + boxH);
-    setlinestyle(SOLID_LINE, 0, 1);
-    setcolor(COLOR(100, 120, 150));
-    rectangle(boxX + 5, boxY + 5, boxX + boxW - 5, boxY + boxH - 5);
-    
-    // Tiêu đề
-    char title[] = "TAM DUNG";
-    settextstyle(BOLD_FONT, HORIZ_DIR, 5);
-    setcolor(COLOR(255, 230, 100));
-    setbkcolor(COLOR(15, 25, 45));
-    int titleWidth = textwidth(title);
-    outtextxy(boxX + (boxW - titleWidth) / 2, boxY + 30, title);
-    
-    // Các Text/Button
-    const char* options[] = {"Choi Tiep", "Thoat Ra Menu"};
-    int numOptions = 2;
+    int numOptions = 4;
     int currentSelection = 0;
     
     int btnW = 300;
-    int btnH = 60;
-    int startY = boxY + 110;
-    int spacing = 20;
+    int btnH = 55;
+    int startY = boxY + 95;
+    int spacing = 15;
     int bX = boxX + (boxW - btnW) / 2;
-    int bY[2];
+    int bY[4];
     for (int i = 0; i < numOptions; i++) {
         bY[i] = startY + i * (btnH + spacing);
     }
@@ -125,20 +153,33 @@ int showPauseMenuOverlay() {
     while(ismouseclick(WM_LBUTTONDOWN)) clearmouseclick(WM_LBUTTONDOWN);
     
     // Ve lan dau
-    for(int i=0; i<numOptions; i++) {
-        drawSinglePauseMenuBtn(i, i == currentSelection, boxX, boxY, boxW, btnW, btnH, startY, spacing, options[i]);
-    }
+    drawPauseMenuContent(currentSelection, boxX, boxY, boxW, boxH, bX, bY, btnW, btnH, numOptions, startY, spacing);
+    
+    char textBuf[128];
     
     while(1) {
         if(ismouseclick(WM_LBUTTONDOWN)) {
             int mx, my;
             getmouseclick(WM_LBUTTONDOWN, mx, my);
             playClick();
+            
             for(int i=0; i<numOptions; i++) {
                 if (mx >= bX && mx <= bX + btnW && my >= bY[i] && my <= bY[i] + btnH) {
-                    putimage(saveX1, saveY1, savedBg, COPY_PUT);
-                    free(savedBg);
-                    return i;
+                    if (i == 0) { // Resume
+                        putimage(saveX1, saveY1, savedBg, COPY_PUT);
+                        free(savedBg);
+                        return 0;
+                    } else if (i == 1) { // Toggle Sound
+                        toggleSound();
+                        drawPauseMenuContent(currentSelection, boxX, boxY, boxW, boxH, bX, bY, btnW, btnH, numOptions, startY, spacing);
+                    } else if (i == 2) { // Toggle Language
+                        setLanguage(1 - gLanguage);
+                        drawPauseMenuContent(currentSelection, boxX, boxY, boxW, boxH, bX, bY, btnW, btnH, numOptions, startY, spacing);
+                    } else if (i == 3) { // Exit
+                        putimage(saveX1, saveY1, savedBg, COPY_PUT);
+                        free(savedBg);
+                        return 1;
+                    }
                 }
             }
         }
@@ -148,9 +189,11 @@ int showPauseMenuOverlay() {
         for(int i=0; i<numOptions; i++) {
             if (mx >= bX && mx <= bX + btnW && my >= bY[i] && my <= bY[i] + btnH) {
                 if (currentSelection != i) {
-                    drawSinglePauseMenuBtn(currentSelection, 0, boxX, boxY, boxW, btnW, btnH, startY, spacing, options[currentSelection]);
+                    getPauseOptionText(currentSelection, textBuf);
+                    drawSinglePauseMenuBtn(currentSelection, 0, boxX, boxY, boxW, btnW, btnH, startY, spacing, textBuf);
                     currentSelection = i;
-                    drawSinglePauseMenuBtn(currentSelection, 1, boxX, boxY, boxW, btnW, btnH, startY, spacing, options[currentSelection]);
+                    getPauseOptionText(currentSelection, textBuf);
+                    drawSinglePauseMenuBtn(currentSelection, 1, boxX, boxY, boxW, btnW, btnH, startY, spacing, textBuf);
                 }
             }
         }
@@ -159,22 +202,41 @@ int showPauseMenuOverlay() {
             char key = getch();
             if(key == 0 || key == -32) {
                 key = getch();
+                int newSelection = currentSelection;
                 if(key == 72) { // up
-                    drawSinglePauseMenuBtn(currentSelection, 0, boxX, boxY, boxW, btnW, btnH, startY, spacing, options[currentSelection]);
-                    currentSelection--;
-                    if(currentSelection < 0) currentSelection = numOptions - 1;
-                    drawSinglePauseMenuBtn(currentSelection, 1, boxX, boxY, boxW, btnW, btnH, startY, spacing, options[currentSelection]);
+                    newSelection--;
+                    if(newSelection < 0) newSelection = numOptions - 1;
                 } else if(key == 80) { // down
-                    drawSinglePauseMenuBtn(currentSelection, 0, boxX, boxY, boxW, btnW, btnH, startY, spacing, options[currentSelection]);
-                    currentSelection++;
-                    if(currentSelection >= numOptions) currentSelection = 0;
-                    drawSinglePauseMenuBtn(currentSelection, 1, boxX, boxY, boxW, btnW, btnH, startY, spacing, options[currentSelection]);
+                    newSelection++;
+                    if(newSelection >= numOptions) newSelection = 0;
+                }
+                
+                if (newSelection != currentSelection) {
+                    getPauseOptionText(currentSelection, textBuf);
+                    drawSinglePauseMenuBtn(currentSelection, 0, boxX, boxY, boxW, btnW, btnH, startY, spacing, textBuf);
+                    currentSelection = newSelection;
+                    getPauseOptionText(currentSelection, textBuf);
+                    drawSinglePauseMenuBtn(currentSelection, 1, boxX, boxY, boxW, btnW, btnH, startY, spacing, textBuf);
                 }
             } else if(key == 13) { // enter
-                putimage(saveX1, saveY1, savedBg, COPY_PUT);
-                free(savedBg);
-                return currentSelection;
+                playClick();
+                if (currentSelection == 0) { // Resume
+                    putimage(saveX1, saveY1, savedBg, COPY_PUT);
+                    free(savedBg);
+                    return 0;
+                } else if (currentSelection == 1) { // Toggle Sound
+                    toggleSound();
+                    drawPauseMenuContent(currentSelection, boxX, boxY, boxW, boxH, bX, bY, btnW, btnH, numOptions, startY, spacing);
+                } else if (currentSelection == 2) { // Toggle Language
+                    setLanguage(1 - gLanguage);
+                    drawPauseMenuContent(currentSelection, boxX, boxY, boxW, boxH, bX, bY, btnW, btnH, numOptions, startY, spacing);
+                } else if (currentSelection == 3) { // Exit to menu
+                    putimage(saveX1, saveY1, savedBg, COPY_PUT);
+                    free(savedBg);
+                    return 1;
+                }
             } else if(key == 27) { // esc (tiep tuc)
+                playClick();
                 putimage(saveX1, saveY1, savedBg, COPY_PUT);
                 free(savedBg);
                 return 0;

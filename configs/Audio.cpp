@@ -80,6 +80,7 @@ static void setAliasVolume(const char* alias, int volume) {
 }
 
 static void playAliasOnce(const char* alias) {
+    if (!gSoundEnabled) return;
     stopAlias(alias);
     seekAliasStart(alias);
     char cmd[64];
@@ -88,6 +89,7 @@ static void playAliasOnce(const char* alias) {
 }
 
 static void playAliasLoop(const char* alias) {
+    if (!gSoundEnabled) return;
     char cmd[64];
     snprintf(cmd, sizeof(cmd), "play %s repeat", alias);
     mciCommand(cmd);
@@ -100,6 +102,7 @@ static void playMusicAlias(const char* alias) {
         stopAlias(gCurrentMusic);
     }
     gCurrentMusic = alias;
+    if (!gSoundEnabled) return;
     playAliasLoop(alias);
 }
 
@@ -189,6 +192,7 @@ void playGetScore() { playAliasOnce(kAliasGetScore); }
 void playJump() { playAliasOnce(kAliasJump); }
 
 void startRunLoop() {
+    if (!gSoundEnabled) return;
     if (gRunLooping) return;
     gRunLooping = 1;
     playAliasLoop(kAliasRun);
@@ -198,6 +202,22 @@ void stopRunLoop() {
     if (!gRunLooping) return;
     gRunLooping = 0;
     stopAlias(kAliasRun);
+}
+
+void toggleSound() {
+    if (gSoundEnabled) {
+        gSoundEnabled = 0;
+        if (gCurrentMusic) {
+            stopAlias(gCurrentMusic);
+        }
+        stopRunLoop();
+    } else {
+        gSoundEnabled = 1;
+        if (gCurrentMusic) {
+            // Because playMusicAlias is gated, let's call playAliasLoop directly
+            playAliasLoop(gCurrentMusic);
+        }
+    }
 }
 
 #endif

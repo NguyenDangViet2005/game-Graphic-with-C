@@ -33,23 +33,23 @@ void drawPowerAttack(int left, int right, int y, float phase) {
     bar(left, coreTop, right, coreBottom);
 
     setcolor(COLOR(220, 30, 30));
-    // Bresenham line
-    bresenhamLine(left, outerTop, right, outerTop);
-    bresenhamLine(left, outerBottom, right, outerBottom);
+    // Use native line function for high performance (Bresenham is too slow for 1000+ pixels per frame)
+    line(left, outerTop, right, outerTop);
+    line(left, outerBottom, right, outerBottom);
 
-    for (int x = left; x < right; x += 12) {
-        float t = (float)sin(phase + x * 0.06f);
-        int flare = (int)(4 + 6 * (t > 0.0f ? t : -t));
+    for (int x = left; x < right; x += 32) {
+        float t = (float)sin(phase + x * 0.03f);
+        int flare = (int)(4 + 8 * (t > 0.0f ? t : -t));
         int flareTop = outerTop - flare;
         int flareBottom = outerBottom + flare;
 
         setfillstyle(SOLID_FILL, COLOR(255, 120, 30));
-        bar(x, flareTop, x + 8, outerTop);
-        bar(x, outerBottom, x + 8, flareBottom);
+        bar(x, flareTop, x + 20, outerTop);
+        bar(x, outerBottom, x + 20, flareBottom);
 
         setfillstyle(SOLID_FILL, COLOR(255, 210, 90));
-        bar(x + 2, flareTop + 2, x + 6, outerTop - 1);
-        bar(x + 2, outerBottom + 1, x + 6, flareBottom - 2);
+        bar(x + 4, flareTop + 2, x + 16, outerTop - 1);
+        bar(x + 4, outerBottom + 1, x + 16, flareBottom - 2);
     }
 }
 

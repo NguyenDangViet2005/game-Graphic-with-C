@@ -19,6 +19,9 @@ void gameLoop() {
                 showScoreboard();
                 break;
             case 3: 
+                showSettings();
+                break;
+            case 4: 
                 running = 0;
                 break;
         }

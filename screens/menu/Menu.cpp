@@ -21,6 +21,7 @@ void* cachedGameBackground = NULL;
 #include "MenuScreens.cpp"
 #include "../instruction/InstructionsScreen.cpp"
 #include "../scoreboard/ScoreboardScreen.cpp"
+#include "../settings/SettingsScreen.cpp"
 #include "../../logic/GameplayTypes.cpp"
 #include "../../logic/GameplayCollision.cpp"
 #include "../../logic/GameplayRender.cpp"

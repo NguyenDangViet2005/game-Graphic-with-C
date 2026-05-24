@@ -35,9 +35,9 @@ void drawLoadingScreen(int progress, const char* statusText = "Loading...") {
         // Subtitle
         settextstyle(DEFAULT_FONT, HORIZ_DIR, 1);
         setcolor(COLOR(180, 180, 180));
-        char subtitle[] = "Prepare for Adventure";
-        int subtitleWidth = textwidth(subtitle);
-        outtextxy((SCREEN_WIDTH - subtitleWidth) / 2, SCREEN_HEIGHT / 2 - 40, subtitle);
+        const char* subtitle = gCurrentLanguage->loading_subtitle;
+        int subtitleWidth = textwidth((char*)subtitle);
+        outtextxy((SCREEN_WIDTH - subtitleWidth) / 2, SCREEN_HEIGHT / 2 - 40, (char*)subtitle);
 
         // Shadow cho depth
         setcolor(COLOR(20, 20, 20));

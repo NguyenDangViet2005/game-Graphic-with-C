@@ -8,14 +8,14 @@
 void showInstructions() {
     loadAndDrawBackground();
 
-    char title[] = "HUONG DAN CHOI GAME";
+    const char* title = gCurrentLanguage->instructions_title;
     settextstyle(BOLD_FONT, HORIZ_DIR, 5);
 
     setbkcolor(COLOR(10, 15, 30));
     setcolor(COLOR(255, 230, 100));
 
-    int titleWidth = textwidth(title);
-    outtextxy((SCREEN_WIDTH - titleWidth) / 2, 80, title);
+    int titleWidth = textwidth((char*)title);
+    outtextxy((SCREEN_WIDTH - titleWidth) / 2, 80, (char*)title);
 
     int boxW = 750;
     int boxH = 340;
@@ -39,21 +39,21 @@ void showInstructions() {
     int y = boxY + 60;
     int textX = boxX + 40;
 
-    outtextxy(textX, y, (char*)"- Phim MUI TEN: Di chuyen");
+    outtextxy(textX, y, (char*)gCurrentLanguage->instructions_move);
     y += 50;
-    outtextxy(textX, y, (char*)"- Phim SPACE  : Tan cong");
+    outtextxy(textX, y, (char*)gCurrentLanguage->instructions_attack);
     y += 50;
-    outtextxy(textX, y, (char*)"- Phim SHIFT + MUI TEN: Di chuyen nhanh");
+    outtextxy(textX, y, (char*)gCurrentLanguage->instructions_dash);
     y += 50;
-    outtextxy(textX, y, (char*)"- Phim CTRL + MUI TEN: Di chuyen cham");
+    outtextxy(textX, y, (char*)gCurrentLanguage->instructions_slow);
     y += 50;
-    outtextxy(textX, y, (char*)"- Phim SHIFT + SPACE : Power Attack");
+    outtextxy(textX, y, (char*)gCurrentLanguage->instructions_power);
 
-    char backMsg[] = "Nhan ESC de quay lai menu";
+    const char* backMsg = gCurrentLanguage->esc_to_back;
     setcolor(COLOR(255, 255, 0));
 
     setbkcolor(COLOR(10, 15, 30));
-    outtextxy(textX, boxY + boxH + 30, backMsg);
+    outtextxy(textX, boxY + boxH + 30, (char*)backMsg);
 
     int backBtnW = 180;
     int backBtnH = 45;

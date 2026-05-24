@@ -11,13 +11,13 @@
 void showScoreboard() {
     loadAndDrawBackground();
 
-    char title[] = "BANG DIEM";
+    const char* title = gCurrentLanguage->scoreboard_title;
     settextstyle(BOLD_FONT, HORIZ_DIR, 5);
     setbkcolor(COLOR(10, 15, 30));
     setcolor(COLOR(255, 230, 100));
 
-    int titleWidth = textwidth(title);
-    outtextxy((SCREEN_WIDTH - titleWidth) / 2, 80, title);
+    int titleWidth = textwidth((char*)title);
+    outtextxy((SCREEN_WIDTH - titleWidth) / 2, 80, (char*)title);
 
     int boxX = SCREEN_WIDTH / 2 - 20;
     int boxY = 160;
@@ -62,7 +62,7 @@ void showScoreboard() {
     }
 
     if (scoreCount == 0) {
-        outtextxy(textX, y, (char*)"Chua co diem nao");
+        outtextxy(textX, y, (char*)gCurrentLanguage->scoreboard_empty);
     } else {
         int maxRows = 6;
         if (scoreCount < maxRows) maxRows = scoreCount;
@@ -74,11 +74,11 @@ void showScoreboard() {
         }
     }
 
-    char backMsg2[] = "Nhan ESC de quay lai menu";
+    const char* backMsg2 = gCurrentLanguage->esc_to_back;
     setcolor(COLOR(255, 255, 0));
 
     setbkcolor(COLOR(10, 15, 30));
-    outtextxy(textX, boxY + boxH + 30, backMsg2);
+    outtextxy(textX, boxY + boxH + 30, (char*)backMsg2);
 
     int backBtnW = 180;
     int backBtnH = 45;

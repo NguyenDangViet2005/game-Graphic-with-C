@@ -83,13 +83,16 @@ int isEnergyWaveHitBoss(const EnergyWave& wave, int bossX, int bossY) {
              waveBottom < bossTop || waveTop > bossBottom);
 }
 
-int isExplorerHitBossAttack(float explorerX, float explorerY, float bossX, float bossY) {
-    float dx = explorerX - bossX;
+int isExplorerHitBossAttack(float explorerX, float explorerY, float bossX, float bossY, float progress) {
+    // Vị trí ngang hiện tại của luồng sóng năng lượng chém ra
+    float cx = bossX - 40.0f - (progress * (bossX + 100.0f));
+    
+    // Khoảng cách giữa luồng năng lượng và Explorer
+    float dx = cx - explorerX;
 
-    // Đòn tấn công bay xa hết màn hình về phía bên trái của Boss
-    if (dx < -40.0f) {
+    // Đòn tấn công chém quét qua Explorer (trong khoảng chiều rộng nhân vật)
+    if (dx >= -50.0f && dx <= 50.0f) {
         // Buộc người chơi phải nhảy cao để né
-        // Chiều cao bình thường là GROUND_Y + 30. Khi nhảy cao explorerY sẽ giảm xuống
         if (explorerY > GROUND_Y - 90.0f) {
             return 1;
         }

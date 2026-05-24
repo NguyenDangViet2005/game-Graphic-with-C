@@ -63,7 +63,7 @@ void drawBackButton(int x, int y, int width, int height, int isHover) {
     setbkcolor(isHover ? COLOR(20, 35, 60) : COLOR(45, 45, 45));
     setcolor(isHover ? COLOR(255, 230, 100) : COLOR(230, 230, 230));
 
-    const char* text = "Quay lai";
+    const char* text = gCurrentLanguage->back_button;
     int textW = textwidth((char*)text);
     int textH = 16;
     int textX = x + (width - textW) / 2;
@@ -84,8 +84,8 @@ void clearMenuInputState() {
 void drawMenuScreen(int currentSelection, const char* menuItems[], int totalItems) {
     const int BUTTON_WIDTH = 400;
     const int BUTTON_HEIGHT = 60;
-    const int BUTTON_SPACING = 20;
-    const int START_Y = 250;
+    const int BUTTON_SPACING = 15;
+    const int START_Y = 230;
     
     loadAndDrawBackground();
     drawTitle();
@@ -102,20 +102,21 @@ void drawMenuScreen(int currentSelection, const char* menuItems[], int totalItem
 int showMainMenu() {
     const int BUTTON_WIDTH = 400;
     const int BUTTON_HEIGHT = 60;
-    const int BUTTON_SPACING = 20;
-    const int START_Y = 250;
+    const int BUTTON_SPACING = 15;
+    const int START_Y = 230;
     
     const char* menuItems[] = {
-        "Choi game",
-        "Huong dan",
-        "Bang diem",
-        "Thoat"
+        gCurrentLanguage->main_menu_play,
+        gCurrentLanguage->main_menu_instructions,
+        gCurrentLanguage->main_menu_scoreboard,
+        gCurrentLanguage->main_menu_settings,
+        gCurrentLanguage->main_menu_exit
     };
     
     int currentSelection = 0;
-    int totalItems = 4;
+    int totalItems = 5;
     int buttonX = SCREEN_WIDTH - BUTTON_WIDTH - 150;
-    int buttonY[4];
+    int buttonY[5];
     for (int i = 0; i < totalItems; i++) {
         buttonY[i] = START_Y + i * (BUTTON_HEIGHT + BUTTON_SPACING);
     }
@@ -183,14 +184,14 @@ int showMainMenu() {
                 return currentSelection;
             }
             else if(key == 27) {
-                return 3;
+                return 4; // ESC exits the game (which corresponds to "Thoat" now at index 4)
             }
         }
         
         delay(5);
     }
     
-    return 3;
+    return 4;
 }
 
 #endif

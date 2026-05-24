@@ -165,7 +165,7 @@ void drawBossHealthBar(int hp, int maxHp) {
     settextstyle(BOLD_FONT, HORIZ_DIR, 2);
     setbkcolor(COLOR(15, 10, 10)); // Tránh nhiễu chữ
     char bossName[64];
-    sprintf(bossName, "REAPER BOSS: %d / %d", hp, maxHp);
+    sprintf(bossName, "%s: %d / %d", gCurrentLanguage->boss_name, hp, maxHp);
     int textW = textwidth(bossName);
     outtextxy(x + (barW - textW) / 2, y - 28, bossName);
 }
@@ -175,7 +175,7 @@ void drawGameStats(int hp, int score, int mana, int manaMax, int skillReady) {
     // Text HP
     setcolor(WHITE);
     settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
-    outtextxy(20, 20, (char*)"HP:");
+    outtextxy(20, 20, (char*)gCurrentLanguage->hud_hp);
     
     // Vẽ trái tim
     drawHearts(70, 20, hp, 2, 5);
@@ -184,13 +184,13 @@ void drawGameStats(int hp, int score, int mana, int manaMax, int skillReady) {
     setcolor(YELLOW);
     settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
     char scoreText[50];
-    sprintf(scoreText, "Diem: %d", score);
+    sprintf(scoreText, "%s: %d", gCurrentLanguage->hud_score, score);
     outtextxy(20, 50, scoreText);
 
     // Nang luong bar
     setcolor(COLOR(160, 200, 255));
     settextstyle(DEFAULT_FONT, HORIZ_DIR, 1);
-    outtextxy(20, 78, (char*)"Nang Luong:");
+    outtextxy(20, 78, (char*)gCurrentLanguage->hud_energy);
     drawEnergyBar(110, 80, mana, manaMax);
 
     (void)skillReady;

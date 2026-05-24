@@ -1,11 +1,18 @@
 #include <graphics.h>
 #include <stdio.h>
 
+#include "languages/Language.h"
+
+int gSoundEnabled = 1;
+int gLanguage = 0;
+const Language* gCurrentLanguage = NULL;
+
 #include "configs/Config.cpp"
 #include "configs/Audio.cpp"
 #include "screens/menu/Menu.cpp"
 
 int main() {
+    gCurrentLanguage = &langVi;
     printf("Dang tai...\n");
     
     initwindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Monster Slayer - Dark Forest Theme");

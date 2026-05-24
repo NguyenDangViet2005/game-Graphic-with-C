@@ -43,7 +43,7 @@ void playGame() {
 
     if (cachedGameBackground == NULL) {
         playMusicLoading();
-        drawLoadingScreen(0, "Vui long cho...");
+        drawLoadingScreen(0, gCurrentLanguage->loading_wait);
         delay(150);
 
         int oldPage = getactivepage();
@@ -51,21 +51,21 @@ void playGame() {
         cleardevice();
 
         setactivepage(0);
-        drawLoadingScreen(20, "Dang tai...");
+        drawLoadingScreen(20, gCurrentLanguage->loading_text);
         setactivepage(1);
         delay(80);
 
         drawBackground();
 
         setactivepage(0);
-        drawLoadingScreen(55, "Dang tai khu rung...");
+        drawLoadingScreen(55, gCurrentLanguage->loading_forest);
         setactivepage(1);
         delay(80);
 
         drawDarkForest();
 
         setactivepage(0);
-        drawLoadingScreen(85, "Dang tai quai vat...");
+        drawLoadingScreen(85, gCurrentLanguage->loading_monsters);
         setactivepage(1);
         delay(80);
 
@@ -74,10 +74,10 @@ void playGame() {
         getimage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cachedGameBackground);
 
         setactivepage(0);
-        drawLoadingScreen(95, "Hoan thanh...");
+        drawLoadingScreen(95, gCurrentLanguage->loading_complete);
         delay(100);
 
-        drawLoadingScreen(100, "Bat dau!");
+        drawLoadingScreen(100, gCurrentLanguage->loading_start);
         delay(400);
 
         putimage(0, 0, cachedGameBackground, COPY_PUT);
@@ -100,6 +100,8 @@ void playGame() {
     float groundY = (float)(GROUND_Y + 30);
     float explorerScale = 1.0f;
     float walkTime = 0.0f;
+    float armSwing = 0.0f;
+    float headSway = 0.0f;
     float shootCooldown = 0.0f;
     float hurtCooldown = 0.0f;
     int facingRight = 1;
@@ -135,6 +137,7 @@ void playGame() {
     float bossSummonTimer = 0.0f;
     float bossX = 0.0f;
     float bossY = 0.0f;
+    int bossLevel = 1;
     int bossHp = 30;
     int bossMaxHp = 30;
     int nextBossScore = 3000;
@@ -181,150 +184,184 @@ void playGame() {
             }
         }
 
-        int onGround = (explorerY >= groundY - 0.5f);
-        int shiftDown = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
-        int ctrlDown = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
-        if ((GetAsyncKeyState(VK_UP) & 0x0001) && onGround && !ctrlDown) {
-            float jumpMultiplier = shiftDown ? 1.5f : 1.0f;
-            explorerVy = jumpSpeed * jumpMultiplier;
-            playJump();
-        }
-
-        int moveDir = 0;
-        if (GetAsyncKeyState(VK_LEFT) & 0x8000) moveDir -= 1;
-        if (GetAsyncKeyState(VK_RIGHT) & 0x8000) moveDir += 1;
-
-        if (moveDir < 0) facingRight = 0;
-        if (moveDir > 0) facingRight = 1;
-
-        float speedMultiplier = 1.0f;
-        if (ctrlDown) {
-            speedMultiplier = 0.3f;
-        } else if (shiftDown) {
-            speedMultiplier = 2.0f;
-        }
-        float effectiveSpeed = explorerSpeed * speedMultiplier;
-        float effectiveAccel = explorerAccel * speedMultiplier;
-        float effectiveFriction = explorerFriction * speedMultiplier;
-
-        if (moveDir != 0) {
-            explorerVx += moveDir * effectiveAccel * dt;
-            if (explorerVx > effectiveSpeed) explorerVx = effectiveSpeed;
-            if (explorerVx < -effectiveSpeed) explorerVx = -effectiveSpeed;
-        } else {
-            if (explorerVx > 0.0f) {
-                explorerVx -= effectiveFriction * dt;
-                if (explorerVx < 0.0f) explorerVx = 0.0f;
-            } else if (explorerVx < 0.0f) {
-                explorerVx += effectiveFriction * dt;
-                if (explorerVx > 0.0f) explorerVx = 0.0f;
+        int isBossSpawning = (bossState == 1 || bossState == 2);
+        if (!isBossSpawning) {
+            int onGround = (explorerY >= groundY - 0.5f);
+            int shiftDown = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+            int ctrlDown = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
+            if ((GetAsyncKeyState(VK_UP) & 0x0001) && onGround && !ctrlDown) {
+                float jumpMultiplier = shiftDown ? 1.5f : 1.0f;
+                explorerVy = jumpSpeed * jumpMultiplier;
+                playJump();
             }
-        }
 
-        explorerX += explorerVx * dt;
-        if (explorerX < 80.0f) explorerX = 80.0f;
-        if (explorerX > SCREEN_WIDTH - 80.0f) explorerX = (float)SCREEN_WIDTH - 80.0f;
+            int moveDir = 0;
+            if (GetAsyncKeyState(VK_LEFT) & 0x8000) moveDir -= 1;
+            if (GetAsyncKeyState(VK_RIGHT) & 0x8000) moveDir += 1;
 
-        explorerVy += gravity * dt;
-        explorerY += explorerVy * dt;
-        if (explorerY > groundY) {
-            explorerY = groundY;
-            explorerVy = 0.0f;
-        }
+            if (moveDir < 0) facingRight = 0;
+            if (moveDir > 0) facingRight = 1;
 
-        float absVx = (float)fabs(explorerVx);
-        if (absVx > 5.0f && onGround) {
-            startRunLoop();
-        } else {
-            stopRunLoop();
-        }
+            float speedMultiplier = 1.0f;
+            if (ctrlDown) {
+                speedMultiplier = 0.3f;
+            } else if (shiftDown) {
+                speedMultiplier = 2.0f;
+            }
+            float effectiveSpeed = explorerSpeed * speedMultiplier;
+            float effectiveAccel = explorerAccel * speedMultiplier;
+            float effectiveFriction = explorerFriction * speedMultiplier;
 
-        float armSwing = 0.0f;
-        float headSway = 0.0f;
-        if (absVx > 5.0f) {
-            walkTime += dt;
-            float bob = (float)sin(walkTime * 8.0f) * 0.08f;
-            explorerScale = 1.0f + bob;
-            armSwing = (float)sin(walkTime * 7.0f) * 0.25f;
-            headSway = (float)sin(walkTime * 4.0f) * 0.12f;
-        } else {
-            explorerScale = 1.0f;
-            armSwing = (float)sin(now * 0.003f) * 0.06f;
-            headSway = (float)sin(now * 0.002f) * 0.05f;
-        }
-        if (!facingRight) {
-            armSwing = -armSwing;
-            headSway = -headSway;
-        }
-
-        int spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x0001) != 0;
-        int skillShot = 0;
-        if (skillReady && shiftDown && spacePressed) {
-            int dir = facingRight ? 1 : -1;
-            for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
-                if (!energyWaves[i].active) {
-                    energyWaves[i].active = 1;
-                    energyWaves[i].x = explorerX + (dir > 0 ? 40.0f : -40.0f);
-                    energyWaves[i].y = explorerY - 30.0f;
-                    energyWaves[i].dir = dir;
-                    energyWaves[i].life = 1.0f;
-                    energyWaves[i].hitBoss = 0;
-                    mana = 0;
-                    skillReady = 0;
-                    playPowerFirer();
-                    skillShot = 1;
-                    break;
+            if (moveDir != 0) {
+                explorerVx += moveDir * effectiveAccel * dt;
+                if (explorerVx > effectiveSpeed) explorerVx = effectiveSpeed;
+                if (explorerVx < -effectiveSpeed) explorerVx = -effectiveSpeed;
+            } else {
+                if (explorerVx > 0.0f) {
+                    explorerVx -= effectiveFriction * dt;
+                    if (explorerVx < 0.0f) explorerVx = 0.0f;
+                } else if (explorerVx < 0.0f) {
+                    explorerVx += effectiveFriction * dt;
+                    if (explorerVx > 0.0f) explorerVx = 0.0f;
                 }
             }
-        }
 
-        if (shootCooldown > 0.0f) shootCooldown -= dt;
-        if (!skillShot && (GetAsyncKeyState(VK_SPACE) & 0x8000) && shootCooldown <= 0.0f) {
+            explorerX += explorerVx * dt;
+            if (explorerX < 80.0f) explorerX = 80.0f;
+            if (explorerX > SCREEN_WIDTH - 80.0f) explorerX = (float)SCREEN_WIDTH - 80.0f;
+
+            explorerVy += gravity * dt;
+            explorerY += explorerVy * dt;
+            if (explorerY > groundY) {
+                explorerY = groundY;
+                explorerVy = 0.0f;
+            }
+
+            float absVx = (float)fabs(explorerVx);
+            if (absVx > 5.0f && onGround) {
+                startRunLoop();
+            } else {
+                stopRunLoop();
+            }
+
+            armSwing = 0.0f;
+            headSway = 0.0f;
+            if (absVx > 5.0f) {
+                walkTime += dt;
+                float bob = (float)sin(walkTime * 8.0f) * 0.08f;
+                explorerScale = 1.0f + bob;
+                armSwing = (float)sin(walkTime * 7.0f) * 0.25f;
+                headSway = (float)sin(walkTime * 4.0f) * 0.12f;
+            } else {
+                explorerScale = 1.0f;
+                armSwing = (float)sin(now * 0.003f) * 0.06f;
+                headSway = (float)sin(now * 0.002f) * 0.05f;
+            }
+            if (!facingRight) {
+                armSwing = -armSwing;
+                headSway = -headSway;
+            }
+
+            int spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x0001) != 0;
+            int skillShot = 0;
+            if (skillReady && shiftDown && spacePressed) {
+                int dir = facingRight ? 1 : -1;
+                for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+                    if (!energyWaves[i].active) {
+                        energyWaves[i].active = 1;
+                        energyWaves[i].x = explorerX + (dir > 0 ? 40.0f : -40.0f);
+                        energyWaves[i].y = explorerY - 30.0f;
+                        energyWaves[i].dir = dir;
+                        energyWaves[i].life = 1.0f;
+                        energyWaves[i].hitBoss = 0;
+                        mana = 0;
+                        skillReady = 0;
+                        playPowerFirer();
+                        skillShot = 1;
+                        break;
+                    }
+                }
+            }
+
+            if (shootCooldown > 0.0f) shootCooldown -= dt;
+            if (!skillShot && (GetAsyncKeyState(VK_SPACE) & 0x8000) && shootCooldown <= 0.0f) {
+                for (int i = 0; i < MAX_ARROWS; i++) {
+                    if (!arrows[i].active) {
+                        arrows[i].active = 1;
+                        arrows[i].x = explorerX + (facingRight ? 52.0f : -52.0f);
+                        arrows[i].y = explorerY - 30.0f;
+                        arrows[i].vx = facingRight ? 620.0f : -620.0f;
+                        arrows[i].vy = -30.0f;
+                        arrows[i].angle = facingRight ? 0.0f : 3.1415926f;
+                        arrows[i].scale = 1.0f;
+                        shootCooldown = 0.35f;
+                        playFire();
+                        break;
+                    }
+                }
+            }
+
             for (int i = 0; i < MAX_ARROWS; i++) {
-                if (!arrows[i].active) {
-                    arrows[i].active = 1;
-                    arrows[i].x = explorerX + (facingRight ? 52.0f : -52.0f);
-                    arrows[i].y = explorerY - 30.0f;
-                    arrows[i].vx = facingRight ? 620.0f : -620.0f;
-                    arrows[i].vy = -30.0f;
-                    arrows[i].angle = facingRight ? 0.0f : 3.1415926f;
-                    arrows[i].scale = 1.0f;
-                    shootCooldown = 0.35f;
-                    playFire();
-                    break;
-                }
-            }
-        }
+                if (!arrows[i].active) continue;
+                arrows[i].x += arrows[i].vx * dt;
+                arrows[i].y += arrows[i].vy * dt;
+                arrows[i].vy += 40.0f * dt;
+                arrows[i].angle = (float)atan2(arrows[i].vy, arrows[i].vx);
+                arrows[i].scale = 1.0f + arrowPulse * 0.08f;
 
-        for (int i = 0; i < MAX_ARROWS; i++) {
-            if (!arrows[i].active) continue;
-            arrows[i].x += arrows[i].vx * dt;
-            arrows[i].y += arrows[i].vy * dt;
-            arrows[i].vy += 40.0f * dt;
-            arrows[i].angle = (float)atan2(arrows[i].vy, arrows[i].vx);
-            arrows[i].scale = 1.0f + arrowPulse * 0.08f;
-
-            if (arrows[i].x > SCREEN_WIDTH + 50 || arrows[i].y < -50 || arrows[i].y > SCREEN_HEIGHT + 50) {
-                arrows[i].active = 0;
-                continue;
-            }
-
-            if (bossState == 3) {
-                if (isArrowHitBoss(arrows[i], (int)bossX, (int)bossY)) {
+                if (arrows[i].x > SCREEN_WIDTH + 50 || arrows[i].y < -50 || arrows[i].y > SCREEN_HEIGHT + 50) {
                     arrows[i].active = 0;
-                    bossHp -= 1;
-                    playDamage();
                     continue;
                 }
+
+                if (bossState == 3) {
+                    if (isArrowHitBoss(arrows[i], (int)bossX, (int)bossY)) {
+                        arrows[i].active = 0;
+                        bossHp -= 1;
+                        playDamage();
+                        continue;
+                    }
+                }
+
+                for (int g = 0; g < MAX_GHOSTS; g++) {
+                    if (!ghosts[g].active) continue;
+                    if (isArrowHitGhost(arrows[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
+                        arrows[i].active = 0;
+                        ghosts[g].hp -= 1;
+                        playDamage();
+                        if (ghosts[g].hp <= 0) {
+                            ghosts[g].active = 0;
+                            score += 100;
+                            mana += 1;
+                            if (mana > manaMax) mana = manaMax;
+                            if (mana >= manaMax) skillReady = 1;
+                            playGetScore();
+                        }
+                        break;
+                    }
+                }
             }
 
-            for (int g = 0; g < MAX_GHOSTS; g++) {
-                if (!ghosts[g].active) continue;
-                if (isArrowHitGhost(arrows[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
-                    arrows[i].active = 0;
-                    ghosts[g].hp -= 1;
-                    playDamage();
-                    if (ghosts[g].hp <= 0) {
+            for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
+                if (!energyWaves[i].active) continue;
+                energyWaves[i].life -= dt;
+                if (energyWaves[i].life <= 0.0f) {
+                    energyWaves[i].active = 0;
+                    continue;
+                }
+
+                if (bossState == 3 && !energyWaves[i].hitBoss) {
+                    if (isEnergyWaveHitBoss(energyWaves[i], (int)bossX, (int)bossY)) {
+                        energyWaves[i].hitBoss = 1;
+                        bossHp -= 6;
+                        playDamage();
+                    }
+                }
+
+                for (int g = 0; g < MAX_GHOSTS; g++) {
+                    if (!ghosts[g].active) continue;
+                    if (isEnergyWaveHitGhost(energyWaves[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
+                        ghosts[g].hp = 0;
                         ghosts[g].active = 0;
                         score += 100;
                         mana += 1;
@@ -332,118 +369,87 @@ void playGame() {
                         if (mana >= manaMax) skillReady = 1;
                         playGetScore();
                     }
-                    break;
-                }
-            }
-        }
-
-        for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
-            if (!energyWaves[i].active) continue;
-            energyWaves[i].life -= dt;
-            if (energyWaves[i].life <= 0.0f) {
-                energyWaves[i].active = 0;
-                continue;
-            }
-
-            if (bossState == 3 && !energyWaves[i].hitBoss) {
-                if (isEnergyWaveHitBoss(energyWaves[i], (int)bossX, (int)bossY)) {
-                    energyWaves[i].hitBoss = 1;
-                    bossHp -= 6;
-                    playDamage();
                 }
             }
 
-            for (int g = 0; g < MAX_GHOSTS; g++) {
-                if (!ghosts[g].active) continue;
-                if (isEnergyWaveHitGhost(energyWaves[i], (int)ghosts[g].x, (int)ghosts[g].y)) {
-                    ghosts[g].hp = 0;
-                    ghosts[g].active = 0;
-                    score += 100;
-                    mana += 1;
-                    if (mana > manaMax) mana = manaMax;
-                    if (mana >= manaMax) skillReady = 1;
-                    playGetScore();
-                }
-            }
-        }
-
-        ghostSpawnTimer -= dt;
-        if (ghostSpawnTimer <= 0.0f) {
-            for (int i = 0; i < MAX_GHOSTS; i++) {
-                if (!ghosts[i].active) {
-                    ghosts[i].active = 1;
-                    ghosts[i].x = (float)SCREEN_WIDTH + 120.0f;
-                    ghosts[i].y = ghostBaseY;
-                    ghosts[i].vx = -90.0f - (float)(rand() % 40);
-                    ghosts[i].shootTimer = 4.0f;
-                    ghosts[i].hp = 2;
-                    ghostSpawnTimer = ghostSpawnMin + ((float)rand() / (float)RAND_MAX) * (ghostSpawnMax - ghostSpawnMin);
-                    break;
-                }
-            }
-        }
-
-        for (int i = 0; i < MAX_GHOSTS; i++) {
-            if (!ghosts[i].active) continue;
-            ghosts[i].x += ghosts[i].vx * dt;
-            ghosts[i].shootTimer -= dt;
-
-            if (ghosts[i].shootTimer <= 0.0f) {
-                for (int f = 0; f < MAX_FIREBALLS; f++) {
-                    if (!fireballs[f].active) {
-                        float dx = explorerX - ghosts[i].x;
-                        float dy = (explorerY - 30.0f) - ghosts[i].y;
-                        float len = (float)sqrt(dx * dx + dy * dy);
-                        if (len < 1.0f) len = 1.0f;
-                        float speed = 240.0f;
-                        fireballs[f].active = 1;
-                        fireballs[f].x = ghosts[i].x - 20.0f;
-                        fireballs[f].y = ghosts[i].y - 20.0f;
-                        fireballs[f].vx = (dx / len) * speed;
-                        fireballs[f].vy = (dy / len) * speed;
+            ghostSpawnTimer -= dt;
+            if (ghostSpawnTimer <= 0.0f) {
+                for (int i = 0; i < MAX_GHOSTS; i++) {
+                    if (!ghosts[i].active) {
+                        ghosts[i].active = 1;
+                        ghosts[i].x = (float)SCREEN_WIDTH + 120.0f;
+                        ghosts[i].y = ghostBaseY;
+                        ghosts[i].vx = -90.0f - (float)(rand() % 40);
                         ghosts[i].shootTimer = 4.0f;
+                        ghosts[i].hp = 2;
+                        ghostSpawnTimer = ghostSpawnMin + ((float)rand() / (float)RAND_MAX) * (ghostSpawnMax - ghostSpawnMin);
                         break;
                     }
                 }
             }
 
-            if (ghosts[i].x < -120.0f) {
-                ghosts[i].active = 0;
-            }
-        }
-
-        for (int i = 0; i < MAX_FIREBALLS; i++) {
-            if (!fireballs[i].active) continue;
-            fireballs[i].x += fireballs[i].vx * dt;
-            fireballs[i].y += fireballs[i].vy * dt;
-            if (fireballs[i].x < -50.0f || fireballs[i].x > SCREEN_WIDTH + 50.0f ||
-                fireballs[i].y < -50.0f || fireballs[i].y > SCREEN_HEIGHT + 50.0f) {
-                fireballs[i].active = 0;
-            }
-        }
-
-        if (hurtCooldown > 0.0f) hurtCooldown -= dt;
-        if (hurtCooldown <= 0.0f) {
             for (int i = 0; i < MAX_GHOSTS; i++) {
                 if (!ghosts[i].active) continue;
-                if (isExplorerHitGhost(explorerX, explorerY, (int)ghosts[i].x, (int)ghosts[i].y)) {
-                    hp -= 1;
-                    hurtCooldown = 0.8f;
-                    playExplorerDamage();
-                    break;
+                ghosts[i].x += ghosts[i].vx * dt;
+                ghosts[i].shootTimer -= dt;
+
+                if (ghosts[i].shootTimer <= 0.0f) {
+                    for (int f = 0; f < MAX_FIREBALLS; f++) {
+                        if (!fireballs[f].active) {
+                            float dx = explorerX - ghosts[i].x;
+                            float dy = (explorerY - 30.0f) - ghosts[i].y;
+                            float len = (float)sqrt(dx * dx + dy * dy);
+                            if (len < 1.0f) len = 1.0f;
+                            float speed = 240.0f;
+                            fireballs[f].active = 1;
+                            fireballs[f].x = ghosts[i].x - 20.0f;
+                            fireballs[f].y = ghosts[i].y - 20.0f;
+                            fireballs[f].vx = (dx / len) * speed;
+                            fireballs[f].vy = (dy / len) * speed;
+                            ghosts[i].shootTimer = 4.0f;
+                            break;
+                        }
+                    }
+                }
+
+                if (ghosts[i].x < -120.0f) {
+                    ghosts[i].active = 0;
                 }
             }
-        }
 
-        if (hurtCooldown <= 0.0f) {
             for (int i = 0; i < MAX_FIREBALLS; i++) {
                 if (!fireballs[i].active) continue;
-                if (isExplorerHitFireball(explorerX, explorerY, fireballs[i].x, fireballs[i].y)) {
+                fireballs[i].x += fireballs[i].vx * dt;
+                fireballs[i].y += fireballs[i].vy * dt;
+                if (fireballs[i].x < -50.0f || fireballs[i].x > SCREEN_WIDTH + 50.0f ||
+                    fireballs[i].y < -50.0f || fireballs[i].y > SCREEN_HEIGHT + 50.0f) {
                     fireballs[i].active = 0;
-                    hp -= 1;
-                    hurtCooldown = 0.8f;
-                    playExplorerDamage();
-                    break;
+                }
+            }
+
+            if (hurtCooldown > 0.0f) hurtCooldown -= dt;
+            if (hurtCooldown <= 0.0f) {
+                for (int i = 0; i < MAX_GHOSTS; i++) {
+                    if (!ghosts[i].active) continue;
+                    if (isExplorerHitGhost(explorerX, explorerY, (int)ghosts[i].x, (int)ghosts[i].y)) {
+                        hp -= 1;
+                        hurtCooldown = 0.8f;
+                        playExplorerDamage();
+                        break;
+                    }
+                }
+            }
+
+            if (hurtCooldown <= 0.0f) {
+                for (int i = 0; i < MAX_FIREBALLS; i++) {
+                    if (!fireballs[i].active) continue;
+                    if (isExplorerHitFireball(explorerX, explorerY, fireballs[i].x, fireballs[i].y)) {
+                        fireballs[i].active = 0;
+                        hp -= 1;
+                        hurtCooldown = 0.8f;
+                        playExplorerDamage();
+                        break;
+                    }
                 }
             }
         }
@@ -452,6 +458,9 @@ void playGame() {
         if (bossState == 0 && score >= nextBossScore) {
             bossState = 1;
             bossWarningTimer = 3.0f;
+            explorerVx = 0.0f;
+            explorerVy = 0.0f;
+            stopRunLoop();
         }
 
         if (bossState == 1) {
@@ -461,7 +470,7 @@ void playGame() {
                 bossSummonTimer = 2.5f;
                 bossX = SCREEN_WIDTH - 220.0f;
                 bossY = GROUND_Y + 30.0f;
-                bossHp = 30;
+                bossHp = bossMaxHp;
             }
         } else if (bossState == 2) {
             bossSummonTimer -= dt;
@@ -484,7 +493,8 @@ void playGame() {
                 }
             } else if (bossAttackActiveTimer > 0.0f) {
                 bossAttackActiveTimer -= dt;
-                if (isExplorerHitBossAttack(explorerX, explorerY, bossX, bossY)) {
+                float progress = (0.4f - bossAttackActiveTimer) / 0.4f;
+                if (isExplorerHitBossAttack(explorerX, explorerY, bossX, bossY, progress)) {
                     hp = 0; // Instant defeat
                 }
             } else {
@@ -500,10 +510,19 @@ void playGame() {
                 bossState = 0;
                 score += 1000;
                 playDeath();
-                if (nextBossScore == 3000) {
+                bossLevel++;
+                if (bossLevel == 2) {
                     nextBossScore = 10000;
+                    bossMaxHp = 50;
+                } else if (bossLevel == 3) {
+                    nextBossScore = 15000;
+                    bossMaxHp = 60;
+                } else if (bossLevel == 4) {
+                    nextBossScore = 20000;
+                    bossMaxHp = 100;
                 } else {
-                    nextBossScore = nextBossScore + 10000;
+                    nextBossScore += 10000;
+                    bossMaxHp = 100;
                 }
             }
         }
@@ -548,13 +567,20 @@ void playGame() {
             drawPowerAttack(left, right, (int)energyWaves[i].y, wavePhase);
         }
 
+        // --- Darken screen during Boss warning and summoning ---
+        if (bossState == 1 || bossState == 2) {
+            char ditherPattern[] = { (char)0x55, (char)0xAA, (char)0x55, (char)0xAA, (char)0x55, (char)0xAA, (char)0x55, (char)0xAA };
+            setfillpattern(ditherPattern, BLACK);
+            bar(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        }
+
         // --- ReaperBoss Render Logic ---
         if (bossState == 1) { // Warning State
             if (((int)(timeSec * 4.0f)) % 2 == 0) {
                 setcolor(COLOR(255, 30, 30));
                 settextstyle(BOLD_FONT, HORIZ_DIR, 4);
-                char warnText[] = "CANH BAO: REAPER BOSS SAP XUAT HIEN!";
-                int wText = textwidth(warnText);
+                const char* warnText = gCurrentLanguage->boss_warning;
+                int wText = textwidth((char*)warnText);
                 int bx1 = (SCREEN_WIDTH - wText) / 2 - 20;
                 int by1 = SCREEN_HEIGHT / 2 - 60;
                 int bx2 = (SCREEN_WIDTH + wText) / 2 + 20;
@@ -565,7 +591,7 @@ void playGame() {
                 rectangle(bx1, by1, bx2, by2);
                 setcolor(COLOR(255, 50, 50));
                 setbkcolor(COLOR(20, 5, 5));
-                outtextxy((SCREEN_WIDTH - wText) / 2, SCREEN_HEIGHT / 2 - 45, warnText);
+                outtextxy((SCREEN_WIDTH - wText) / 2, SCREEN_HEIGHT / 2 - 45, (char*)warnText);
                 setbkcolor(BLACK); // Restore bkcolor
             }
         } else if (bossState == 2) { // Summoning State
@@ -595,8 +621,8 @@ void playGame() {
                     setcolor(COLOR(255, 80, 80));
                     settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
                     setbkcolor(COLOR(20, 5, 5));
-                    char chargeText[] = "NE DON!";
-                    outtextxy((int)(explorerX - 30), (int)(explorerY - 130), chargeText);
+                    const char* chargeText = gCurrentLanguage->boss_dodge;
+                    outtextxy((int)(explorerX - 30), (int)(explorerY - 130), (char*)chargeText);
                     setbkcolor(BLACK); // Restore bkcolor
                 }
             }

@@ -61,7 +61,7 @@ void drawGameOverButton(int x, int y, int width, int height, int isHover) {
     setbkcolor(isHover ? COLOR(20, 35, 60) : COLOR(45, 45, 45));
     setcolor(isHover ? COLOR(255, 230, 100) : COLOR(230, 230, 230));
 
-    const char* text = "Ve menu";
+    const char* text = gCurrentLanguage->game_over_to_menu;
     int textW = textwidth((char*)text);
     int textH = 16;
     int textX = x + (width - textW) / 2;
@@ -77,13 +77,13 @@ void showGameOverScreen(int score) {
     settextstyle(BOLD_FONT, HORIZ_DIR, 6);
     setcolor(COLOR(255, 80, 80));
     setbkcolor(BLACK);
-    char title[] = "GAME OVER";
-    outtextxy((SCREEN_WIDTH - textwidth(title)) / 2, 220, title);
+    const char* title = gCurrentLanguage->game_over_title;
+    outtextxy((SCREEN_WIDTH - textwidth((char*)title)) / 2, 220, (char*)title);
 
     settextstyle(DEFAULT_FONT, HORIZ_DIR, 3);
     setcolor(COLOR(255, 230, 120));
     char scoreText[64];
-    sprintf(scoreText, "Diem: %d", score);
+    sprintf(scoreText, "%s: %d", gCurrentLanguage->game_over_score, score);
     outtextxy((SCREEN_WIDTH - textwidth(scoreText)) / 2, 320, scoreText);
 
     int btnW = 220;
