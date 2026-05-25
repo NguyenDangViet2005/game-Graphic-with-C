@@ -420,9 +420,9 @@ void drawBossScytheSlash(int bossX, int bossY, float progress) {
     int cx = bossX - 40 - (int)(progress * (bossX + 100.0f));
     int cy = bossY - 40;
     
-    int size = 65 + (int)(progress * 25);
+    int size = 85 + (int)(progress * 35);
     int colors[] = { COLOR(80, 0, 40), COLOR(210, 15, 30), COLOR(255, 140, 140) };
-    int thicknesses[] = { 6, 4, 2 };
+    int thicknesses[] = { 8, 6, 3 };
     int radii[] = { size, size - 8, size - 16 };
     
     for (int i = 0; i < 3; i++) {

@@ -27,7 +27,7 @@ static const Language langVi = {
     "- Phim MUI TEN: Di chuyen",                  // instructions_move
     "- Phim SPACE  : Tan cong",                   // instructions_attack
     "- Phim SHIFT + MUI TEN: Di chuyen nhanh",    // instructions_dash
-    "- Phim CTRL + MUI TEN: Di chuyen cham",      // instructions_slow
+    "- Phim CTRL + MUI TEN: Di chuyen cham + Khien",      // instructions_slow
     "- Phim SHIFT + SPACE : Power Attack",        // instructions_power
 
     // Scoreboard Screen
@@ -43,6 +43,8 @@ static const Language langVi = {
     "HP:",                        // hud_hp
     "Diem",                       // hud_score
     "Nang Luong:",                // hud_energy
+    "[C] Doi vu khi",             // hud_weapon_switch
+    "- Phim C      : Doi vu khi (Cung / Kiem)", // instructions_weapon
 
     // Boss Info
     "REAPER BOSS",                             // boss_name
@@ -61,7 +63,12 @@ static const Language langVi = {
     // Game Over Screen
     "GAME OVER",                  // game_over_title
     "Diem",                       // game_over_score
-    "Ve menu"                     // game_over_to_menu
+    "Ve menu",                    // game_over_to_menu
+
+    // Spam Warning Screen
+    "CANH BAO: NHAN SPACE QUA NHANH", // spam_title
+    "Vui long nhan SPACE cham lai.",  // spam_message
+    "Choi Tiep"                      // spam_button
 };
 
 #endif

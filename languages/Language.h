@@ -36,11 +36,14 @@ struct Language {
     const char* pause_title;
     const char* pause_resume;
     const char* pause_exit_to_menu;
-
     // HUD and Stats
     const char* hud_hp;
     const char* hud_score;
     const char* hud_energy;
+    const char* hud_weapon_switch;
+
+    // Instructions Screen
+    const char* instructions_weapon;
 
     // Boss Info
     const char* boss_name;
@@ -60,6 +63,11 @@ struct Language {
     const char* game_over_title;
     const char* game_over_score;
     const char* game_over_to_menu;
+
+    // Spam Warning Screen
+    const char* spam_title;
+    const char* spam_message;
+    const char* spam_button;
 };
 
 #endif

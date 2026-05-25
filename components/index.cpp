@@ -19,5 +19,6 @@
 #include "MenuBackground.cpp"
 #include "SummonSigil.cpp"
 #include "ReaperBoss.cpp"
+#include "GiantSwordAttack.cpp"
 
 #endif

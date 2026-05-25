@@ -27,7 +27,7 @@ static const Language langEn = {
     "- ARROW keys: Move",                         // instructions_move
     "- SPACE key  : Attack",                      // instructions_attack
     "- SHIFT + ARROW: Dash/Move fast",            // instructions_dash
-    "- CTRL + ARROW: Move slow",                  // instructions_slow
+    "- CTRL + ARROW: Move slow + Shield",                  // instructions_slow
     "- SHIFT + SPACE : Power Attack",              // instructions_power
 
     // Scoreboard Screen
@@ -43,6 +43,8 @@ static const Language langEn = {
     "HP:",                        // hud_hp
     "Score",                      // hud_score
     "Energy:",                    // hud_energy
+    "[C] Switch Weapon",          // hud_weapon_switch
+    "- C key       : Switch Weapon (Bow / Sword)", // instructions_weapon
 
     // Boss Info
     "REAPER BOSS",                             // boss_name
@@ -61,7 +63,12 @@ static const Language langEn = {
     // Game Over Screen
     "GAME OVER",                  // game_over_title
     "Score",                      // game_over_score
-    "Main Menu"                   // game_over_to_menu
+    "Main Menu",                  // game_over_to_menu
+
+    // Spam Warning Screen
+    "SPACE SPAM DETECTED",        // spam_title
+    "Please slow down your SPACE presses.", // spam_message
+    "Resume"                      // spam_button
 };
 
 #endif

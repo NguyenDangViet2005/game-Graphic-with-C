@@ -44,6 +44,23 @@ void drawArrowAffine(float x, float y, float angle, float scale) {
     fillpoly(3, tailPts);
 }
 
+void drawSlowShield(float x, float y, float timeSec) {
+    int centerX = (int)x;
+    int centerY = (int)(y - 40.0f);
+    int pulse = (int)(sin(timeSec * 6.0f) * 3.0f);
+    int baseR = 62 + pulse;
+
+    setcolor(COLOR(120, 200, 255));
+    setlinestyle(SOLID_LINE, 0, 2);
+    circle(centerX, centerY, baseR);
+
+    setcolor(COLOR(60, 140, 220));
+    setlinestyle(DOTTED_LINE, 0, 1);
+    circle(centerX, centerY, baseR + 6);
+
+    setlinestyle(SOLID_LINE, 0, 1);
+}
+
 void drawGameOverButton(int x, int y, int width, int height, int isHover) {
     if (isHover) {
         setfillstyle(SOLID_FILL, COLOR(20, 35, 60));
@@ -62,6 +79,30 @@ void drawGameOverButton(int x, int y, int width, int height, int isHover) {
     setcolor(isHover ? COLOR(255, 230, 100) : COLOR(230, 230, 230));
 
     const char* text = gCurrentLanguage->game_over_to_menu;
+    int textW = textwidth((char*)text);
+    int textH = 16;
+    int textX = x + (width - textW) / 2;
+    int textY = y + (height - textH) / 2;
+    outtextxy(textX, textY, (char*)text);
+}
+
+static void drawTextButton(int x, int y, int width, int height, int isHover, const char* text) {
+    if (isHover) {
+        setfillstyle(SOLID_FILL, COLOR(20, 35, 60));
+        setcolor(COLOR(255, 230, 100));
+    } else {
+        setfillstyle(SOLID_FILL, COLOR(45, 45, 45));
+        setcolor(COLOR(220, 220, 220));
+    }
+
+    bar(x, y, x + width, y + height);
+    setlinestyle(SOLID_LINE, 0, 2);
+    rectangle(x, y, x + width, y + height);
+
+    settextstyle(BOLD_FONT, HORIZ_DIR, 2);
+    setbkcolor(isHover ? COLOR(20, 35, 60) : COLOR(45, 45, 45));
+    setcolor(isHover ? COLOR(255, 230, 100) : COLOR(230, 230, 230));
+
     int textW = textwidth((char*)text);
     int textH = 16;
     int textX = x + (width - textW) / 2;
@@ -112,6 +153,54 @@ void showGameOverScreen(int score) {
         if (isHover != btnHover) {
             btnHover = isHover;
             drawGameOverButton(btnX, btnY, btnW, btnH, btnHover);
+        }
+
+        delay(10);
+    }
+}
+
+void showSpamWarningScreen() {
+    setfillstyle(SOLID_FILL, BLACK);
+    bar(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    settextstyle(BOLD_FONT, HORIZ_DIR, 4);
+    setcolor(COLOR(255, 120, 80));
+    setbkcolor(BLACK);
+    const char* title = gCurrentLanguage->spam_title;
+    outtextxy((SCREEN_WIDTH - textwidth((char*)title)) / 2, 220, (char*)title);
+
+    settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
+    setcolor(COLOR(220, 220, 220));
+    const char* msg = gCurrentLanguage->spam_message;
+    outtextxy((SCREEN_WIDTH - textwidth((char*)msg)) / 2, 290, (char*)msg);
+
+    int btnW = 200;
+    int btnH = 48;
+    int btnX = (SCREEN_WIDTH - btnW) / 2;
+    int btnY = 380;
+    int btnHover = 0;
+    const char* btnText = gCurrentLanguage->spam_button;
+    drawTextButton(btnX, btnY, btnW, btnH, btnHover, btnText);
+
+    while (ismouseclick(WM_LBUTTONDOWN)) clearmouseclick(WM_LBUTTONDOWN);
+    while (1) {
+        if (ismouseclick(WM_LBUTTONDOWN)) {
+            int mx, my;
+            getmouseclick(WM_LBUTTONDOWN, mx, my);
+            playClick();
+            if (mx >= btnX && mx <= btnX + btnW &&
+                my >= btnY && my <= btnY + btnH) {
+                break;
+            }
+        }
+
+        int mx = mousex();
+        int my = mousey();
+        int isHover = (mx >= btnX && mx <= btnX + btnW &&
+                       my >= btnY && my <= btnY + btnH);
+        if (isHover != btnHover) {
+            btnHover = isHover;
+            drawTextButton(btnX, btnY, btnW, btnH, btnHover, btnText);
         }
 
         delay(10);

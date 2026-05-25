@@ -16,7 +16,6 @@ void showInstructions() {
 
     int titleWidth = textwidth((char*)title);
     outtextxy((SCREEN_WIDTH - titleWidth) / 2, 80, (char*)title);
-
     int boxW = 750;
     int boxH = 340;
     int boxX = 410;
@@ -36,17 +35,19 @@ void showInstructions() {
     setcolor(COLOR(240, 240, 250));
     setbkcolor(COLOR(15, 20, 35));
 
-    int y = boxY + 60;
+    int y = boxY + 30;
     int textX = boxX + 40;
 
     outtextxy(textX, y, (char*)gCurrentLanguage->instructions_move);
-    y += 50;
+    y += 45;
     outtextxy(textX, y, (char*)gCurrentLanguage->instructions_attack);
-    y += 50;
+    y += 45;
+    outtextxy(textX, y, (char*)gCurrentLanguage->instructions_weapon);
+    y += 45;
     outtextxy(textX, y, (char*)gCurrentLanguage->instructions_dash);
-    y += 50;
+    y += 45;
     outtextxy(textX, y, (char*)gCurrentLanguage->instructions_slow);
-    y += 50;
+    y += 45;
     outtextxy(textX, y, (char*)gCurrentLanguage->instructions_power);
 
     const char* backMsg = gCurrentLanguage->esc_to_back;

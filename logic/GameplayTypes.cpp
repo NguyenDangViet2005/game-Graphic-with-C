@@ -34,7 +34,6 @@ struct Fireball {
     float vy;
     int active;
 };
-
 struct EnergyWave {
     float x;
     float y;
@@ -42,6 +41,7 @@ struct EnergyWave {
     float life;
     int active;
     int hitBoss;
+    int type; // 0: Bow (laser), 1: Sword (giant falling sword)
 };
 
 struct BossAttack {
@@ -84,6 +84,8 @@ struct GameState {
     float shootCooldown;
     float hurtCooldown;
     int facingRight;
+    int slowShieldActive;
+    int slowShieldWasActive;
 
     // Ghost spawn variables
     float ghostBaseY;
@@ -116,9 +118,18 @@ struct GameState {
     float timeSec;
     float arrowPulse;
     float wavePhase;
+    float lastSpacePressTime;
+    int rapidSpaceCount;
+    int spaceSpamStop;
     
     // Page for double buffering
     int page;
+
+    // Weapon variables
+    int currentWeapon;      // 0: Bow, 1: Sword
+    int isSlashing;         // 1 if active slash, 0 otherwise
+    float swordSlashTime;   // remaining time for slash animation
+    float swordSlashDuration;
 };
 
 Vec2 applyAffine(const Vec2& p, float cosA, float sinA, float sx, float sy, float tx, float ty) {

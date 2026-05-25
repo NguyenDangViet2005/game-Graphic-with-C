@@ -1,5 +1,6 @@
 #include <graphics.h>
 #include <stdio.h>
+#include <windows.h>
 
 #include "languages/Language.h"
 
@@ -13,22 +14,20 @@ const Language* gCurrentLanguage = NULL;
 
 int main() {
     gCurrentLanguage = &langVi;
-    printf("Dang tai...\n");
-    
-    initwindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Monster Slayer - Dark Forest Theme");
- 
+    int screenW = GetSystemMetrics(SM_CXSCREEN);
+    int screenH = GetSystemMetrics(SM_CYSCREEN);
+    int winX = (screenW - SCREEN_WIDTH) / 2;
+    int winY = (screenH - SCREEN_HEIGHT) / 2;
+    if (winX < 0) winX = 0;
+    if (winY < 0) winY = 0;
+    initwindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Monster Slayer - Dark Forest Theme", winX, winY);
     if (graphresult() != grOk) {
         printf("Tai that bai!\n");
         return 1;   
     }
-    
     printf("Tai thanh cong!\n");
-    printf("Dang chay...\n");
-
     initAudio();
     gameLoop(); 
-    
-    printf("Da thoat, hen gap lai!\n");
     shutdownAudio();
     closegraph();
     return 0;

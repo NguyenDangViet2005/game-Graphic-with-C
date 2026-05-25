@@ -22,7 +22,7 @@ static void buildRotatedPoly(const int* pts, int count, float cx, float cy, floa
     }
 }
 
-void drawExplorer(int x, int y, float scale, float armAngle, float headAngle) {
+void drawExplorer(int x, int y, float scale, float armAngle, float headAngle, int weaponType = 0, float slashProgress = 0.0f) {
     // Bảng màu nhân vật
     int armorDark = COLOR(45, 50, 70);      // Giáp tối
     int armorMain = COLOR(80, 90, 110);     // Giáp sáng
@@ -47,20 +47,29 @@ void drawExplorer(int x, int y, float scale, float armAngle, float headAngle) {
     int quiver[] = {quiverX, quiverY-S(15), quiverX+S(12), quiverY-S(5), quiverX-S(5), quiverY+S(15), quiverX-S(12), quiverY+S(5)};
     fillpoly(4, quiver); drawpoly(4, quiver);
     
-    // 3 mũi tên trong ống
-    setcolor(goldLight);
-    setlinestyle(SOLID_LINE, 0, thickBold);
-    bresenhamLine(quiverX+S(2), quiverY-S(12), quiverX-S(8), quiverY-S(30));
-    bresenhamLine(quiverX+S(6), quiverY-S(9), quiverX-S(2), quiverY-S(32));
-    bresenhamLine(quiverX+S(10), quiverY-S(6), quiverX+S(4), quiverY-S(28));
-    
-    // lông tên đỏ
-    setcolor(gemColor);
-    bresenhamLine(quiverX-S(8), quiverY-S(30), quiverX-S(12), quiverY-S(27));
-    bresenhamLine(quiverX-S(2), quiverY-S(32), quiverX-S(6), quiverY-S(29));
-    bresenhamLine(quiverX+S(4), quiverY-S(28), quiverX, quiverY-S(25));
-    setlinestyle(SOLID_LINE, 0, thickNormal); 
-    setcolor(outlineColor);
+    if (weaponType == 0) {
+        // 3 mũi tên trong ống
+        setcolor(goldLight);
+        setlinestyle(SOLID_LINE, 0, thickBold);
+        bresenhamLine(quiverX+S(2), quiverY-S(12), quiverX-S(8), quiverY-S(30));
+        bresenhamLine(quiverX+S(6), quiverY-S(9), quiverX-S(2), quiverY-S(32));
+        bresenhamLine(quiverX+S(10), quiverY-S(6), quiverX+S(4), quiverY-S(28));
+        
+        // lông tên đỏ
+        setcolor(gemColor);
+        bresenhamLine(quiverX-S(8), quiverY-S(30), quiverX-S(12), quiverY-S(27));
+        bresenhamLine(quiverX-S(2), quiverY-S(32), quiverX-S(6), quiverY-S(29));
+        bresenhamLine(quiverX+S(4), quiverY-S(28), quiverX, quiverY-S(25));
+        setlinestyle(SOLID_LINE, 0, thickNormal); 
+        setcolor(outlineColor);
+    } else {
+        // Khi dùng kiếm, vẽ bao kiếm chéo đơn giản sau lưng
+        setcolor(armorDark);
+        setlinestyle(SOLID_LINE, 0, thickBold);
+        bresenhamLine(quiverX, quiverY, quiverX - S(10), quiverY - S(25));
+        setlinestyle(SOLID_LINE, 0, thickNormal);
+        setcolor(outlineColor);
+    }
 
     // chân trái - đùi
     setfillstyle(SOLID_FILL, armorDark);
@@ -149,6 +158,9 @@ void drawExplorer(int x, int y, float scale, float armAngle, float headAngle) {
     bresenhamLine(x+S(14), y-S(15), x+S(10), y-S(5));
     setcolor(outlineColor);
 
+    if (weaponType == 1 && slashProgress > 0.0f && slashProgress < 1.0f) {
+        armAngle = -1.2f + slashProgress * 2.7f;
+    }
     // tay phải cầm cung (xoay quanh khop)
     float armCos = (float)cos(armAngle);
     float armSin = (float)sin(armAngle);
@@ -168,59 +180,121 @@ void drawExplorer(int x, int y, float scale, float armAngle, float headAngle) {
     midpointFilledCircle(handX, handY, S(7));
     midpointCircle(handX, handY, S(7));
 
-    // cung tên
-    int bowX = x + S(40);
-    int bowY = y - S(30);
-    int bowXr = 0;
-    int bowYr = 0;
-    rotatePoint((float)bowX, (float)bowY, armPivotX, armPivotY, armCos, armSin, bowXr, bowYr);
-    float bowAngleOffset = armAngle * 180.0f / 3.1415926f;
-    setlinestyle(SOLID_LINE, 0, thickBold);
-    
-    setcolor(goldMain);
-    arc(bowXr - S(10), bowYr, (int)(280 + bowAngleOffset), (int)(80 + bowAngleOffset), S(25));
-    setcolor(armorDark);
-    arc(bowXr - S(12), bowYr, (int)(285 + bowAngleOffset), (int)(75 + bowAngleOffset), S(23));
-    
-    // tay cầm cung
-    setfillstyle(SOLID_FILL, armorDark);
-    bar(bowXr-S(2), bowYr-S(6), bowXr+S(5), bowYr+S(6));
-    setcolor(outlineColor);
-    rectangle(bowXr-S(2), bowYr-S(6), bowXr+S(5), bowYr+S(6));
-    setcolor(gemColor);
-    midpointFilledCircle(bowXr+S(1), bowYr, S(2));
+    if (weaponType == 0) {
+        // cung tên
+        int bowX = x + S(40);
+        int bowY = y - S(30);
+        int bowXr = 0;
+        int bowYr = 0;
+        rotatePoint((float)bowX, (float)bowY, armPivotX, armPivotY, armCos, armSin, bowXr, bowYr);
+        float bowAngleOffset = armAngle * 180.0f / 3.1415926f;
+        setlinestyle(SOLID_LINE, 0, thickBold);
+        
+        setcolor(goldMain);
+        arc(bowXr - S(10), bowYr, (int)(280 + bowAngleOffset), (int)(80 + bowAngleOffset), S(25));
+        setcolor(armorDark);
+        arc(bowXr - S(12), bowYr, (int)(285 + bowAngleOffset), (int)(75 + bowAngleOffset), S(23));
+        
+        // tay cầm cung
+        setfillstyle(SOLID_FILL, armorDark);
+        bar(bowXr-S(2), bowYr-S(6), bowXr+S(5), bowYr+S(6));
+        setcolor(outlineColor);
+        rectangle(bowXr-S(2), bowYr-S(6), bowXr+S(5), bowYr+S(6));
+        setcolor(gemColor);
+        midpointFilledCircle(bowXr+S(1), bowYr, S(2));
 
-    // dây cung
-    setcolor(glowColor);
-    setlinestyle(SOLID_LINE, 0, thickNormal); 
-    int lineA0x = 0, lineA0y = 0, lineA1x = 0, lineA1y = 0;
-    int lineB0x = 0, lineB0y = 0, lineB1x = 0, lineB1y = 0;
-    rotatePoint((float)(bowX - S(4)), (float)(bowY - S(24)), armPivotX, armPivotY, armCos, armSin, lineA0x, lineA0y);
-    rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineA1x, lineA1y);
-    rotatePoint((float)(bowX - S(4)), (float)(bowY + S(24)), armPivotX, armPivotY, armCos, armSin, lineB0x, lineB0y);
-    rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineB1x, lineB1y);
-    bresenhamLine(lineA0x, lineA0y, lineA1x, lineA1y);
-    bresenhamLine(lineB0x, lineB0y, lineB1x, lineB1y);
-    
-    // mũi tên năng lượng
-    setcolor(goldLight);
-    setlinestyle(SOLID_LINE, 0, thickBold);
-    int arrowLx = 0, arrowLy = 0, arrowRx = 0, arrowRy = 0;
-    rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowLx, arrowLy);
-    rotatePoint((float)(bowX + S(16)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowRx, arrowRy);
-    bresenhamLine(arrowLx, arrowLy, arrowRx, arrowRy);
-    
-    // đầu mũi tên
-    setfillstyle(SOLID_FILL, eyeColor);
-    int arrowHead[] = {bowX+S(16), bowY, bowX+S(10), bowY-S(4), bowX+S(13), bowY, bowX+S(10), bowY+S(4)};
-    int arrowHeadRot[8];
-    buildRotatedPoly(arrowHead, 4, armPivotX, armPivotY, armCos, armSin, arrowHeadRot);
-    fillpoly(4, arrowHeadRot);
-    setcolor(glowColor);
-    drawpoly(4, arrowHeadRot);
+        // dây cung
+        setcolor(glowColor);
+        setlinestyle(SOLID_LINE, 0, thickNormal); 
+        int lineA0x = 0, lineA0y = 0, lineA1x = 0, lineA1y = 0;
+        int lineB0x = 0, lineB0y = 0, lineB1x = 0, lineB1y = 0;
+        rotatePoint((float)(bowX - S(4)), (float)(bowY - S(24)), armPivotX, armPivotY, armCos, armSin, lineA0x, lineA0y);
+        rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineA1x, lineA1y);
+        rotatePoint((float)(bowX - S(4)), (float)(bowY + S(24)), armPivotX, armPivotY, armCos, armSin, lineB0x, lineB0y);
+        rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineB1x, lineB1y);
+        bresenhamLine(lineA0x, lineA0y, lineA1x, lineA1y);
+        bresenhamLine(lineB0x, lineB0y, lineB1x, lineB1y);
+        
+        // mũi tên năng lượng
+        setcolor(goldLight);
+        setlinestyle(SOLID_LINE, 0, thickBold);
+        int arrowLx = 0, arrowLy = 0, arrowRx = 0, arrowRy = 0;
+        rotatePoint((float)(bowX - S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowLx, arrowLy);
+        rotatePoint((float)(bowX + S(16)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowRx, arrowRy);
+        bresenhamLine(arrowLx, arrowLy, arrowRx, arrowRy);
+        
+        // đầu mũi tên
+        setfillstyle(SOLID_FILL, eyeColor);
+        int arrowHead[] = {bowX+S(16), bowY, bowX+S(10), bowY-S(4), bowX+S(13), bowY, bowX+S(10), bowY+S(4)};
+        int arrowHeadRot[8];
+        buildRotatedPoly(arrowHead, 4, armPivotX, armPivotY, armCos, armSin, arrowHeadRot);
+        fillpoly(4, arrowHeadRot);
+        setcolor(glowColor);
+        drawpoly(4, arrowHeadRot);
 
-    setlinestyle(SOLID_LINE, 0, thickNormal); 
-    setcolor(outlineColor);
+        setlinestyle(SOLID_LINE, 0, thickNormal); 
+        setcolor(outlineColor);
+    } else {
+        // Vẽ kiếm năng lượng mới
+        // Hilt (Chuôi kiếm)
+        int hilt[] = {
+            x + S(26), y - S(32),
+            x + S(40), y - S(32),
+            x + S(40), y - S(28),
+            x + S(26), y - S(28)
+        };
+        int hiltRot[8];
+        buildRotatedPoly(hilt, 4, armPivotX, armPivotY, armCos, armSin, hiltRot);
+        setfillstyle(SOLID_FILL, armorDark);
+        fillpoly(4, hiltRot);
+        setcolor(outlineColor);
+        drawpoly(4, hiltRot);
+
+        // Guard (Chắn kiếm)
+        int guard[] = {
+            x + S(39), y - S(43),
+            x + S(42), y - S(43),
+            x + S(42), y - S(17),
+            x + S(39), y - S(17)
+        };
+        int guardRot[8];
+        buildRotatedPoly(guard, 4, armPivotX, armPivotY, armCos, armSin, guardRot);
+        setfillstyle(SOLID_FILL, goldMain);
+        fillpoly(4, guardRot);
+        setcolor(outlineColor);
+        drawpoly(4, guardRot);
+
+        // Blade Outer (Lưỡi kiếm phát sáng)
+        int blade[] = {
+            x + S(41), y - S(34),
+            x + S(92), y - S(34),
+            x + S(99), y - S(30),
+            x + S(92), y - S(26),
+            x + S(41), y - S(26)
+        };
+        int bladeRot[10];
+        buildRotatedPoly(blade, 5, armPivotX, armPivotY, armCos, armSin, bladeRot);
+        setfillstyle(SOLID_FILL, COLOR(0, 220, 255)); // Cyan
+        fillpoly(5, bladeRot);
+        setcolor(COLOR(100, 240, 255));
+        drawpoly(5, bladeRot);
+
+        // Blade Inner Core (Lõi trắng)
+        int core[] = {
+            x + S(42), y - S(31),
+            x + S(89), y - S(31),
+            x + S(94), y - S(30),
+            x + S(89), y - S(29),
+            x + S(42), y - S(29)
+        };
+        int coreRot[10];
+        buildRotatedPoly(core, 5, armPivotX, armPivotY, armCos, armSin, coreRot);
+        setfillstyle(SOLID_FILL, WHITE);
+        fillpoly(5, coreRot);
+
+        setlinestyle(SOLID_LINE, 0, thickNormal); 
+        setcolor(outlineColor);
+    }
 
     // đầu và mũ
     int headX = x;

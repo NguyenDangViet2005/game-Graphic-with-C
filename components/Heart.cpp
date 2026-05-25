@@ -169,9 +169,8 @@ void drawBossHealthBar(int hp, int maxHp) {
     int textW = textwidth(bossName);
     outtextxy(x + (barW - textW) / 2, y - 28, bossName);
 }
-
-// Vẽ text HP, điểm, năng lượng
-void drawGameStats(int hp, int score, int mana, int manaMax, int skillReady) {
+// Vẽ text HP, điểm, năng lượng và HUD chọn vũ khí
+void drawGameStats(int hp, int score, int mana, int manaMax, int skillReady, int currentWeapon = 0) {
     // Text HP
     setcolor(WHITE);
     settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
@@ -192,6 +191,58 @@ void drawGameStats(int hp, int score, int mana, int manaMax, int skillReady) {
     settextstyle(DEFAULT_FONT, HORIZ_DIR, 1);
     outtextxy(20, 78, (char*)gCurrentLanguage->hud_energy);
     drawEnergyBar(110, 80, mana, manaMax);
+
+    // Vẽ HUD chọn vũ khí mới
+    // Ô Cung tên (Slot 0)
+    int s0_x1 = 20, s0_y1 = 105, s0_x2 = 56, s0_y2 = 141;
+    setfillstyle(SOLID_FILL, COLOR(15, 20, 35));
+    bar(s0_x1, s0_y1, s0_x2, s0_y2);
+    if (currentWeapon == 0) {
+        setcolor(COLOR(240, 180, 40));
+        setlinestyle(SOLID_LINE, 0, 2);
+    } else {
+        setcolor(COLOR(70, 70, 70));
+        setlinestyle(SOLID_LINE, 0, 1);
+    }
+    rectangle(s0_x1, s0_y1, s0_x2, s0_y2);
+
+    // Vẽ mini bow icon
+    setlinestyle(SOLID_LINE, 0, 1);
+    setcolor(COLOR(180, 130, 30));
+    arc(s0_x1 + 13, s0_y1 + 18, 300, 60, 10);
+    setcolor(COLOR(220, 220, 220));
+    line(s0_x1 + 18, s0_y1 + 9, s0_x1 + 18, s0_y1 + 27);
+    setcolor(COLOR(255, 230, 120));
+    line(s0_x1 + 13, s0_y1 + 18, s0_x1 + 24, s0_y1 + 18);
+
+    // Ô Kiếm (Slot 1)
+    int s1_x1 = 66, s1_y1 = 105, s1_x2 = 102, s1_y2 = 141;
+    setfillstyle(SOLID_FILL, COLOR(15, 20, 35));
+    bar(s1_x1, s1_y1, s1_x2, s1_y2);
+    if (currentWeapon == 1) {
+        setcolor(COLOR(240, 180, 40));
+        setlinestyle(SOLID_LINE, 0, 2);
+    } else {
+        setcolor(COLOR(70, 70, 70));
+        setlinestyle(SOLID_LINE, 0, 1);
+    }
+    rectangle(s1_x1, s1_y1, s1_x2, s1_y2);
+
+    // Vẽ mini sword icon
+    setlinestyle(SOLID_LINE, 0, 1);
+    setcolor(COLOR(0, 220, 255)); // Thân kiếm cyan
+    line(s1_x1 + 12, s1_y1 + 24, s1_x1 + 24, s1_y1 + 12);
+    setcolor(COLOR(240, 180, 40)); // Chắn kiếm gold
+    line(s1_x1 + 10, s1_y1 + 22, s1_x1 + 14, s1_y1 + 26);
+    setcolor(COLOR(100, 100, 100)); // Chuôi kiếm xám
+    line(s1_x1 + 12, s1_y1 + 24, s1_x1 + 8, s1_y1 + 28);
+
+    // Text hướng dẫn phím C đổi vũ khí
+    setlinestyle(SOLID_LINE, 0, 1);
+    setcolor(COLOR(200, 200, 200));
+    settextstyle(DEFAULT_FONT, HORIZ_DIR, 1);
+    setbkcolor(BLACK);
+    outtextxy(115, 118, (char*)gCurrentLanguage->hud_weapon_switch);
 
     (void)skillReady;
 }

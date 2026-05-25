@@ -22,7 +22,7 @@ static void buildRotatedPolyMirrored(const int* pts, int count, float cx, float 
     }
 }
 
-void drawExplorerMirrored(int x, int y, float scale, float armAngle, float headAngle) {
+void drawExplorerMirrored(int x, int y, float scale, float armAngle, float headAngle, int weaponType = 0, float slashProgress = 0.0f) {
     // Bang mau nhan vat
     int armorDark = COLOR(45, 50, 70);      // Giap toi
     int armorMain = COLOR(80, 90, 110);     // Giap sang
@@ -47,20 +47,29 @@ void drawExplorerMirrored(int x, int y, float scale, float armAngle, float headA
     int quiver[] = {quiverX, quiverY-S(15), quiverX-S(12), quiverY-S(5), quiverX+S(5), quiverY+S(15), quiverX+S(12), quiverY+S(5)};
     fillpoly(4, quiver); drawpoly(4, quiver);
     
-    // 3 mui ten trong ong
-    setcolor(goldLight);
-    setlinestyle(SOLID_LINE, 0, thickBold);
-    bresenhamLine(quiverX-S(2), quiverY-S(12), quiverX+S(8), quiverY-S(30));
-    bresenhamLine(quiverX-S(6), quiverY-S(9), quiverX+S(2), quiverY-S(32));
-    bresenhamLine(quiverX-S(10), quiverY-S(6), quiverX-S(4), quiverY-S(28));
-    
-    // long ten do
-    setcolor(gemColor);
-    bresenhamLine(quiverX+S(8), quiverY-S(30), quiverX+S(12), quiverY-S(27));
-    bresenhamLine(quiverX+S(2), quiverY-S(32), quiverX+S(6), quiverY-S(29));
-    bresenhamLine(quiverX-S(4), quiverY-S(28), quiverX, quiverY-S(25));
-    setlinestyle(SOLID_LINE, 0, thickNormal); 
-    setcolor(outlineColor);
+    if (weaponType == 0) {
+        // 3 mui ten trong ong
+        setcolor(goldLight);
+        setlinestyle(SOLID_LINE, 0, thickBold);
+        bresenhamLine(quiverX-S(2), quiverY-S(12), quiverX+S(8), quiverY-S(30));
+        bresenhamLine(quiverX-S(6), quiverY-S(9), quiverX+S(2), quiverY-S(32));
+        bresenhamLine(quiverX-S(10), quiverY-S(6), quiverX-S(4), quiverY-S(28));
+        
+        // long ten do
+        setcolor(gemColor);
+        bresenhamLine(quiverX+S(8), quiverY-S(30), quiverX+S(12), quiverY-S(27));
+        bresenhamLine(quiverX+S(2), quiverY-S(32), quiverX+S(6), quiverY-S(29));
+        bresenhamLine(quiverX-S(4), quiverY-S(28), quiverX, quiverY-S(25));
+        setlinestyle(SOLID_LINE, 0, thickNormal); 
+        setcolor(outlineColor);
+    } else {
+        // Khi dung kiem, ve bao kiem cheo don gian sau lung
+        setcolor(armorDark);
+        setlinestyle(SOLID_LINE, 0, thickBold);
+        bresenhamLine(quiverX, quiverY, quiverX + S(10), quiverY - S(25));
+        setlinestyle(SOLID_LINE, 0, thickNormal);
+        setcolor(outlineColor);
+    }
 
     // chan trai - dui
     setfillstyle(SOLID_FILL, armorDark);
@@ -149,6 +158,9 @@ void drawExplorerMirrored(int x, int y, float scale, float armAngle, float headA
     bresenhamLine(x-S(14), y-S(15), x-S(10), y-S(5));
     setcolor(outlineColor);
 
+    if (weaponType == 1 && slashProgress > 0.0f && slashProgress < 1.0f) {
+        armAngle = -1.2f + slashProgress * 2.7f;
+    }
     // tay phai cam cung (xoay quanh khop)
     float armCos = (float)cos(armAngle);
     float armSin = (float)sin(armAngle);
@@ -168,59 +180,121 @@ void drawExplorerMirrored(int x, int y, float scale, float armAngle, float headA
     midpointFilledCircle(handX, handY, S(7));
     midpointCircle(handX, handY, S(7));
 
-    // cung ten
-    int bowX = x - S(40);
-    int bowY = y - S(30);
-    int bowXr = 0;
-    int bowYr = 0;
-    rotatePointMirrored((float)bowX, (float)bowY, armPivotX, armPivotY, armCos, armSin, bowXr, bowYr);
-    float bowAngleOffset = armAngle * 180.0f / 3.1415926f;
-    setlinestyle(SOLID_LINE, 0, thickBold);
-    
-    setcolor(goldMain);
-    arc(bowXr + S(10), bowYr, (int)(100 + bowAngleOffset), (int)(260 + bowAngleOffset), S(25));
-    setcolor(armorDark);
-    arc(bowXr + S(12), bowYr, (int)(105 + bowAngleOffset), (int)(255 + bowAngleOffset), S(23));
-    
-    // tay cam cung
-    setfillstyle(SOLID_FILL, armorDark);
-    bar(bowXr-S(5), bowYr-S(6), bowXr+S(2), bowYr+S(6));
-    setcolor(outlineColor);
-    rectangle(bowXr-S(5), bowYr-S(6), bowXr+S(2), bowYr+S(6));
-    setcolor(gemColor);
-    midpointFilledCircle(bowXr-S(1), bowYr, S(2));
+    if (weaponType == 0) {
+        // cung ten
+        int bowX = x - S(40);
+        int bowY = y - S(30);
+        int bowXr = 0;
+        int bowYr = 0;
+        rotatePointMirrored((float)bowX, (float)bowY, armPivotX, armPivotY, armCos, armSin, bowXr, bowYr);
+        float bowAngleOffset = armAngle * 180.0f / 3.1415926f;
+        setlinestyle(SOLID_LINE, 0, thickBold);
+        
+        setcolor(goldMain);
+        arc(bowXr + S(10), bowYr, (int)(100 + bowAngleOffset), (int)(260 + bowAngleOffset), S(25));
+        setcolor(armorDark);
+        arc(bowXr + S(12), bowYr, (int)(105 + bowAngleOffset), (int)(255 + bowAngleOffset), S(23));
+        
+        // tay cam cung
+        setfillstyle(SOLID_FILL, armorDark);
+        bar(bowXr-S(5), bowYr-S(6), bowXr+S(2), bowYr+S(6));
+        setcolor(outlineColor);
+        rectangle(bowXr-S(5), bowYr-S(6), bowXr+S(2), bowYr+S(6));
+        setcolor(gemColor);
+        midpointFilledCircle(bowXr-S(1), bowYr, S(2));
 
-    // day cung
-    setcolor(glowColor);
-    setlinestyle(SOLID_LINE, 0, thickNormal); 
-    int lineA0x = 0, lineA0y = 0, lineA1x = 0, lineA1y = 0;
-    int lineB0x = 0, lineB0y = 0, lineB1x = 0, lineB1y = 0;
-    rotatePointMirrored((float)(bowX + S(4)), (float)(bowY - S(24)), armPivotX, armPivotY, armCos, armSin, lineA0x, lineA0y);
-    rotatePointMirrored((float)(bowX + S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineA1x, lineA1y);
-    rotatePointMirrored((float)(bowX + S(4)), (float)(bowY + S(24)), armPivotX, armPivotY, armCos, armSin, lineB0x, lineB0y);
-    rotatePointMirrored((float)(bowX + S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineB1x, lineB1y);
-    bresenhamLine(lineA0x, lineA0y, lineA1x, lineA1y);
-    bresenhamLine(lineB0x, lineB0y, lineB1x, lineB1y);
-    
-    // mui ten nang luong
-    setcolor(goldLight);
-    setlinestyle(SOLID_LINE, 0, thickBold);
-    int arrowLx = 0, arrowLy = 0, arrowRx = 0, arrowRy = 0;
-    rotatePointMirrored((float)(bowX + S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowLx, arrowLy);
-    rotatePointMirrored((float)(bowX - S(16)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowRx, arrowRy);
-    bresenhamLine(arrowLx, arrowLy, arrowRx, arrowRy);
-    
-    // dau mui ten
-    setfillstyle(SOLID_FILL, eyeColor);
-    int arrowHead[] = {bowX-S(16), bowY, bowX-S(10), bowY-S(4), bowX-S(13), bowY, bowX-S(10), bowY+S(4)};
-    int arrowHeadRot[8];
-    buildRotatedPolyMirrored(arrowHead, 4, armPivotX, armPivotY, armCos, armSin, arrowHeadRot);
-    fillpoly(4, arrowHeadRot);
-    setcolor(glowColor);
-    drawpoly(4, arrowHeadRot);
+        // day cung
+        setcolor(glowColor);
+        setlinestyle(SOLID_LINE, 0, thickNormal); 
+        int lineA0x = 0, lineA0y = 0, lineA1x = 0, lineA1y = 0;
+        int lineB0x = 0, lineB0y = 0, lineB1x = 0, lineB1y = 0;
+        rotatePointMirrored((float)(bowX + S(4)), (float)(bowY - S(24)), armPivotX, armPivotY, armCos, armSin, lineA0x, lineA0y);
+        rotatePointMirrored((float)(bowX + S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineA1x, lineA1y);
+        rotatePointMirrored((float)(bowX + S(4)), (float)(bowY + S(24)), armPivotX, armPivotY, armCos, armSin, lineB0x, lineB0y);
+        rotatePointMirrored((float)(bowX + S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, lineB1x, lineB1y);
+        bresenhamLine(lineA0x, lineA0y, lineA1x, lineA1y);
+        bresenhamLine(lineB0x, lineB0y, lineB1x, lineB1y);
+        
+        // mui ten nang luong
+        setcolor(goldLight);
+        setlinestyle(SOLID_LINE, 0, thickBold);
+        int arrowLx = 0, arrowLy = 0, arrowRx = 0, arrowRy = 0;
+        rotatePointMirrored((float)(bowX + S(14)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowLx, arrowLy);
+        rotatePointMirrored((float)(bowX - S(16)), (float)(bowY), armPivotX, armPivotY, armCos, armSin, arrowRx, arrowRy);
+        bresenhamLine(arrowLx, arrowLy, arrowRx, arrowRy);
+        
+        // dau mui ten
+        setfillstyle(SOLID_FILL, eyeColor);
+        int arrowHead[] = {bowX-S(16), bowY, bowX-S(10), bowY-S(4), bowX-S(13), bowY, bowX-S(10), bowY+S(4)};
+        int arrowHeadRot[8];
+        buildRotatedPolyMirrored(arrowHead, 4, armPivotX, armPivotY, armCos, armSin, arrowHeadRot);
+        fillpoly(4, arrowHeadRot);
+        setcolor(glowColor);
+        drawpoly(4, arrowHeadRot);
 
-    setlinestyle(SOLID_LINE, 0, thickNormal); 
-    setcolor(outlineColor);
+        setlinestyle(SOLID_LINE, 0, thickNormal); 
+        setcolor(outlineColor);
+    } else {
+        // Vẽ kiếm năng lượng mới
+        // Hilt (Chuôi kiếm)
+        int hilt[] = {
+            x - S(26), y - S(32),
+            x - S(40), y - S(32),
+            x - S(40), y - S(28),
+            x - S(26), y - S(28)
+        };
+        int hiltRot[8];
+        buildRotatedPolyMirrored(hilt, 4, armPivotX, armPivotY, armCos, armSin, hiltRot);
+        setfillstyle(SOLID_FILL, armorDark);
+        fillpoly(4, hiltRot);
+        setcolor(outlineColor);
+        drawpoly(4, hiltRot);
+
+        // Guard (Chắn kiếm)
+        int guard[] = {
+            x - S(39), y - S(43),
+            x - S(42), y - S(43),
+            x - S(42), y - S(17),
+            x - S(39), y - S(17)
+        };
+        int guardRot[8];
+        buildRotatedPolyMirrored(guard, 4, armPivotX, armPivotY, armCos, armSin, guardRot);
+        setfillstyle(SOLID_FILL, goldMain);
+        fillpoly(4, guardRot);
+        setcolor(outlineColor);
+        drawpoly(4, guardRot);
+
+        // Blade Outer (Lưỡi kiếm phát sáng)
+        int blade[] = {
+            x - S(41), y - S(34),
+            x - S(92), y - S(34),
+            x - S(99), y - S(30),
+            x - S(92), y - S(26),
+            x - S(41), y - S(26)
+        };
+        int bladeRot[10];
+        buildRotatedPolyMirrored(blade, 5, armPivotX, armPivotY, armCos, armSin, bladeRot);
+        setfillstyle(SOLID_FILL, COLOR(0, 220, 255)); // Cyan
+        fillpoly(5, bladeRot);
+        setcolor(COLOR(100, 240, 255));
+        drawpoly(5, bladeRot);
+
+        // Blade Inner Core (Lõi trắng)
+        int core[] = {
+            x - S(42), y - S(31),
+            x - S(89), y - S(31),
+            x - S(94), y - S(30),
+            x - S(89), y - S(29),
+            x - S(42), y - S(29)
+        };
+        int coreRot[10];
+        buildRotatedPolyMirrored(core, 5, armPivotX, armPivotY, armCos, armSin, coreRot);
+        setfillstyle(SOLID_FILL, WHITE);
+        fillpoly(5, coreRot);
+
+        setlinestyle(SOLID_LINE, 0, thickNormal); 
+        setcolor(outlineColor);
+    }
 
     // dau va mu
     int headX = x;

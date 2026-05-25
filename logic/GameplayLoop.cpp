@@ -54,6 +54,8 @@ static void initGameState(GameState& state) {
     state.shootCooldown = 0.0f;
     state.hurtCooldown = 0.0f;
     state.facingRight = 1;
+    state.slowShieldActive = 0;
+    state.slowShieldWasActive = 0;
 
     state.ghostBaseY = (float)(GROUND_Y + 30);
     state.ghostSpawnTimer = 1.6f;
@@ -90,7 +92,16 @@ static void initGameState(GameState& state) {
     state.timeSec = 0.0f;
     state.arrowPulse = 0.0f;
     state.wavePhase = 0.0f;
+    state.lastSpacePressTime = 0.0f;
+    state.rapidSpaceCount = 0;
+    state.spaceSpamStop = 0;
     state.page = 0;
+
+    // Weapon defaults
+    state.currentWeapon = 0; // Bow by default
+    state.isSlashing = 0;
+    state.swordSlashTime = 0.0f;
+    state.swordSlashDuration = 0.2f;
 }
 
 static void initGameBackground() {
@@ -161,6 +172,13 @@ static void handleGameEvents(GameState& state) {
             state.gameRunning = 0;
         }
     }
+
+    if (GetAsyncKeyState(0x43) & 0x0001) { // 'C' key
+        if (!state.isSlashing) {
+            state.currentWeapon = 1 - state.currentWeapon;
+            playClick();
+        }
+    }
 }
 
 static void updateExplorer(GameState& state) {
@@ -186,6 +204,22 @@ static void updateExplorer(GameState& state) {
     } else if (shiftDown) {
         speedMultiplier = 2.0f;
     }
+    int wantsShield = (ctrlDown && moveDir != 0) ? 1 : 0;
+    if (wantsShield && !state.slowShieldWasActive) {
+        if (state.mana > 0) {
+            state.mana -= 1;
+            if (state.mana < 0) state.mana = 0;
+            state.skillReady = (state.mana >= state.manaMax) ? 1 : 0;
+            state.slowShieldActive = 1;
+        } else {
+            state.slowShieldActive = 0;
+        }
+    } else if (wantsShield) {
+        state.slowShieldActive = 1;
+    } else {
+        state.slowShieldActive = 0;
+    }
+    state.slowShieldWasActive = state.slowShieldActive;
     float effectiveSpeed = state.explorerSpeed * speedMultiplier;
     float effectiveAccel = state.explorerAccel * speedMultiplier;
     float effectiveFriction = state.explorerFriction * speedMultiplier;
@@ -243,20 +277,51 @@ static void updateExplorer(GameState& state) {
 }
 
 static void updateProjectiles(GameState& state) {
+    if (state.isSlashing) {
+        state.swordSlashTime -= state.dt;
+        if (state.swordSlashTime <= 0.0f) {
+            state.isSlashing = 0;
+            state.swordSlashTime = 0.0f;
+        }
+    }
+
     int shiftDown = (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
     int spacePressed = (GetAsyncKeyState(VK_SPACE) & 0x0001) != 0;
     int skillShot = 0;
+
+    if (spacePressed) {
+        float delta = state.timeSec - state.lastSpacePressTime;
+        if (delta > 0.0f && delta < 0.25f) {
+            state.rapidSpaceCount += 1;
+        } else {
+            state.rapidSpaceCount = 0;
+        }
+        state.lastSpacePressTime = state.timeSec;
+        if (state.rapidSpaceCount >= 6) {
+            state.spaceSpamStop = 1;
+            return;
+        }
+    }
 
     if (state.skillReady && shiftDown && spacePressed) {
         int dir = state.facingRight ? 1 : -1;
         for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
             if (!state.energyWaves[i].active) {
                 state.energyWaves[i].active = 1;
-                state.energyWaves[i].x = state.explorerX + (dir > 0 ? 40.0f : -40.0f);
-                state.energyWaves[i].y = state.explorerY - 30.0f;
                 state.energyWaves[i].dir = dir;
-                state.energyWaves[i].life = 1.0f;
                 state.energyWaves[i].hitBoss = 0;
+                state.energyWaves[i].type = state.currentWeapon;
+                
+                if (state.currentWeapon == 0) {
+                    state.energyWaves[i].x = state.explorerX + (dir > 0 ? 40.0f : -40.0f);
+                    state.energyWaves[i].y = state.explorerY - 30.0f;
+                    state.energyWaves[i].life = 1.0f;
+                } else {
+                    state.energyWaves[i].x = state.explorerX + (dir > 0 ? 150.0f : -150.0f);
+                    state.energyWaves[i].y = state.explorerY;
+                    state.energyWaves[i].life = 0.6f;
+                }
+                
                 state.mana = 0;
                 state.skillReady = 0;
                 playPowerFirer();
@@ -268,18 +333,59 @@ static void updateProjectiles(GameState& state) {
 
     if (state.shootCooldown > 0.0f) state.shootCooldown -= state.dt;
     if (!skillShot && (GetAsyncKeyState(VK_SPACE) & 0x8000) && state.shootCooldown <= 0.0f) {
-        for (int i = 0; i < MAX_ARROWS; i++) {
-            if (!state.arrows[i].active) {
-                state.arrows[i].active = 1;
-                state.arrows[i].x = state.explorerX + (state.facingRight ? 52.0f : -52.0f);
-                state.arrows[i].y = state.explorerY - 30.0f;
-                state.arrows[i].vx = state.facingRight ? 620.0f : -620.0f;
-                state.arrows[i].vy = -30.0f;
-                state.arrows[i].angle = state.facingRight ? 0.0f : 3.1415926f;
-                state.arrows[i].scale = 1.0f;
-                state.shootCooldown = 0.35f;
-                playFire();
-                break;
+        if (state.currentWeapon == 0) {
+            for (int i = 0; i < MAX_ARROWS; i++) {
+                if (!state.arrows[i].active) {
+                    state.arrows[i].active = 1;
+                    state.arrows[i].x = state.explorerX + (state.facingRight ? 52.0f : -52.0f);
+                    state.arrows[i].y = state.explorerY - 30.0f;
+                    state.arrows[i].vx = state.facingRight ? 620.0f : -620.0f;
+                    state.arrows[i].vy = -30.0f;
+                    state.arrows[i].angle = state.facingRight ? 0.0f : 3.1415926f;
+                    state.arrows[i].scale = 1.0f;
+                    state.shootCooldown = 0.35f;
+                    playFire();
+                    break;
+                }
+            }
+        } else {
+            // Sword melee attack
+            state.isSlashing = 1;
+            state.swordSlashTime = state.swordSlashDuration;
+            state.shootCooldown = 0.35f;
+            playFire(); // Play slash whoosh sound
+
+            // Melee collision checks
+            int ghostLimit = (state.bossState == 0) ? MAX_GHOSTS : 2;
+            for (int g = 0; g < ghostLimit; g++) {
+                if (!state.ghosts[g].active) continue;
+                if (isSwordHitGhost(state.explorerX, state.explorerY, state.facingRight, (int)state.ghosts[g].x, (int)state.ghosts[g].y)) {
+                    state.ghosts[g].hp -= 2;
+                    playDamage();
+                    if (state.ghosts[g].hp <= 0) {
+                        state.ghosts[g].active = 0;
+                        state.score += 100;
+                        state.mana += 2;
+                        if (state.mana > state.manaMax) state.mana = state.manaMax;
+                        if (state.mana >= state.manaMax) state.skillReady = 1;
+                        playGetScore();
+                    }
+                }
+            }
+
+            if (state.bossState == 3) {
+                if (isSwordHitBoss(state.explorerX, state.explorerY, state.facingRight, (int)state.bossX, (int)state.bossY)) {
+                    state.bossHp -= 3;
+                    playDamage();
+                }
+            }
+
+            for (int f = 0; f < MAX_FIREBALLS; f++) {
+                if (!state.fireballs[f].active) continue;
+                if (isSwordHitFireball(state.explorerX, state.explorerY, state.facingRight, state.fireballs[f].x, state.fireballs[f].y)) {
+                    state.fireballs[f].active = 0; // deflect/destroy fireball
+                    playDamage();
+                }
             }
         }
     }
@@ -334,32 +440,48 @@ static void updateProjectiles(GameState& state) {
         }
 
         if (state.bossState == 3 && !state.energyWaves[i].hitBoss) {
-            if (isEnergyWaveHitBoss(state.energyWaves[i], (int)state.bossX, (int)state.bossY)) {
+            int canHit = (state.energyWaves[i].type == 0) || ((state.energyWaves[i].life / 0.6f) <= 0.4f);
+            if (canHit && isEnergyWaveHitBoss(state.energyWaves[i], (int)state.bossX, (int)state.bossY)) {
                 state.energyWaves[i].hitBoss = 1;
-                state.bossHp -= 6;
+                state.bossHp -= (state.energyWaves[i].type == 1) ? 15 : 6;
                 playDamage();
             }
         }
 
-        for (int g = 0; g < MAX_GHOSTS; g++) {
-            if (!state.ghosts[g].active) continue;
-            if (isEnergyWaveHitGhost(state.energyWaves[i], (int)state.ghosts[g].x, (int)state.ghosts[g].y)) {
-                state.ghosts[g].hp = 0;
-                state.ghosts[g].active = 0;
-                state.score += 100;
-                state.mana += 1;
-                if (state.mana > state.manaMax) state.mana = state.manaMax;
-                if (state.mana >= state.manaMax) state.skillReady = 1;
-                playGetScore();
+        int canHitGhosts = (state.energyWaves[i].type == 0) || ((state.energyWaves[i].life / 0.6f) <= 0.4f);
+        if (canHitGhosts) {
+            for (int g = 0; g < MAX_GHOSTS; g++) {
+                if (!state.ghosts[g].active) continue;
+                if (isEnergyWaveHitGhost(state.energyWaves[i], (int)state.ghosts[g].x, (int)state.ghosts[g].y)) {
+                    state.ghosts[g].hp = 0;
+                    state.ghosts[g].active = 0;
+                    state.score += 100;
+                    state.mana += 2;
+                    if (state.mana > state.manaMax) state.mana = state.manaMax;
+                    if (state.mana >= state.manaMax) state.skillReady = 1;
+                    playGetScore();
+                }
+            }
+
+            if (state.energyWaves[i].type == 1) {
+                float waveLeft = (state.energyWaves[i].dir > 0) ? (state.energyWaves[i].x - 220.0f) : 0.0f;
+                float waveRight = (state.energyWaves[i].dir > 0) ? (float)SCREEN_WIDTH : (state.energyWaves[i].x + 220.0f);
+                for (int f = 0; f < MAX_FIREBALLS; f++) {
+                    if (!state.fireballs[f].active) continue;
+                    if (state.fireballs[f].x >= waveLeft && state.fireballs[f].x <= waveRight) {
+                        state.fireballs[f].active = 0;
+                    }
+                }
             }
         }
     }
 }
 
 static void updateGhostsAndHazards(GameState& state) {
+    int ghostLimit = (state.bossState == 0) ? MAX_GHOSTS : 2;
     state.ghostSpawnTimer -= state.dt;
     if (state.ghostSpawnTimer <= 0.0f) {
-        for (int i = 0; i < MAX_GHOSTS; i++) {
+        for (int i = 0; i < ghostLimit; i++) {
             if (!state.ghosts[i].active) {
                 state.ghosts[i].active = 1;
                 state.ghosts[i].x = (float)SCREEN_WIDTH + 120.0f;
@@ -373,7 +495,7 @@ static void updateGhostsAndHazards(GameState& state) {
         }
     }
 
-    for (int i = 0; i < MAX_GHOSTS; i++) {
+    for (int i = 0; i < ghostLimit; i++) {
         if (!state.ghosts[i].active) continue;
         state.ghosts[i].x += state.ghosts[i].vx * state.dt;
         state.ghosts[i].shootTimer -= state.dt;
@@ -414,12 +536,14 @@ static void updateGhostsAndHazards(GameState& state) {
 
     if (state.hurtCooldown > 0.0f) state.hurtCooldown -= state.dt;
     if (state.hurtCooldown <= 0.0f) {
-        for (int i = 0; i < MAX_GHOSTS; i++) {
+        for (int i = 0; i < ghostLimit; i++) {
             if (!state.ghosts[i].active) continue;
             if (isExplorerHitGhost(state.explorerX, state.explorerY, (int)state.ghosts[i].x, (int)state.ghosts[i].y)) {
-                state.hp -= 1;
-                state.hurtCooldown = 0.8f;
-                playExplorerDamage();
+                if (!state.slowShieldActive) {
+                    state.hp -= 1;
+                    state.hurtCooldown = 0.8f;
+                    playExplorerDamage();
+                }
                 break;
             }
         }
@@ -430,9 +554,11 @@ static void updateGhostsAndHazards(GameState& state) {
             if (!state.fireballs[i].active) continue;
             if (isExplorerHitFireball(state.explorerX, state.explorerY, state.fireballs[i].x, state.fireballs[i].y)) {
                 state.fireballs[i].active = 0;
-                state.hp -= 1;
-                state.hurtCooldown = 0.8f;
-                playExplorerDamage();
+                if (!state.slowShieldActive) {
+                    state.hp -= 1;
+                    state.hurtCooldown = 0.8f;
+                    playExplorerDamage();
+                }
                 break;
             }
         }
@@ -443,9 +569,6 @@ static void updateBoss(GameState& state) {
     if (state.bossState == 0 && state.score >= state.nextBossScore) {
         state.bossState = 1;
         state.bossWarningTimer = 3.0f;
-        state.explorerVx = 0.0f;
-        state.explorerVy = 0.0f;
-        stopRunLoop();
     }
 
     if (state.bossState == 1) {
@@ -510,22 +633,95 @@ static void updateBoss(GameState& state) {
     }
 }
 
+static void drawSwordSlashTrail(int cx, int cy, float scale, int facingRight, float progress) {
+    if (progress <= 0.0f || progress >= 1.0f) return;
+    
+    // Sweep range in degrees
+    float startAngle, endAngle;
+    if (facingRight) {
+        // Sweep from -80 to 80 degrees (counter-clockwise)
+        startAngle = -80.0f;
+        endAngle = 80.0f;
+    } else {
+        // Sweep from 260 to 100 degrees (clockwise)
+        startAngle = 260.0f;
+        endAngle = 100.0f;
+    }
+
+    float currentAngle = startAngle + progress * (endAngle - startAngle);
+    float trailSize = 65.0f; // degrees of trail length
+
+    // Calculate start and end of trail arc for BGI
+    float arcStart, arcEnd;
+    if (facingRight) {
+        arcStart = currentAngle - trailSize;
+        arcEnd = currentAngle;
+        if (arcStart < startAngle) arcStart = startAngle;
+    } else {
+        // For facing left (clockwise sweep: 260 -> 100)
+        // BGI draws counter-clockwise, so we draw from currentAngle to currentAngle + trailSize
+        arcStart = currentAngle;
+        arcEnd = currentAngle + trailSize;
+        if (arcEnd > startAngle) arcEnd = startAngle;
+    }
+
+    // Scale the radii
+    int rOuter = (int)(95 * scale);
+    int rMid = (int)(88 * scale);
+    int rInner = (int)(82 * scale);
+
+    // Set line style for thick outer trail
+    setlinestyle(SOLID_LINE, 0, 7);
+    setcolor(COLOR(0, 180, 255)); // Blue outer glow
+    arc(cx, cy, (int)arcStart, (int)arcEnd, rOuter);
+
+    setlinestyle(SOLID_LINE, 0, 4);
+    setcolor(COLOR(100, 230, 255)); // Cyan inner glow
+    arc(cx, cy, (int)arcStart, (int)arcEnd, rMid);
+
+    setlinestyle(SOLID_LINE, 0, 2);
+    setcolor(COLOR(255, 255, 255)); // White core
+    arc(cx, cy, (int)arcStart, (int)arcEnd, rInner);
+    
+    // Restore default linestyle
+    setlinestyle(SOLID_LINE, 0, 1);
+}
+
 static void drawGameplay(const GameState& state) {
     setactivepage(state.page);
     putimage(0, 0, cachedGameBackground, COPY_PUT);
     drawForestSway(state.timeSec);
     drawFirefliesAnimated(state.timeSec);
-    for (int i = 0; i < MAX_GHOSTS; i++) {
+    int ghostLimit = (state.bossState == 0) ? MAX_GHOSTS : 2;
+    for (int i = 0; i < ghostLimit; i++) {
         if (!state.ghosts[i].active) continue;
         drawGhost((int)state.ghosts[i].x, (int)state.ghosts[i].y);
     }
     if (state.skillReady) {
         drawFootGlow((int)state.explorerX, (int)state.explorerY, state.explorerScale);
     }
+
+    float slashProgress = 0.0f;
+    if (state.isSlashing && state.swordSlashDuration > 0.0f) {
+        slashProgress = (state.swordSlashDuration - state.swordSlashTime) / state.swordSlashDuration;
+        if (slashProgress < 0.0f) slashProgress = 0.0f;
+        if (slashProgress > 1.0f) slashProgress = 1.0f;
+    }
+
     if (state.facingRight) {
-        drawExplorer((int)state.explorerX, (int)state.explorerY, state.explorerScale, state.armSwing, state.headSway);
+        drawExplorer((int)state.explorerX, (int)state.explorerY, state.explorerScale, state.armSwing, state.headSway, state.currentWeapon, slashProgress);
     } else {
-        drawExplorerMirrored((int)state.explorerX, (int)state.explorerY, state.explorerScale, state.armSwing, state.headSway);
+        drawExplorerMirrored((int)state.explorerX, (int)state.explorerY, state.explorerScale, state.armSwing, state.headSway, state.currentWeapon, slashProgress);
+    }
+
+    if (state.isSlashing) {
+        float cx = state.explorerX + (state.facingRight ? 25.0f : -25.0f) * state.explorerScale;
+        float cy = state.explorerY - 35.0f * state.explorerScale;
+        drawSwordSlashTrail((int)cx, (int)cy, state.explorerScale, state.facingRight, slashProgress);
+    }
+
+    if (state.slowShieldActive) {
+        drawSlowShield(state.explorerX, state.explorerY, state.timeSec);
     }
     for (int i = 0; i < MAX_ARROWS; i++) {
         if (!state.arrows[i].active) continue;
@@ -537,14 +733,22 @@ static void drawGameplay(const GameState& state) {
     }
     for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
         if (!state.energyWaves[i].active) continue;
-        int left = (state.energyWaves[i].dir > 0) ? (int)state.energyWaves[i].x : 0;
-        int right = (state.energyWaves[i].dir > 0) ? SCREEN_WIDTH : (int)state.energyWaves[i].x;
-        drawPowerAttack(left, right, (int)state.energyWaves[i].y, state.wavePhase);
+        if (state.energyWaves[i].type == 0) {
+            int left = (state.energyWaves[i].dir > 0) ? (int)state.energyWaves[i].x : 0;
+            int right = (state.energyWaves[i].dir > 0) ? SCREEN_WIDTH : (int)state.energyWaves[i].x;
+            drawPowerAttack(left, right, (int)state.energyWaves[i].y, state.wavePhase);
+        } else {
+            float lifeRatio = state.energyWaves[i].life / 0.6f;
+            if (lifeRatio < 0.0f) lifeRatio = 0.0f;
+            if (lifeRatio > 1.0f) lifeRatio = 1.0f;
+            drawGiantSwordAttack(state.energyWaves[i].x, state.energyWaves[i].y, lifeRatio, state.energyWaves[i].dir);
+        }
     }
 
-    if (state.bossState == 1 || state.bossState == 2) {
-        char ditherPattern[] = { (char)0x55, (char)0xAA, (char)0x55, (char)0xAA, (char)0x55, (char)0xAA, (char)0x55, (char)0xAA };
-        setfillpattern(ditherPattern, BLACK);
+    if (state.bossState == 2) {
+        char ditherPattern[] = { (char)0x11, (char)0x00, (char)0x44, (char)0x00, (char)0x11, (char)0x00, (char)0x44, (char)0x00 };
+        int bossDimColor = COLOR(20, 20, 28);
+        setfillpattern(ditherPattern, bossDimColor);
         bar(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     }
 
@@ -605,7 +809,7 @@ static void drawGameplay(const GameState& state) {
         }
     }
 
-    drawGameStats(state.hp, state.score, state.mana, state.manaMax, state.skillReady);
+    drawGameStats(state.hp, state.score, state.mana, state.manaMax, state.skillReady, state.currentWeapon);
     drawPauseButton(state.pauseBtnX, state.pauseBtnY);
 
     setvisualpage(state.page);
@@ -642,14 +846,21 @@ void playGame() {
 
         handleGameEvents(state);
 
-        int isBossSpawning = (state.bossState == 1 || state.bossState == 2);
-        if (!isBossSpawning) {
+        if (state.bossState != 2) {
             updateExplorer(state);
             updateProjectiles(state);
             updateGhostsAndHazards(state);
         }
 
         updateBoss(state);
+
+        if (state.spaceSpamStop) {
+            stopRunLoop();
+            showSpamWarningScreen();
+            state.spaceSpamStop = 0;
+            state.rapidSpaceCount = 0;
+            state.lastSpacePressTime = state.timeSec;
+        }
 
         if (state.hp <= 0) {
             appendScoreToFile(state.score);

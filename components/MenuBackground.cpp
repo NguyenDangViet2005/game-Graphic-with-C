@@ -9,8 +9,7 @@
 #include "../algorithms/index.cpp"
 #include "../algorithms/fractal.cpp"
 #include "SummonSigil.cpp"
-
-void drawExplorer(int x, int y, float scale = 1.0f, float armAngle = 0.0f, float headAngle = 0.0f);
+void drawExplorer(int x, int y, float scale, float armAngle, float headAngle, int weaponType, float slashProgress);
 
 // Vẽ background chung cho Menu, Hướng dẫn, Bảng điểm
 void drawMenuBackground() {
@@ -135,7 +134,7 @@ void drawMenuBackground() {
     drawSummonSigil(280, SCREEN_HEIGHT - 140, 2.6f);
 
     // nhân vật 
-    drawExplorer(280, SCREEN_HEIGHT - 25, 2.5f);
+    drawExplorer(280, SCREEN_HEIGHT - 25, 2.5f, 0.0f, 0.0f, 0, 0.0f);
 }
 
 #endif
