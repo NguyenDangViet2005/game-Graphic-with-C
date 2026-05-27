@@ -28,7 +28,8 @@ static const Language langVi = {
     "- Phim SPACE  : Tan cong",                   // instructions_attack
     "- Phim SHIFT + MUI TEN: Di chuyen nhanh",    // instructions_dash
     "- Phim CTRL + MUI TEN: Di chuyen cham + Khien",      // instructions_slow
-    "- Phim SHIFT + SPACE : Power Attack",        // instructions_power
+    "- Phim SHIFT + SPACE : Power Attack",        // instructions_power'
+    "- Phim C       : Doi vu khi (Cung / Kiem)", // instructions_weapon
 
     // Scoreboard Screen
     "BANG DIEM",                  // scoreboard_title
@@ -43,8 +44,6 @@ static const Language langVi = {
     "HP:",                        // hud_hp
     "Diem",                       // hud_score
     "Nang Luong:",                // hud_energy
-    "[C] Doi vu khi",             // hud_weapon_switch
-    "- Phim C      : Doi vu khi (Cung / Kiem)", // instructions_weapon
 
     // Boss Info
     "REAPER BOSS",                             // boss_name

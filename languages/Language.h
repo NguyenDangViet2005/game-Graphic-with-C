@@ -27,6 +27,7 @@ struct Language {
     const char* instructions_dash;
     const char* instructions_slow;
     const char* instructions_power;
+    const char* instructions_weapon;
 
     // Scoreboard Screen
     const char* scoreboard_title;
@@ -40,10 +41,6 @@ struct Language {
     const char* hud_hp;
     const char* hud_score;
     const char* hud_energy;
-    const char* hud_weapon_switch;
-
-    // Instructions Screen
-    const char* instructions_weapon;
 
     // Boss Info
     const char* boss_name;

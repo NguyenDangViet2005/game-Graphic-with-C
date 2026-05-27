@@ -29,6 +29,7 @@ static const Language langEn = {
     "- SHIFT + ARROW: Dash/Move fast",            // instructions_dash
     "- CTRL + ARROW: Move slow + Shield",                  // instructions_slow
     "- SHIFT + SPACE : Power Attack",              // instructions_power
+    "- C key       : Switch Weapon (Bow / Sword)", // instructions_weapon
 
     // Scoreboard Screen
     "SCOREBOARD",                 // scoreboard_title
@@ -43,8 +44,6 @@ static const Language langEn = {
     "HP:",                        // hud_hp
     "Score",                      // hud_score
     "Energy:",                    // hud_energy
-    "[C] Switch Weapon",          // hud_weapon_switch
-    "- C key       : Switch Weapon (Bow / Sword)", // instructions_weapon
 
     // Boss Info
     "REAPER BOSS",                             // boss_name

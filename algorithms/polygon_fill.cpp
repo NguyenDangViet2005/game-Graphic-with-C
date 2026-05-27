@@ -3,47 +3,26 @@
 
 #include <graphics.h>
 
-// Thuật toán Flood Fill đệ quy
-void recursiveFloodFill(int x, int y, int newColor, int oldColor) {
-    // Kiểm tra biên
-    if (x < 0 || x >= getmaxx() || y < 0 || y >= getmaxy()) {
-        return;
-    }
-    
-    // Kiểm tra màu hiện tại
-    int currentColor = getpixel(x, y);
-    if (currentColor != oldColor || currentColor == newColor) {
-        return;
-    }
-    
-    // Tô màu điểm hiện tại
-    putpixel(x, y, newColor);
-    
-    // Đệ quy 4 hướng
-    recursiveFloodFill(x + 1, y, newColor, oldColor);
-    recursiveFloodFill(x - 1, y, newColor, oldColor);
-    recursiveFloodFill(x, y + 1, newColor, oldColor);
-    recursiveFloodFill(x, y - 1, newColor, oldColor);
-}
-
-
 // Thuật toán Boundary Fill đệ quy
+// - Tô vùng được bao bởi boundaryColor.
+// - fillColor là màu tô vào bên trong; boundaryColor là màu biên cần dừng.
 void recursiveBoundaryFill(int x, int y, int fillColor, int boundaryColor) {
+    // Kiểm tra biên màn hình
     if (x < 0 || x >= getmaxx() || y < 0 || y >= getmaxy()) {
         return;
     }
     
     int currentColor = getpixel(x, y);
     
-    // Nếu là màu biên hoặc đã tô rồi thì dừng
+    // Nếu gặp màu biên hoặc đã tô rồi thì dừng
     if (currentColor == boundaryColor || currentColor == fillColor) {
         return;
     }
     
-    // Tô màu điểm hiện tại
+    // Tô màu điểm hiện tại rồi lan ra 4 hướng kề nhau
     putpixel(x, y, fillColor);
     
-    // Đệ quy 4 hướng
+    // Đệ quy 4 hướng (4-connected)
     recursiveBoundaryFill(x + 1, y, fillColor, boundaryColor);
     recursiveBoundaryFill(x - 1, y, fillColor, boundaryColor);
     recursiveBoundaryFill(x, y + 1, fillColor, boundaryColor);

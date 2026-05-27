@@ -56,10 +56,6 @@ void drawBackground() {
     drawCloud(850, 80, 45);
     drawCloud(1050, 120, 38);
     
-    // Bo chi tiet trang tri tren may
-
-    drawDragonRootOrnament(140, GROUND_Y + 5, 1);
-    drawDragonRootOrnament(980, GROUND_Y + 10, 1);
     
     // vẽ nền đất và cỏ
     
@@ -115,23 +111,6 @@ void drawBackground() {
     setlinestyle(SOLID_LINE, 0, 3);
     // Bresenham line (thick)
     bresenhamThickLine(0, GROUND_Y, SCREEN_WIDTH, GROUND_Y, 3);
-
-    // Trang tri nho bang flood fill de quy (vung rat nho)
-    int decoLeft = 30;
-    int decoTop = GROUND_Y - 18;
-    int decoRight = 42;
-    int decoBottom = GROUND_Y - 6;
-
-    setfillstyle(SOLID_FILL, COLOR(1, 2, 3));
-    bar(decoLeft, decoTop, decoRight, decoBottom);
-
-    setcolor(COLOR(20, 25, 35));
-    int decoOldColor = getpixel(decoLeft + 2, decoTop + 2);
-    if (decoOldColor != COLOR(20, 25, 35)) {
-        recursiveFloodFill(decoLeft + 2, decoTop + 2, COLOR(20, 25, 35), decoOldColor);
-    }
-    
-    // Đom đóm được vẽ động ở layer foreground
 }
 
 #endif 

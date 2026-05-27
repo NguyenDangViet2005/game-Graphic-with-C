@@ -237,13 +237,6 @@ void drawGameStats(int hp, int score, int mana, int manaMax, int skillReady, int
     setcolor(COLOR(100, 100, 100)); // Chuôi kiếm xám
     line(s1_x1 + 12, s1_y1 + 24, s1_x1 + 8, s1_y1 + 28);
 
-    // Text hướng dẫn phím C đổi vũ khí
-    setlinestyle(SOLID_LINE, 0, 1);
-    setcolor(COLOR(200, 200, 200));
-    settextstyle(DEFAULT_FONT, HORIZ_DIR, 1);
-    setbkcolor(BLACK);
-    outtextxy(115, 118, (char*)gCurrentLanguage->hud_weapon_switch);
-
     (void)skillReady;
 }
 

@@ -12,12 +12,12 @@ const Language* gCurrentLanguage = NULL;
 #include "configs/Audio.cpp"
 #include "screens/menu/Menu.cpp"
 
-int main() {
+main() {
     gCurrentLanguage = &langVi;
     int screenW = GetSystemMetrics(SM_CXSCREEN);
     int screenH = GetSystemMetrics(SM_CYSCREEN);
     int winX = (screenW - SCREEN_WIDTH) / 2;
-    int winY = (screenH - SCREEN_HEIGHT) / 2;
+    int winY = (screenH - SCREEN_HEIGHT) / 2 - 30;
     if (winX < 0) winX = 0;
     if (winY < 0) winY = 0;
     initwindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Monster Slayer - Dark Forest Theme", winX, winY);
@@ -30,5 +30,4 @@ int main() {
     gameLoop(); 
     shutdownAudio();
     closegraph();
-    return 0;
 }

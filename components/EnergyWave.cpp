@@ -10,10 +10,13 @@ void drawEnergyWave(int left, int right, int y) {
     int top = y - height / 2;
     int bottom = top + height;
 
-    // Boundary fill de quy (vung nho, co bien ro rang)
+    // Boundary fill de quy (vung nho, co bien ro dang hinh song nang luong)
+    // - Ve bien hinh chu nhat bang mau boundary (WHITE)
+    // - To mau phan ben trong cua song nang luong, dung lai khi gap bien
     setcolor(WHITE);
     rectangle(left, top, right, bottom);
     setcolor(WHITE);
+    // To tu diem ben trong de dam bao chi to phan ruot song
     recursiveBoundaryFill(left + 1, top + 1, getcolor(), WHITE);
 
     setcolor(COLOR(220, 40, 40));

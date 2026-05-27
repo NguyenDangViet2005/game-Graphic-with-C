@@ -4,6 +4,7 @@
 #include <graphics.h>
 #include <math.h>
 #include "../algorithms/index.cpp"
+#include "../configs/Config.cpp"
 
 // Vẽ đom đóm với tỉ lệ co giãn (affine dãn)
 void drawFireflyScaled(int x, int y, int brightness, float scale) {
@@ -26,12 +27,17 @@ void drawFireflyScaled(int x, int y, int brightness, float scale) {
     if (glowR > 255) glowR = 255;
     if (glowG > 255) glowG = 255;
     
-    setcolor(COLOR(glowR, glowG, glowB));
-    setfillstyle(SOLID_FILL, COLOR(glowR, glowG, glowB));
-    // Midpoint filled circle
     int coreR = (int)(4 * scale);
     if (coreR < 1) coreR = 1;
-    midpointFilledCircle(x, y, coreR);
+
+    // Ve vien tron va to ruot bang midpoint de tranh tran stack
+    int coreFillColor = COLOR(glowR, glowG, glowB);
+    int coreBorderColor = COLOR(glowR - 20, glowG - 20, glowB - 10);
+    setcolor(coreBorderColor);
+    bresenhamCircle(x, y, coreR);
+
+    setcolor(coreFillColor);
+    midpointFilledCircle(x, y, coreR - 1);
     
     // Hào quang ngoài
     setcolor(COLOR(glowR - 50, glowG - 50, glowB - 20));
