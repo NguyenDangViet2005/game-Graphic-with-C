@@ -83,7 +83,7 @@ static void initGameState(GameState& state) {
     state.bossLevel = 1;
     state.bossHp = 30;
     state.bossMaxHp = 30;
-    state.nextBossScore = 3000;
+    state.nextBossScore = 2000;
     state.bossAttackCooldown = 3.0f;
     state.bossAttackChargeTimer = 0.0f;
     state.bossAttackActiveTimer = 0.0f;
@@ -617,17 +617,17 @@ static void updateBoss(GameState& state) {
             playDeath();
             state.bossLevel++;
             if (state.bossLevel == 2) {
-                state.nextBossScore = 10000;
-                state.bossMaxHp = 50;
+                state.nextBossScore = 6000;
+                state.bossMaxHp = 50;  // demonBoss lần đầu xuất hiện
             } else if (state.bossLevel == 3) {
-                state.nextBossScore = 15000;
-                state.bossMaxHp = 60;
+                state.nextBossScore = 10000;
+                state.bossMaxHp = 70;  // reaperBoss lần 2 xuất hiện (nhiều máu hơn ban đầu 30)
             } else if (state.bossLevel == 4) {
-                state.nextBossScore = 20000;
-                state.bossMaxHp = 100;
+                state.nextBossScore = 15000;
+                state.bossMaxHp = 100; // demonBoss lần 2 xuất hiện (nhiều máu hơn ban đầu 50)
             } else {
-                state.nextBossScore += 10000;
-                state.bossMaxHp = 100;
+                state.nextBossScore += 5000;
+                state.bossMaxHp = 120;
             }
         }
     }
@@ -776,9 +776,17 @@ static void drawGameplay(const GameState& state) {
         float ratio = 1.0f - (state.bossSummonTimer / 2.5f);
         if (ratio < 0.0f) ratio = 0.0f;
         if (ratio > 1.0f) ratio = 1.0f;
-        drawReaperBoss((int)state.bossX, (int)(GROUND_Y + 30), ratio, state.timeSec);
+        if (state.bossLevel % 2 == 0) {
+            drawDemonBoss((int)state.bossX, (int)(GROUND_Y + 30), ratio, state.timeSec);
+        } else {
+            drawReaperBoss((int)state.bossX, (int)(GROUND_Y + 30), ratio, state.timeSec);
+        }
     } else if (state.bossState == 3) {
-        drawReaperBoss((int)state.bossX, (int)state.bossY, 1.0f, state.timeSec);
+        if (state.bossLevel % 2 == 0) {
+            drawDemonBoss((int)state.bossX, (int)state.bossY, 1.0f, state.timeSec);
+        } else {
+            drawReaperBoss((int)state.bossX, (int)state.bossY, 1.0f, state.timeSec);
+        }
         drawBossHealthBar(state.bossHp, state.bossMaxHp);
 
         if (state.bossAttackChargeTimer > 0.0f) {
@@ -805,7 +813,11 @@ static void drawGameplay(const GameState& state) {
 
         if (state.bossAttackActiveTimer > 0.0f) {
             float progress = (0.4f - state.bossAttackActiveTimer) / 0.4f;
-            drawBossScytheSlash((int)state.bossX, (int)state.bossY, progress);
+            if (state.bossLevel % 2 == 0) {
+                drawBossSwordSlash((int)state.bossX, (int)state.bossY, 1.0f, progress);
+            } else {
+                drawBossScytheSlash((int)state.bossX, (int)state.bossY, progress);
+            }
         }
     }
 
