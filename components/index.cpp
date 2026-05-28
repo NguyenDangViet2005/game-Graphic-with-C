@@ -10,7 +10,6 @@
 #include "FootGlow.cpp"
 #include "Explorer.cpp"
 #include "ExplorerMirrored.cpp"
-#include "EnergyWave.cpp"
 #include "PowerAttack.cpp"
 #include "Fireball.cpp"
 #include "Ghost.cpp"

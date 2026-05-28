@@ -111,6 +111,24 @@ void drawBackground() {
     setlinestyle(SOLID_LINE, 0, 3);
     // Bresenham line (thick)
     bresenhamThickLine(0, GROUND_Y, SCREEN_WIDTH, GROUND_Y, 3);
+
+    // Vẽ thêm các ngôi sao lấp lánh trang trí nền trời bằng tô màu đệ quy giới hạn
+    auto drawSmallStar = [](int cx, int cy) {
+        setcolor(WHITE);
+        line(cx, cy - 4, cx + 4, cy);
+        line(cx + 4, cy, cx, cy + 4);
+        line(cx, cy + 4, cx - 4, cy);
+        line(cx - 4, cy, cx, cy - 4);
+        recursiveBoundaryFillBounded(cx, cy, YELLOW, WHITE, cx - 5, cy - 5, cx + 5, cy + 5);
+    };
+
+    drawSmallStar(100, 50);
+    drawSmallStar(150, 80);
+    drawSmallStar(320, 60);
+    drawSmallStar(450, 40);
+    drawSmallStar(700, 90);
+    drawSmallStar(800, 50);
+    drawSmallStar(950, 70);
 }
 
 #endif 

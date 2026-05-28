@@ -135,6 +135,34 @@ void drawMenuBackground() {
 
     // nhân vật 
     drawExplorer(280, SCREEN_HEIGHT - 25, 2.5f, 0.0f, 0.0f, 0, 0.0f);
+
+    // Vẽ thêm đèn lồng trang trí treo trên cây bằng tô màu đệ quy giới hạn
+    auto drawSmallLantern = [](int cx, int cy) {
+        // Móc treo
+        setcolor(COLOR(80, 80, 80));
+        bresenhamLine(cx, cy - 8, cx, cy - 4);
+        
+        // Viền đèn lồng đỏ sẫm làm biên (Dùng chuẩn RED để so khớp getpixel)
+        setcolor(RED);
+        line(cx - 4, cy - 4, cx + 4, cy - 4);
+        line(cx + 4, cy - 4, cx + 6, cy);
+        line(cx + 6, cy, cx + 4, cy + 4);
+        line(cx + 4, cy + 4, cx - 4, cy + 4);
+        line(cx - 4, cy + 4, cx - 6, cy);
+        line(cx - 6, cy, cx - 4, cy - 4);
+        
+        // Tô đệ quy bằng màu vàng YELLOW
+        recursiveBoundaryFillBounded(cx, cy, YELLOW, RED, cx - 8, cy - 8, cx + 8, cy + 8);
+        
+        // Tua rua vàng
+        setcolor(YELLOW);
+        bresenhamLine(cx, cy + 4, cx, cy + 8);
+    };
+
+    drawSmallLantern(120, SCREEN_HEIGHT - 280);
+    drawSmallLantern(180, SCREEN_HEIGHT - 320);
+    drawSmallLantern(SCREEN_WIDTH - 150, SCREEN_HEIGHT - 260);
+    drawSmallLantern(SCREEN_WIDTH - 210, SCREEN_HEIGHT - 310);
 }
 
 #endif
