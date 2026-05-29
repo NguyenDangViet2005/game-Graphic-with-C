@@ -350,17 +350,27 @@ static void updateProjectiles(GameState& state) {
 
 static void updateGhostsAndHazards(GameState& state) {
     int ghostLimit = (state.bossState == 0) ? MAX_GHOSTS : 2;
+    int isGoblinPhase = (state.bossLevel % 2 == 0);
+    
     state.ghostSpawnTimer -= state.dt;
     if (state.ghostSpawnTimer <= 0.0f) {
         for (int i = 0; i < ghostLimit; i++) {
             if (!state.ghosts[i].active) {
                 state.ghosts[i].active = 1;
                 state.ghosts[i].x = (float)SCREEN_WIDTH + 120.0f;
-                state.ghosts[i].y = state.ghostBaseY;
-                state.ghosts[i].vx = -90.0f - (float)(rand() % 40);
-                state.ghosts[i].shootTimer = 4.0f;
-                state.ghosts[i].hp = 2;
-                state.ghostSpawnTimer = state.ghostSpawnMin + ((float)rand() / (float)RAND_MAX) * (state.ghostSpawnMax - state.ghostSpawnMin);
+                if (isGoblinPhase) {
+                    state.ghosts[i].y = (float)(GROUND_Y + 30); // Goblin ngang hàng Explorer
+                    state.ghosts[i].vx = -160.0f - (float)(rand() % 50); // Đi nhanh hơn
+                    state.ghosts[i].shootTimer = 0.8f; // Thời gian chờ chém lần đầu
+                    state.ghosts[i].hp = 3; // Máu nhiều hơn (3 hp)
+                } else {
+                    state.ghosts[i].y = state.ghostBaseY; // Ghost bay lơ lửng
+                    state.ghosts[i].vx = -90.0f - (float)(rand() % 40);
+                    state.ghosts[i].shootTimer = 4.0f; // Bắn cầu lửa
+                    state.ghosts[i].hp = 2; // Máu 2 hp
+                }
+                float baseSpawn = state.ghostSpawnMin + ((float)rand() / (float)RAND_MAX) * (state.ghostSpawnMax - state.ghostSpawnMin);
+                state.ghostSpawnTimer = isGoblinPhase ? (baseSpawn * 1.4f) : baseSpawn; // Giảm tần suất sinh Goblin
                 break;
             }
         }
@@ -368,24 +378,47 @@ static void updateGhostsAndHazards(GameState& state) {
 
     for (int i = 0; i < ghostLimit; i++) {
         if (!state.ghosts[i].active) continue;
-        state.ghosts[i].x += state.ghosts[i].vx * state.dt;
-        state.ghosts[i].shootTimer -= state.dt;
+        
+        if (isGoblinPhase) {
+            // Chỉ di chuyển tiến lại gần nếu khoảng cách lớn hơn 50px và không trong trạng thái bổ rìu (shootTimer > 1.6s)
+            float distanceX = abs(state.ghosts[i].x - state.explorerX);
+            if (distanceX > 50.0f && state.ghosts[i].shootTimer <= 1.6f) {
+                state.ghosts[i].x += state.ghosts[i].vx * state.dt;
+            }
+            state.ghosts[i].shootTimer -= state.dt;
+            
+            // Nếu tiến tới cực gần Explorer thì thực hiện chém gây mất máu
+            if (distanceX < 50.0f && state.ghosts[i].shootTimer <= 0.0f) {
+                if (state.hurtCooldown <= 0.0f) {
+                    if (!state.slowShieldActive) {
+                        state.hp -= 1;
+                        state.hurtCooldown = 0.8f;
+                        playExplorerDamage();
+                    }
+                }
+                state.ghosts[i].shootTimer = 2.0f; // Reset cooldown chém (gồm 0.4s chém dừng hình)
+            }
+        } else {
+            // Ghost di chuyển bình thường và bắn cầu lửa từ xa
+            state.ghosts[i].x += state.ghosts[i].vx * state.dt;
+            state.ghosts[i].shootTimer -= state.dt;
 
-        if (state.ghosts[i].shootTimer <= 0.0f) {
-            for (int f = 0; f < MAX_FIREBALLS; f++) {
-                if (!state.fireballs[f].active) {
-                    float dx = state.explorerX - state.ghosts[i].x;
-                    float dy = (state.explorerY - 30.0f) - state.ghosts[i].y;
-                    float len = (float)sqrt(dx * dx + dy * dy);
-                    if (len < 1.0f) len = 1.0f;
-                    float speed = 240.0f;
-                    state.fireballs[f].active = 1;
-                    state.fireballs[f].x = state.ghosts[i].x - 20.0f;
-                    state.fireballs[f].y = state.ghosts[i].y - 20.0f;
-                    state.fireballs[f].vx = (dx / len) * speed;
-                    state.fireballs[f].vy = (dy / len) * speed;
-                    state.ghosts[i].shootTimer = 4.0f;
-                    break;
+            if (state.ghosts[i].shootTimer <= 0.0f) {
+                for (int f = 0; f < MAX_FIREBALLS; f++) {
+                    if (!state.fireballs[f].active) {
+                        float dx = state.explorerX - state.ghosts[i].x;
+                        float dy = (state.explorerY - 30.0f) - state.ghosts[i].y;
+                        float len = (float)sqrt(dx * dx + dy * dy);
+                        if (len < 1.0f) len = 1.0f;
+                        float speed = 240.0f;
+                        state.fireballs[f].active = 1;
+                        state.fireballs[f].x = state.ghosts[i].x - 20.0f;
+                        state.fireballs[f].y = state.ghosts[i].y - 20.0f;
+                        state.fireballs[f].vx = (dx / len) * speed;
+                        state.fireballs[f].vy = (dy / len) * speed;
+                        state.ghosts[i].shootTimer = 4.0f;
+                        break;
+                    }
                 }
             }
         }
@@ -409,13 +442,16 @@ static void updateGhostsAndHazards(GameState& state) {
     if (state.hurtCooldown <= 0.0f) {
         for (int i = 0; i < ghostLimit; i++) {
             if (!state.ghosts[i].active) continue;
-            if (isExplorerHitGhost(state.explorerX, state.explorerY, (int)state.ghosts[i].x, (int)state.ghosts[i].y)) {
-                if (!state.slowShieldActive) {
-                    state.hp -= 1;
-                    state.hurtCooldown = 0.8f;
-                    playExplorerDamage();
+            // Chỉ check va chạm thường nếu là Ghost, Goblin đã có cơ chế chém riêng ở trên
+            if (!isGoblinPhase) {
+                if (isExplorerHitGhost(state.explorerX, state.explorerY, (int)state.ghosts[i].x, (int)state.ghosts[i].y)) {
+                    if (!state.slowShieldActive) {
+                        state.hp -= 1;
+                        state.hurtCooldown = 0.8f;
+                        playExplorerDamage();
+                    }
+                    break;
                 }
-                break;
             }
         }
     }
@@ -488,6 +524,9 @@ static void updateBoss(GameState& state) {
             state.score += 1000;
             playDeath();
             state.bossLevel++;
+            for (int i = 0; i < MAX_GHOSTS; i++) {
+                state.ghosts[i].active = 0;
+            }
             if (state.bossLevel == 2) {
                 state.nextBossScore = 6000;
                 state.bossMaxHp = 50;  // demonBoss lần đầu xuất hiện

@@ -20,5 +20,6 @@
 #include "ReaperBoss.cpp"
 #include "DemonBoss.cpp"
 #include "GiantSwordAttack.cpp"
+#include "Goblin.cpp"
 
 #endif

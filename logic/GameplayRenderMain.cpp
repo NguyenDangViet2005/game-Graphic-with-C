@@ -80,12 +80,20 @@ static void drawGameplay(const GameState& state) {
         if (!state.ghosts[i].active) continue;
         int gx = (int)state.ghosts[i].x;
         int gy = (int)state.ghosts[i].y;
-        int ghostW = 25 * 3;
-        int ghostH = 46 * 3;
-        int startX = gx + 2 * 3;
-        int startY = gy - ghostH;
-        putimage(startX, startY, cachedGhostMask, AND_PUT);
-        putimage(startX, startY, cachedGhostSprite, OR_PUT);
+        if (state.bossLevel % 2 == 0) {
+            float attackProgress = 0.0f;
+            if (state.ghosts[i].shootTimer > 1.6f && state.ghosts[i].shootTimer <= 2.0f) {
+                attackProgress = (2.0f - state.ghosts[i].shootTimer) / 0.4f;
+            }
+            drawGoblin(gx, gy, 1.0f, state.timeSec, attackProgress);
+        } else {
+            int ghostW = 25 * 3;
+            int ghostH = 46 * 3;
+            int startX = gx + 2 * 3;
+            int startY = gy - ghostH;
+            putimage(startX, startY, cachedGhostMask, AND_PUT);
+            putimage(startX, startY, cachedGhostSprite, OR_PUT);
+        }
     }
     if (state.skillReady) {
         drawFootGlow((int)state.explorerX, (int)state.explorerY, state.explorerScale);
