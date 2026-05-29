@@ -4,17 +4,24 @@
 #include <graphics.h>
 
 // Vẽ con ma pixel art
-void drawGhost(int x, int y) {
+void drawGhost(int x, int y, int isMask = 0) {
     int colorBlack = BLACK;
-    int colorWhite = COLOR(240, 245, 255); // Trắng sáng
-    int colorLight = COLOR(190, 205, 235); // Xanh nhạt
-    int colorMid   = COLOR(140, 155, 200); // Xanh tím giữa
-    int colorDark  = COLOR(90, 100, 150);  // Tím đậm
-    int colorDeep  = COLOR(40, 45, 70);    // Tím rất đậm/Đen
+    int colorWhite = isMask ? BLACK : COLOR(240, 245, 255); // Trắng sáng
+    int colorLight = isMask ? BLACK : COLOR(190, 205, 235); // Xanh nhạt
+    int colorMid   = isMask ? BLACK : COLOR(140, 155, 200); // Xanh tím giữa
+    int colorDark  = isMask ? BLACK : COLOR(90, 100, 150);  // Tím đậm
+    int colorDeep  = isMask ? BLACK : COLOR(40, 45, 70);    // Tím rất đậm/Đen
+    
+    int colorRed   = isMask ? BLACK : COLOR(255, 50, 50);   // Đỏ tà ác (glowing red eyes)
     
     int pixelSize = 3;
     int startX = x + 2 * pixelSize; // Căn chỉnh lại tâm
     int startY = y - 46 * pixelSize;
+
+    if (isMask) {
+        setfillstyle(SOLID_FILL, WHITE);
+        bar(startX, startY, startX + 25 * pixelSize, startY + 46 * pixelSize);
+    }
     
     const char* pixels[] = {
         "                         ",
@@ -26,10 +33,10 @@ void drawGhost(int x, int y) {
         "    0111111111111110     ",
         "    0111111111111110     ",
         "    0111001110011110     ",
-        "    0110000100001110     ",
-        "    0110000100001110     ",
-        "    0110000100001110     ",
-        "    0110000100001110     ",
+        "    0116600100661110     ", // Glowing evil slanted red eyes
+        "    0110660106600110     ",
+        "    0110066166000110     ",
+        "    0110000100000110     ",
         "    0111001110011110     ",
         "    0111111111111110     ",
         "    0111111111111110     ",
@@ -70,7 +77,7 @@ void drawGhost(int x, int y) {
     for (int r = 0; r < rows; r++) {
         for (int c = 0; pixels[r][c] != '\0'; c++) {
             char p = pixels[r][c];
-            if (p >= '0' && p <= '5') {
+            if (p >= '0' && p <= '6') {
                 int drawColor = colorBlack;
                 switch(p) {
                     case '0': drawColor = colorBlack; break;
@@ -79,6 +86,7 @@ void drawGhost(int x, int y) {
                     case '3': drawColor = colorMid; break;
                     case '4': drawColor = colorDark; break;
                     case '5': drawColor = colorDeep; break;
+                    case '6': drawColor = colorRed; break;
                 }
                 setfillstyle(SOLID_FILL, drawColor);
                 bar(startX + c * pixelSize, startY + r * pixelSize,

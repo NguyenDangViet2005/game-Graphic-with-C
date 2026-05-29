@@ -160,24 +160,46 @@ void showGameOverScreen(int score) {
 }
 
 void showSpamWarningScreen() {
-    setfillstyle(SOLID_FILL, BLACK);
-    bar(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    int visPage = getvisualpage();
+    setactivepage(visPage); // Draw directly onto the visible screen
 
-    settextstyle(BOLD_FONT, HORIZ_DIR, 4);
+    int popupW = 580;
+    int popupH = 260;
+    int popupX = (SCREEN_WIDTH - popupW) / 2;
+    int popupY = (SCREEN_HEIGHT - popupH) / 2;
+
+    // Draw the pop-up container
+    setfillstyle(SOLID_FILL, COLOR(20, 24, 35));
+    bar(popupX, popupY, popupX + popupW, popupY + popupH);
+
+    // Border
     setcolor(COLOR(255, 120, 80));
-    setbkcolor(BLACK);
-    const char* title = gCurrentLanguage->spam_title;
-    outtextxy((SCREEN_WIDTH - textwidth((char*)title)) / 2, 220, (char*)title);
+    setlinestyle(SOLID_LINE, 0, 3);
+    rectangle(popupX, popupY, popupX + popupW, popupY + popupH);
 
+    // Inner border
+    setcolor(COLOR(100, 110, 130));
+    setlinestyle(SOLID_LINE, 0, 1);
+    rectangle(popupX + 5, popupY + 5, popupX + popupW - 5, popupY + popupH - 5);
+
+    // Title
+    settextstyle(BOLD_FONT, HORIZ_DIR, 3);
+    setcolor(COLOR(255, 100, 100));
+    setbkcolor(COLOR(20, 24, 35));
+    const char* title = gCurrentLanguage->spam_title;
+    outtextxy(popupX + (popupW - textwidth((char*)title)) / 2, popupY + 30, (char*)title);
+
+    // Message
     settextstyle(DEFAULT_FONT, HORIZ_DIR, 2);
     setcolor(COLOR(220, 220, 220));
     const char* msg = gCurrentLanguage->spam_message;
-    outtextxy((SCREEN_WIDTH - textwidth((char*)msg)) / 2, 290, (char*)msg);
+    outtextxy(popupX + (popupW - textwidth((char*)msg)) / 2, popupY + 100, (char*)msg);
 
-    int btnW = 200;
-    int btnH = 48;
-    int btnX = (SCREEN_WIDTH - btnW) / 2;
-    int btnY = 380;
+    // Button
+    int btnW = 160;
+    int btnH = 44;
+    int btnX = popupX + (popupW - btnW) / 2;
+    int btnY = popupY + 170;
     int btnHover = 0;
     const char* btnText = gCurrentLanguage->spam_button;
     drawTextButton(btnX, btnY, btnW, btnH, btnHover, btnText);

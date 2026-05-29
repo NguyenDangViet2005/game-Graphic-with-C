@@ -64,6 +64,7 @@ void playGame() {
 
         if (state.spaceSpamStop) {
             stopRunLoop();
+            drawGameplay(state);
             showSpamWarningScreen();
             state.spaceSpamStop = 0;
             state.rapidSpaceCount = 0;

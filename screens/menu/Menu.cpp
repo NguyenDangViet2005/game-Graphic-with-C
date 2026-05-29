@@ -16,6 +16,10 @@
 
 void* cachedBackground = NULL;
 void* cachedGameBackground = NULL;
+void* cachedGhostSprite = NULL;
+void* cachedGhostMask = NULL;
+void* cachedFireballSprite = NULL;
+void* cachedFireballMask = NULL;
 
 #include "MenuCache.cpp"
 #include "MenuScreens.cpp"

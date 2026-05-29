@@ -43,8 +43,10 @@ struct Language {
     const char* hud_energy;
 
     // Boss Info
-    const char* boss_name;
-    const char* boss_warning;
+    const char* boss_name_reaper;
+    const char* boss_name_demon;
+    const char* boss_warning_reaper;
+    const char* boss_warning_demon;
     const char* boss_dodge;
 
     // Loading Screen

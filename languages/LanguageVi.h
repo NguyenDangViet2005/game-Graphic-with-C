@@ -46,8 +46,10 @@ static const Language langVi = {
     "Nang Luong:",                // hud_energy
 
     // Boss Info
-    "REAPER BOSS",                             // boss_name
-    "CANH BAO: REAPER BOSS SAP XUAT HIEN!",     // boss_warning
+    "REAPER BOSS",                             // boss_name_reaper
+    "DEMON BOSS",                              // boss_name_demon
+    "CANH BAO: REAPER BOSS SAP XUAT HIEN!",     // boss_warning_reaper
+    "CANH BAO: DEMON BOSS SAP XUAT HIEN!",      // boss_warning_demon
     "NE DON!",                                 // boss_dodge
 
     // Loading Screen

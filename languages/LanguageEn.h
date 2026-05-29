@@ -46,8 +46,10 @@ static const Language langEn = {
     "Energy:",                    // hud_energy
 
     // Boss Info
-    "REAPER BOSS",                             // boss_name
-    "WARNING: REAPER BOSS IS SPAWNING!",       // boss_warning
+    "REAPER BOSS",                             // boss_name_reaper
+    "DEMON BOSS",                              // boss_name_demon
+    "WARNING: REAPER BOSS IS SPAWNING!",       // boss_warning_reaper
+    "WARNING: DEMON BOSS IS SPAWNING!",        // boss_warning_demon
     "DODGE!",                                  // boss_dodge
 
     // Loading Screen

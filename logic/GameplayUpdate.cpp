@@ -320,6 +320,20 @@ static void updateProjectiles(GameState& state) {
                 }
             }
 
+            if (state.energyWaves[i].type == 0) {
+                float waveLeft = (state.energyWaves[i].dir > 0) ? state.energyWaves[i].x : 0.0f;
+                float waveRight = (state.energyWaves[i].dir > 0) ? (float)SCREEN_WIDTH : state.energyWaves[i].x;
+                float waveTop = state.energyWaves[i].y - 35.0f;
+                float waveBottom = state.energyWaves[i].y + 35.0f;
+                for (int f = 0; f < MAX_FIREBALLS; f++) {
+                    if (!state.fireballs[f].active) continue;
+                    if (state.fireballs[f].x >= waveLeft && state.fireballs[f].x <= waveRight &&
+                        state.fireballs[f].y >= waveTop && state.fireballs[f].y <= waveBottom) {
+                        state.fireballs[f].active = 0;
+                    }
+                }
+            }
+
             if (state.energyWaves[i].type == 1) {
                 float waveLeft = (state.energyWaves[i].dir > 0) ? (state.energyWaves[i].x - 220.0f) : 0.0f;
                 float waveRight = (state.energyWaves[i].dir > 0) ? (float)SCREEN_WIDTH : (state.energyWaves[i].x + 220.0f);

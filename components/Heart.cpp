@@ -122,7 +122,7 @@ static void drawEnergyBar(int x, int y, int mana, int manaMax) {
     rectangle(x, y, x + barW, y + barH);
 }
 
-void drawBossHealthBar(int hp, int maxHp) {
+void drawBossHealthBar(int hp, int maxHp, int bossLevel) {
     int screenW = 1200;
     int barW = 600;
     int barH = 16;
@@ -165,7 +165,10 @@ void drawBossHealthBar(int hp, int maxHp) {
     settextstyle(BOLD_FONT, HORIZ_DIR, 2);
     setbkcolor(COLOR(15, 10, 10)); // Tránh nhiễu chữ
     char bossName[64];
-    sprintf(bossName, "%s: %d / %d", gCurrentLanguage->boss_name, hp, maxHp);
+    const char* bossLabel = (bossLevel % 2 == 0)
+        ? gCurrentLanguage->boss_name_demon
+        : gCurrentLanguage->boss_name_reaper;
+    sprintf(bossName, "%s: %d / %d", bossLabel, hp, maxHp);
     int textW = textwidth(bossName);
     outtextxy(x + (barW - textW) / 2, y - 28, bossName);
 }

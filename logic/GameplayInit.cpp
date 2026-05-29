@@ -11,6 +11,10 @@
 #include "GameplayTypes.cpp"
 
 extern void* cachedGameBackground;
+extern void* cachedGhostSprite;
+extern void* cachedGhostMask;
+extern void* cachedFireballSprite;
+extern void* cachedFireballMask;
 
 static void appendScoreToFile(int score) {
     FILE* fp = fopen("scores.txt", "a");
@@ -130,6 +134,39 @@ static void initGameBackground() {
         unsigned int size = imagesize(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         cachedGameBackground = malloc(size);
         getimage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cachedGameBackground);
+
+        // Pre-cache Ghost and Fireball sprites/masks for lag-free performance!
+        int ghostW = 25 * 3;
+        int ghostH = 46 * 3;
+        unsigned int ghostSize = imagesize(0, 0, ghostW, ghostH);
+        
+        // Ghost Sprite
+        cleardevice();
+        drawGhost(-6, 138, 0);
+        cachedGhostSprite = malloc(ghostSize);
+        getimage(0, 0, ghostW, ghostH, cachedGhostSprite);
+        
+        // Ghost Mask
+        cleardevice();
+        drawGhost(-6, 138, 1);
+        cachedGhostMask = malloc(ghostSize);
+        getimage(0, 0, ghostW, ghostH, cachedGhostMask);
+
+        int fireW = 11 * 3;
+        int fireH = 11 * 3;
+        unsigned int fireSize = imagesize(0, 0, fireW, fireH);
+        
+        // Fireball Sprite
+        cleardevice();
+        drawFireball(16, 16, 0);
+        cachedFireballSprite = malloc(fireSize);
+        getimage(0, 0, fireW, fireH, cachedFireballSprite);
+        
+        // Fireball Mask
+        cleardevice();
+        drawFireball(16, 16, 1);
+        cachedFireballMask = malloc(fireSize);
+        getimage(0, 0, fireW, fireH, cachedFireballMask);
 
         setactivepage(0);
         drawLoadingScreen(95, gCurrentLanguage->loading_complete);

@@ -3,30 +3,38 @@
 
 #include <graphics.h>
 
-void drawFireball(float x, float y) {
-    const int pixel = 2;
+void drawFireball(float x, float y, int isMask = 0) {
+    const int pixel = 3;
     const int color0 = -1;
-    const int color1 = COLOR(40, 140, 200);
-    const int color2 = COLOR(70, 200, 240);
-    const int color3 = COLOR(140, 240, 255);
-    const int color4 = COLOR(200, 255, 255);
+    const int color1 = isMask ? BLACK : COLOR(20, 80, 160);   // Dark ghostly blue edge
+    const int color2 = isMask ? BLACK : COLOR(40, 140, 210);  // Ghostly blue
+    const int color3 = isMask ? BLACK : COLOR(80, 200, 245);  // Cyan glow
+    const int color4 = isMask ? BLACK : COLOR(150, 240, 255); // Pale cyan inner aura
+    const int color5 = isMask ? BLACK : COLOR(230, 255, 255); // Bright white hot core
 
     const char* pixels[] = {
-        "000220000",
-        "002332000",
-        "023443200",
-        "023443200",
-        "233444320",
-        "233444320",
-        "023443200",
-        "022333200",
-        "002222000"
+        "00001110000",
+        "00122222100",
+        "01233333210",
+        "12344444321",
+        "12345554321",
+        "12345554321",
+        "12345554321",
+        "12344444321",
+        "01233333210",
+        "00122222100",
+        "00001110000"
     };
 
     int rows = sizeof(pixels) / sizeof(pixels[0]);
-    int cols = 9;
+    int cols = 11;
     int startX = (int)x - (cols * pixel) / 2;
     int startY = (int)y - (rows * pixel) / 2;
+
+    if (isMask) {
+        setfillstyle(SOLID_FILL, WHITE);
+        bar(startX, startY, startX + cols * pixel, startY + rows * pixel);
+    }
 
     for (int r = 0; r < rows; r++) {
         for (int c = 0; c < cols; c++) {
@@ -36,6 +44,7 @@ void drawFireball(float x, float y) {
                 case '2': drawColor = color2; break;
                 case '3': drawColor = color3; break;
                 case '4': drawColor = color4; break;
+                case '5': drawColor = color5; break;
                 default: drawColor = color0; break;
             }
 

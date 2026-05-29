@@ -10,6 +10,10 @@
 #include "GameplayRender.cpp"
 
 extern void* cachedGameBackground;
+extern void* cachedGhostSprite;
+extern void* cachedGhostMask;
+extern void* cachedFireballSprite;
+extern void* cachedFireballMask;
 
 static void drawSwordSlashTrail(int cx, int cy, float scale, int facingRight, float progress) {
     if (progress <= 0.0f || progress >= 1.0f) return;
@@ -73,7 +77,14 @@ static void drawGameplay(const GameState& state) {
     int ghostLimit = (state.bossState == 0) ? MAX_GHOSTS : 2;
     for (int i = 0; i < ghostLimit; i++) {
         if (!state.ghosts[i].active) continue;
-        drawGhost((int)state.ghosts[i].x, (int)state.ghosts[i].y);
+        int gx = (int)state.ghosts[i].x;
+        int gy = (int)state.ghosts[i].y;
+        int ghostW = 25 * 3;
+        int ghostH = 46 * 3;
+        int startX = gx + 2 * 3;
+        int startY = gy - ghostH;
+        putimage(startX, startY, cachedGhostMask, AND_PUT);
+        putimage(startX, startY, cachedGhostSprite, OR_PUT);
     }
     if (state.skillReady) {
         drawFootGlow((int)state.explorerX, (int)state.explorerY, state.explorerScale);
@@ -107,7 +118,14 @@ static void drawGameplay(const GameState& state) {
     }
     for (int i = 0; i < MAX_FIREBALLS; i++) {
         if (!state.fireballs[i].active) continue;
-        drawFireball(state.fireballs[i].x, state.fireballs[i].y);
+        int fx = (int)state.fireballs[i].x;
+        int fy = (int)state.fireballs[i].y;
+        int fireW = 11 * 3;
+        int fireH = 11 * 3;
+        int startX = fx - fireW / 2;
+        int startY = fy - fireH / 2;
+        putimage(startX, startY, cachedFireballMask, AND_PUT);
+        putimage(startX, startY, cachedFireballSprite, OR_PUT);
     }
     for (int i = 0; i < MAX_ENERGY_WAVES; i++) {
         if (!state.energyWaves[i].active) continue;
@@ -134,7 +152,9 @@ static void drawGameplay(const GameState& state) {
         if (((int)(state.timeSec * 4.0f)) % 2 == 0) {
             setcolor(COLOR(255, 30, 30));
             settextstyle(BOLD_FONT, HORIZ_DIR, 4);
-            const char* warnText = gCurrentLanguage->boss_warning;
+            const char* warnText = (state.bossLevel % 2 == 0)
+                ? gCurrentLanguage->boss_warning_demon
+                : gCurrentLanguage->boss_warning_reaper;
             int wText = textwidth((char*)warnText);
             int bx1 = (SCREEN_WIDTH - wText) / 2 - 20;
             int by1 = SCREEN_HEIGHT / 2 - 60;
@@ -165,7 +185,7 @@ static void drawGameplay(const GameState& state) {
         } else {
             drawReaperBoss((int)state.bossX, (int)state.bossY, 1.0f, state.timeSec);
         }
-        drawBossHealthBar(state.bossHp, state.bossMaxHp);
+        drawBossHealthBar(state.bossHp, state.bossMaxHp, state.bossLevel);
 
         if (state.bossAttackChargeTimer > 0.0f) {
             setcolor(COLOR(255, 0, 0));

@@ -91,6 +91,18 @@ void drawDemonBoss(int x, int y, float scale, float timeSec) {
         bx + S(28), by + S(5)
     };
     drawDemonFilledPoly(9, wingRPts, wingShadow, BLACK, 2);
+
+    // Họa tiết đỏ rực rỡ bên trong màng cánh phải
+    int wingRRedPts[] = {
+        bx + S(45), by - S(47) - (int)(wingWiggle * S(40)),
+        bx + S(68), by - S(75) - (int)(wingWiggle * S(70)),
+        bx + S(95), by - S(62) - (int)(wingWiggle * S(90)),
+        bx + S(115), by - S(36) - (int)(wingWiggle * S(100)),
+        bx + S(90), by - S(8),
+        bx + S(78), by + S(8),
+        bx + S(55), by - S(15)
+    };
+    drawDemonFilledPoly(7, wingRRedPts, COLOR(160, 10, 10), BLACK, 1);
     
     // Xương cánh phải sắc nét
     setcolor(wingLight);
@@ -113,6 +125,18 @@ void drawDemonBoss(int x, int y, float scale, float timeSec) {
         bx - S(22), by + S(5)
     };
     drawDemonFilledPoly(9, wingLPts, wingDark, BLACK, 2);
+
+    // Họa tiết đỏ rực rỡ bên trong màng cánh trái
+    int wingLRedPts[] = {
+        bx - S(40), by - S(43) + (int)(wingWiggle * S(40)),
+        bx - S(63), by - S(71) + (int)(wingWiggle * S(70)),
+        bx - S(88), by - S(57) + (int)(wingWiggle * S(90)),
+        bx - S(110), by - S(30) + (int)(wingWiggle * S(100)),
+        bx - S(85), by - S(5),
+        bx - S(73), by + S(10),
+        bx - S(50), by - S(13)
+    };
+    drawDemonFilledPoly(7, wingLRedPts, COLOR(220, 15, 15), BLACK, 1);
     
     // Xương cánh trái sắc nét
     setcolor(wingLight);
@@ -251,7 +275,16 @@ void drawDemonBoss(int x, int y, float scale, float timeSec) {
     putpixel(skX - S(2), skY + S(1), RED);
     putpixel(skX + S(2), skY + S(1), RED);
 
-    // --- 7. ĐẦU QUY QUAY HẲN VỀ BÊN TRÁI (Bản vẽ nghiêng rõ nét) ---
+    // --- 7. ĐẦU VÀ CỔ QUY (Quay về bên trái) ---
+    // Vẽ phần cổ màu đỏ nối liền thân mình và đầu
+    int neckPts[] = {
+        bx - S(10), by - S(20), // Nối cổ sau đầu
+        bx + S(2), by - S(20),  // Nối cổ trước đầu
+        bx + S(8), by - S(10),  // Nối vai sau thân
+        bx - S(14), by - S(12)  // Nối vai trước thân
+    };
+    drawDemonFilledPoly(4, neckPts, skinRed, BLACK, 2);
+
     // Khuôn mặt vẽ dạng profile nghiêng trái cực kỳ rõ ràng
     int headPts[] = {
         bx - S(12), by - S(20), // Cổ sau
@@ -265,12 +298,21 @@ void drawDemonBoss(int x, int y, float scale, float timeSec) {
     };
     drawDemonFilledPoly(8, headPts, skinRed, BLACK, 2);
 
-    // Mắt ác quỷ nghiêng trái: Chỉ vẽ mắt nhìn chéo về bên trái
-    setcolor(eyeOrange);
+    // Mắt ác quỷ thứ nhất (Mắt phải gần - lớn hơn, xếch ngược lên phía sau)
+    int eye1Pts[] = {
+        bx - S(16), by - S(33), // Khóe mắt trong (thấp, gần mũi)
+        bx - S(9), by - S(39),  // Đuôi mắt ngoài (cao, xếch lên phía sau)
+        bx - S(14), by - S(33)  // Đáy mắt
+    };
+    drawDemonFilledPoly(3, eye1Pts, eyeYellow, eyeOrange, 1);
+    setcolor(COLOR(255, 0, 0));
+    setlinestyle(SOLID_LINE, 0, 2);
+    line(bx - S(15), by - S(34), bx - S(10), by - S(38)); // Đồng tử xếch theo mắt
+
+    // Lông mày xếch tà ác mắt 1 (dữ tợn hơn, ôm sát viền trên mắt)
+    setcolor(BLACK);
     setlinestyle(SOLID_LINE, 0, 3);
-    line(bx - S(18), by - S(37), bx - S(11), by - S(35)); // Vẽ mắt xếch hẳn sát rìa trái khuôn mặt
-    putpixel(bx - S(15), by - S(36), eyeYellow);
-    putpixel(bx - S(14), by - S(36), WHITE); // Đốm sáng lòng tử
+    line(bx - S(18), by - S(35), bx - S(8), by - S(41));
 
     // Tai nhọn ác quỷ chỉ vẽ ở phía sau chĩa về bên phải (do quay đầu sang trái)
     int earRPts[] = { bx + S(8), by - S(33), bx + S(19), by - S(31), bx + S(8), by - S(27) };
@@ -285,85 +327,106 @@ void drawDemonBoss(int x, int y, float scale, float timeSec) {
         bx - S(8), by - S(25)
     };
     drawDemonFilledPoly(5, beardPts, beardWhite, beardDark, 2);
-    // Sợi râu sáng tạo khối râu tóc chảy nghiêng
-    setcolor(WHITE);
-    setlinestyle(SOLID_LINE, 0, 1);
-    line(bx - S(18), by - S(20), bx - S(20), by - S(2));
-    line(bx - S(14), by - S(20), bx - S(15), by + S(3));
 
-    // Cặp sừng Ác quỷ lớn chỉ hướng về bên phải (hướng ra sau đầu do quay mặt sang trái)
-    // Sừng trái (ở phía trước, xuất phát từ trán trái bx - S(12))
+    // Cặp sừng Ác quỷ lớn được thiết kế CONG ĐẸP VÀ UỐN LƯỢN DỮ TỢN HƠN
+    // Sừng trái (ở phía trước)
     int hornLPts[] = {
-        bx - S(12), by - S(43),
-        bx - S(8), by - S(55),
-        bx + S(2), by - S(70),
-        bx + S(15), by - S(76), // Cong hẳn ra phía sau (bên phải)
-        bx + S(8), by - S(64),
-        bx + S(2), by - S(53),
-        bx - S(5), by - S(43)
+        bx - S(10), by - S(43), // Gốc sừng trước
+        bx - S(22), by - S(54), // Cong lượn sang trái
+        bx - S(20), by - S(70), // Cong vút lên trên
+        bx - S(2), by - S(84),  // Uốn ngược sang phải
+        bx + S(18), by - S(90), // Ngọn sừng nhọn hoắt
+        bx + S(8), by - S(80),  // Viền dưới ngọn sừng
+        bx - S(8), by - S(68),
+        bx - S(10), by - S(54),
+        bx - S(4), by - S(43)   // Gốc sừng sau
     };
-    drawDemonFilledPoly(7, hornLPts, hornDark, BLACK, 2);
-    // Vân sừng trái gồ ghề
-    setcolor(hornLight);
-    setlinestyle(SOLID_LINE, 0, 1);
-    line(bx - S(5), by - S(52), bx + S(1), by - S(52));
-    line(bx + S(1), by - S(62), bx + S(7), by - S(62));
-    line(bx + S(8), by - S(70), bx + S(13), by - S(70));
+    drawDemonFilledPoly(9, hornLPts, hornDark, BLACK, 2);
 
-    // Sừng phải (ở phía sau, xuất phát từ đỉnh đầu sau bx + S(4))
+    // Sừng phải (ở phía sau)
     int hornRPts[] = {
-        bx + S(4), by - S(43),
-        bx + S(10), by - S(52),
-        bx + S(18), by - S(66),
-        bx + S(28), by - S(70), // Cong ra sau
-        bx + S(22), by - S(60),
-        bx + S(14), by - S(50),
-        bx + S(6), by - S(43)
+        bx + S(4), by - S(43),  // Gốc sừng trước
+        bx - S(6), by - S(52),  // Cong lượn sang trái
+        bx - S(4), by - S(66),  // Cong vút lên
+        bx + S(10), by - S(78), // Uốn sang phải
+        bx + S(28), by - S(84), // Ngọn sừng nhọn hoắt
+        bx + S(18), by - S(74), // Viền dưới
+        bx + S(4), by - S(62),
+        bx + S(2), by - S(50),
+        bx + S(8), by - S(43)   // Gốc sừng sau
     };
-    drawDemonFilledPoly(7, hornRPts, hornDark, BLACK, 2);
+    drawDemonFilledPoly(9, hornRPts, hornDark, BLACK, 2);
 
     // --- 8. Cánh tay trái (Background arm - ở phía sau) ---
-    int armLPts[] = {
-        bx + S(22), by - S(8),   // Vai sau
-        bx + S(34), by + S(0),   // Bắp tay
-        bx + S(38), by + S(14),  // Khuỷu tay
-        bx + S(28), by + S(25),  // Cổ tay
-        bx + S(20), by + S(22),  // Cánh tay dưới
-        bx + S(15), by + S(10)   // Nách sau
+    // Bắp tay sau (Background upper arm) - Làm to hơn
+    int bicepLPts[] = {
+        bx + S(22), by - S(10), // Vai sau
+        bx + S(39), by + S(0),  // Bắp tay ngoài (phình to hơn)
+        bx + S(41), by + S(14), // Khủy tay (nhô rộng hơn)
+        bx + S(24), by + S(8),  // Khủy tay trong
+        bx + S(15), by + S(8)   // Nách sau
     };
-    drawDemonFilledPoly(6, armLPts, skinShadow, BLACK, 2);
+    drawDemonFilledPoly(5, bicepLPts, skinShadow, BLACK, 2);
+
+    // Cẳng tay sau (Background forearm) - Làm to hơn
+    int forearmLPts[] = {
+        bx + S(41), by + S(14), // Khủy tay
+        bx + S(44), by + S(20), // Cơ cánh tay dưới (to hơn)
+        bx + S(30), by + S(26), // Cổ tay ngoài
+        bx + S(20), by + S(22), // Cổ tay trong
+        bx + S(24), by + S(8)   // Khớp trong
+    };
+    drawDemonFilledPoly(5, forearmLPts, skinShadow, BLACK, 2);
     
-    // Bàn tay trái (Background hand) nắm đấm ở hông
-    int handLX = bx + S(24);
-    int handLY = by + S(25);
+    // Bàn tay trái (Background hand) nắm đấm ở hông với các móng vuốt quỷ sắc lẹm màu đen
+    int handLX = bx + S(26);
+    int handLY = by + S(26);
     setfillstyle(SOLID_FILL, skinShadow);
     setcolor(BLACK);
     setlinestyle(SOLID_LINE, 0, 1);
-    fillellipse(handLX, handLY, S(5), S(5));
-    circle(handLX, handLY, S(5));
+    fillellipse(handLX, handLY, S(6), S(6)); // Nắm đấm to hơn
+    circle(handLX, handLY, S(6));
 
-    // --- 9. Cánh tay phải cầm Kiếm Lửa QUAY SANG TRÁI (Foreground arm) ---
-    // Nâng thanh kiếm chĩa về bên trái, đảm bảo khớp nối cổ tay không bị cụt
-    int armRPts[] = {
-        bx - S(22), by - S(8),   // Vai trước
-        bx - S(34), by - S(3),   // Bắp tay
-        bx - S(46), by + S(10),  // Khuỷu tay
-        bx - S(44), by + S(20),  // Cổ tay dưới (khớp với bàn tay ở handX, handY)
-        bx - S(38), by + S(22),  // Cổ tay trên
-        bx - S(26), by + S(12),  // Cánh tay trong
-        bx - S(16), by + S(6)    // Nách trước
+    // Vẽ móng vuốt quỷ sắc bén
+    int lclaw1[] = { handLX + S(4), handLY + S(2), handLX + S(7), handLY + S(4), handLX + S(4), handLY + S(5) };
+    drawDemonFilledPoly(3, lclaw1, hornDark, BLACK, 1);
+    int lclaw2[] = { handLX, handLY + S(4), handLX + S(4), handLY + S(8), handLX - S(1), handLY + S(6) };
+    drawDemonFilledPoly(3, lclaw2, hornDark, BLACK, 1);
+
+    // --- 9. Cánh tay phải cầm Kiếm Lửa QUAY SANG TRÁI (Foreground arm - ở phía trước) ---
+    // Bắp tay trước (Foreground upper arm) - Làm to hơn
+    int bicepRPts[] = {
+        bx - S(22), by - S(10), // Vai trước
+        bx - S(39), by - S(4),  // Bắp tay ngoài (phình to hơn)
+        bx - S(48), by + S(12), // Khủy tay ngoài (rộng hơn)
+        bx - S(30), by + S(14), // Khớp trong
+        bx - S(15), by + S(6)   // Nách trước
     };
-    drawDemonFilledPoly(7, armRPts, skinRed, BLACK, 2);
+    drawDemonFilledPoly(5, bicepRPts, skinRed, BLACK, 2);
+    // Highlight bắp tay trước
     setcolor(skinHighlight);
     setlinestyle(SOLID_LINE, 0, 2);
-    line(bx - S(28), by + S(2), bx - S(42), by + S(12));
+    line(bx - S(24), by - S(5), bx - S(35), by + S(4));
 
-    // Bàn tay cầm kiếm
-    int handX = bx - S(42);
-    int handY = by + S(20);
+    // Cẳng tay trước (Foreground forearm) - Làm to hơn
+    int forearmRPts[] = {
+        bx - S(48), by + S(12), // Khủy tay
+        bx - S(53), by + S(18), // Cơ cánh tay dưới (to hơn)
+        bx - S(48), by + S(23), // Cổ tay ngoài
+        bx - S(38), by + S(24), // Cổ tay trong
+        bx - S(30), by + S(14)  // Khớp trong
+    };
+    drawDemonFilledPoly(5, forearmRPts, skinRed, BLACK, 2);
+    // Highlight cẳng tay trước
+    setcolor(skinHighlight);
+    line(bx - S(45), by + S(15), bx - S(39), by + S(22));
+
+    // Bàn tay cầm kiếm (dịch chuyển khớp với cổ tay to hơn)
+    int handX = bx - S(43);
+    int handY = by + S(23);
     setfillstyle(SOLID_FILL, skinRed);
-    fillellipse(handX, handY, S(6), S(6));
-    circle(handX, handY, S(6));
+    fillellipse(handX, handY, S(7), S(7)); // Bàn tay to hơn một chút
+    circle(handX, handY, S(7));
 
     // --- 10. Kiếm Lửa Khổng Lồ Sắc Nét Chĩa Sang Trái (Thiết kế tương tự kiếm của Hero) ---
     float angle = 2.30f; // Góc chéo hướng xuống bên trái
