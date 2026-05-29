@@ -49,4 +49,24 @@ void drawCloud(int x, int y, int size) {
     ellipse(x - size*0.3, y - size*0.4, 30, 150, size*0.7, size*0.5);
 }
 
+void drawFloatingClouds(float timeSec) {
+    int widthPeriod = SCREEN_WIDTH + 300; // Chu kỳ cuộn màn hình
+    
+    // Đám mây 1 (nhanh, bay ở độ cao 100)
+    int cx1 = (int)(200 + timeSec * 16.0f) % widthPeriod - 150;
+    drawCloud(cx1, 100, 40);
+
+    // Đám mây 2 (chậm, bay ở độ cao 150)
+    int cx2 = (int)(500 + timeSec * 10.0f) % widthPeriod - 150;
+    drawCloud(cx2, 150, 35);
+
+    // Đám mây 3 (nhanh hơn, bay ở độ cao 80)
+    int cx3 = (int)(850 + timeSec * 22.0f) % widthPeriod - 150;
+    drawCloud(cx3, 80, 45);
+
+    // Đám mây 4 (chậm vừa, bay ở độ cao 120)
+    int cx4 = (int)(1050 + timeSec * 13.0f) % widthPeriod - 150;
+    drawCloud(cx4, 120, 38);
+}
+
 #endif

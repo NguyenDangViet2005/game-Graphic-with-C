@@ -52,12 +52,7 @@ void drawMenuBackground() {
     fillellipse(moonX - 12, moonY + 15, 7, 6);
     fillellipse(moonX - 5, moonY - 25, 6, 5);
     
-    // dám mây
-    drawCloud(180, 120, 45);
-    drawCloud(400, 90, 38);
-    drawCloud(650, 140, 42);
-    drawCloud(900, 100, 40);
-    drawCloud(1050, 130, 36);
+    // Đám mây được chuyển sang chế độ bay động bồng bềnh (drawFloatingClouds)
 
     // Bo chi tiet trang tri tren may
     

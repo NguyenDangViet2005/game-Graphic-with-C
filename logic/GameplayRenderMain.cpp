@@ -72,6 +72,7 @@ static void drawSwordSlashTrail(int cx, int cy, float scale, int facingRight, fl
 static void drawGameplay(const GameState& state) {
     setactivepage(state.page);
     putimage(0, 0, cachedGameBackground, COPY_PUT);
+    drawFloatingClouds(state.timeSec);
     drawForestSway(state.timeSec);
     drawFirefliesAnimated(state.timeSec);
     int ghostLimit = (state.bossState == 0) ? MAX_GHOSTS : 2;

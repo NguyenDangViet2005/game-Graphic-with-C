@@ -21,6 +21,7 @@ static const char* kAliasGameOver = "sfx_gameover";
 static const char* kAliasGetScore = "sfx_getscore";
 static const char* kAliasJump = "sfx_jump";
 static const char* kAliasRun = "sfx_run";
+static const char* kAliasDemonSmile = "sfx_demonsmile";
 
 static const char* kPathLoading = "sound-effects\\sound-loading.mp3";
 static const char* kPathBackground = "sound-effects\\sound-background.mp3";
@@ -35,6 +36,7 @@ static const char* kPathGameOver = "sound-effects\\sound-gameover.mp3";
 static const char* kPathGetScore = "sound-effects\\sound-getscore.mp3";
 static const char* kPathJump = "sound-effects\\sound-jump.mp3";
 static const char* kPathRun = "sound-effects\\sound-run.mp3";
+static const char* kPathDemonSmile = "sound-effects\\demon-smile.mp3";
 
 static int gAudioInitialized = 0;
 static const char* gCurrentMusic = NULL;
@@ -121,6 +123,7 @@ void initAudio() {
     openAlias(kAliasGetScore, kPathGetScore);
     openAlias(kAliasJump, kPathJump);
     openAlias(kAliasRun, kPathRun);
+    openAlias(kAliasDemonSmile, kPathDemonSmile);
 
     setAliasVolume(kAliasBackground, 520);
     setAliasVolume(kAliasPlay, 650);
@@ -136,6 +139,7 @@ void initAudio() {
     setAliasVolume(kAliasGetScore, 820);
     setAliasVolume(kAliasJump, 720);
     setAliasVolume(kAliasRun, 600);
+    setAliasVolume(kAliasDemonSmile, 850);
     gAudioInitialized = 1;
 }
 
@@ -145,6 +149,7 @@ void shutdownAudio() {
     stopAlias(kAliasBackground);
     stopAlias(kAliasPlay);
     stopAlias(kAliasRun);
+    stopAlias(kAliasDemonSmile);
     closeAlias(kAliasLoading);
     closeAlias(kAliasBackground);
     closeAlias(kAliasPlay);
@@ -158,6 +163,7 @@ void shutdownAudio() {
     closeAlias(kAliasGetScore);
     closeAlias(kAliasJump);
     closeAlias(kAliasRun);
+    closeAlias(kAliasDemonSmile);
     gAudioInitialized = 0;
     gCurrentMusic = NULL;
     gRunLooping = 0;
@@ -189,6 +195,7 @@ void playFire() { playAliasOnce(kAliasFire); }
 void playPowerFirer() { playAliasOnce(kAliasPowerFirer); }
 void playGameOver() { playAliasOnce(kAliasGameOver); }
 void playGetScore() { playAliasOnce(kAliasGetScore); }
+void playDemonSmile() { playAliasOnce(kAliasDemonSmile); }
 void playJump() { playAliasOnce(kAliasJump); }
 
 void startRunLoop() {

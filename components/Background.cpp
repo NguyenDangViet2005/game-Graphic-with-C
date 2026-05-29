@@ -50,11 +50,7 @@ void drawBackground() {
     fillellipse(moonX - 10, moonY + 12, 6, 5);
     
     
-    // Đám mây (GIỮ NGUYÊN)
-    drawCloud(200, 100, 40);
-    drawCloud(500, 150, 35);
-    drawCloud(850, 80, 45);
-    drawCloud(1050, 120, 38);
+    // Đám mây đã được chuyển sang chế độ bay bồng bềnh động (drawFloatingClouds)
     
     
     // vẽ nền đất và cỏ

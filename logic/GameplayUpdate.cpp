@@ -450,6 +450,7 @@ static void updateBoss(GameState& state) {
             state.bossX = SCREEN_WIDTH - 220.0f;
             state.bossY = GROUND_Y + 30.0f;
             state.bossHp = state.bossMaxHp;
+            playDemonSmile(); // Play demon smile sound effect when boss summon begins (summonSigil appears)
         }
     } else if (state.bossState == 2) {
         state.bossSummonTimer -= state.dt;
