@@ -10,6 +10,7 @@
 #include "../algorithms/polygon_fill.cpp"
 #include "Gravestone.cpp"
 #include "TallGrass.cpp"
+#include "Bush.cpp"
 
 // Vết nứt đất quỷ giới màu dung nham đỏ cam
 static void drawGroundCracksDemon(int x, int y, int width) {

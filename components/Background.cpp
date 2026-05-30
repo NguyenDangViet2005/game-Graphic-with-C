@@ -7,6 +7,7 @@
 #include "Firefly.cpp"
 #include "GroundCracks.cpp"
 #include "Gravestone.cpp"
+#include "Bush.cpp"
 #include "TallGrass.cpp"
 #include "../algorithms/fractal.cpp"
 #include "../algorithms/index.cpp"

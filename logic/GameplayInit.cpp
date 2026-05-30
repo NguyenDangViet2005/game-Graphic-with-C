@@ -7,7 +7,6 @@
 #include "../configs/Config.cpp"
 #include "../configs/Audio.cpp"
 #include "../components/index.cpp"
-#include "../components/LoadingScreen.cpp"
 #include "GameplayTypes.cpp"
 
 extern void* cachedGameBackground;

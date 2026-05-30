@@ -11,12 +11,10 @@
 #include "../configs/Config.cpp"
 #include "../configs/Audio.cpp"
 #include "../components/index.cpp"
-#include "../components/LoadingScreen.cpp"
 #include "GameplayTypes.cpp"
 #include "GameplayCollision.cpp"
 #include "GameplayRender.cpp"
 
-// Import các file logic đã được tách để tăng tính mô-đun
 #include "GameplayInit.cpp"
 #include "GameplayUpdate.cpp"
 #include "GameplayRenderMain.cpp"

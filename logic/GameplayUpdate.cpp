@@ -9,6 +9,8 @@
 #include "../configs/Audio.cpp"
 #include "GameplayTypes.cpp"
 #include "GameplayCollision.cpp"
+#include "GameplayInit.cpp"
+#include "../components/index.cpp"
 
 static void handleGameEvents(GameState& state) {
     if (ismouseclick(WM_LBUTTONDOWN)) {
