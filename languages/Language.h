@@ -67,6 +67,9 @@ struct Language {
     const char* spam_title;
     const char* spam_message;
     const char* spam_button;
+
+    // Portal
+    const char* portal_enter;
 };
 
 #endif

@@ -25,6 +25,30 @@ static void appendScoreToFile(int score) {
     fclose(fp);
 }
 
+void updateGameBackgroundTheme(bool isDemonTheme) {
+    if (cachedGameBackground == NULL) return;
+    int oldActive = getactivepage();
+    
+    // Đặt Active Page sang trang tạm để vẽ ngầm
+    int tempPage = 1 - oldActive;
+    setactivepage(tempPage);
+    cleardevice();
+    
+    if (isDemonTheme) {
+        drawBackgroundDemon();
+        drawDarkForestDemon();
+    } else {
+        drawBackground();
+        drawDarkForest();
+    }
+    
+    // Ghi đè vào cachedGameBackground
+    getimage(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cachedGameBackground);
+    
+    // Khôi phục lại Active Page
+    setactivepage(oldActive);
+}
+
 static void initGameState(GameState& state) {
     state.hp = 3;
     state.score = 0;
@@ -100,6 +124,20 @@ static void initGameState(GameState& state) {
     state.isSlashing = 0;
     state.swordSlashTime = 0.0f;
     state.swordSlashDuration = 0.2f;
+
+    // Demon Theme and Portal transition variables
+    state.isDemonTheme = 0;
+    state.showPortal = 0;
+    state.portalX = 0.0f;
+    state.portalY = 0.0f;
+
+    // Demon Boss Eruption Skill variables
+    state.bossAttackType = 0;
+    state.eruptionX[0] = 0.0f;
+    state.eruptionX[1] = 0.0f;
+    state.eruptionX[2] = 0.0f;
+
+    // Reset background to normal theme is now handled in initGameBackground
 }
 
 static void initGameBackground() {
@@ -179,6 +217,20 @@ static void initGameBackground() {
         setactivepage(oldPage);
         playMusicPlay();
     } else {
+        // Nếu đã có cache (chơi lại), reset background về rừng tối trong lúc hiển thị màn hình loading nhanh
+        playMusicLoading();
+        drawLoadingScreen(20, gCurrentLanguage->loading_wait);
+        delay(150);
+
+        drawLoadingScreen(60, gCurrentLanguage->loading_text);
+        
+        // Thực hiện cập nhật background về trạng thái ban đầu trong lúc đang hiện loading
+        updateGameBackgroundTheme(false);
+        delay(100);
+
+        drawLoadingScreen(100, gCurrentLanguage->loading_complete);
+        delay(300);
+
         putimage(0, 0, cachedGameBackground, COPY_PUT);
         playMusicPlay();
     }

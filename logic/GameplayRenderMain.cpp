@@ -75,6 +75,14 @@ static void drawGameplay(const GameState& state) {
     drawFloatingClouds(state.timeSec);
     drawForestSway(state.timeSec);
     drawFirefliesAnimated(state.timeSec);
+    if (state.showPortal) {
+        drawSummonSigil((int)state.portalX, (int)state.portalY - 60, 2.2f);
+        setcolor(COLOR(255, 80, 80));
+        settextstyle(BOLD_FONT, HORIZ_DIR, 2);
+        const char* portalText = gCurrentLanguage->portal_enter;
+        int wText = textwidth((char*)portalText);
+        outtextxy((int)(state.portalX - wText / 2), (int)(state.portalY - 140), (char*)portalText);
+    }
     int ghostLimit = (state.bossState == 0) ? MAX_GHOSTS : 2;
     for (int i = 0; i < ghostLimit; i++) {
         if (!state.ghosts[i].active) continue;
@@ -197,16 +205,39 @@ static void drawGameplay(const GameState& state) {
         drawBossHealthBar(state.bossHp, state.bossMaxHp, state.bossLevel);
 
         if (state.bossAttackChargeTimer > 0.0f) {
-            setcolor(COLOR(255, 0, 0));
-            setlinestyle(DOTTED_LINE, 0, 2);
-            int rx1 = 0;
-            int rx2 = (int)(state.bossX - 40);
-            int ry1 = (int)(GROUND_Y - 90);
-            int ry2 = (int)(GROUND_Y + 30);
-            rectangle(rx1, ry1, rx2, ry2);
-            line(rx1, ry1, rx2, ry2);
-            line(rx1, ry2, rx2, ry1);
-            setlinestyle(SOLID_LINE, 0, 1);
+            if (state.bossAttackType == 1) {
+                // Vẽ các vòng tròn cảnh báo dưới chân người chơi
+                for (int i = 0; i < 3; i++) {
+                    int px = (int)state.eruptionX[i];
+                    int py = (int)(GROUND_Y + 20);
+                    int pulseRadius = (int)(35 + 10 * sin(state.timeSec * 15.0f));
+                    
+                    // Vòng ngoài màu đỏ cảnh báo nhấp nháy
+                    setcolor(COLOR(255, 30, 30));
+                    setlinestyle(DOTTED_LINE, 0, 2);
+                    ellipse(px, py, 0, 360, 45, 14);
+                    
+                    // Vòng trong màu cam lan rộng/co lại theo thời gian sạc
+                    setcolor(COLOR(255, 120, 0));
+                    setlinestyle(SOLID_LINE, 0, 3);
+                    int progressRadius = (int)(45.0f * (state.bossAttackChargeTimer / 1.8f));
+                    if (progressRadius < 5) progressRadius = 5;
+                    ellipse(px, py, 0, 360, progressRadius, (int)(progressRadius * 0.3f));
+                }
+                setlinestyle(SOLID_LINE, 0, 1);
+            } else {
+                // Vẽ cảnh báo chém ngang truyền thống
+                setcolor(COLOR(255, 0, 0));
+                setlinestyle(DOTTED_LINE, 0, 2);
+                int rx1 = 0;
+                int rx2 = (int)(state.bossX - 40);
+                int ry1 = (int)(GROUND_Y - 90);
+                int ry2 = (int)(GROUND_Y + 30);
+                rectangle(rx1, ry1, rx2, ry2);
+                line(rx1, ry1, rx2, ry2);
+                line(rx1, ry2, rx2, ry1);
+                setlinestyle(SOLID_LINE, 0, 1);
+            }
             
             if (((int)(state.timeSec * 5.0f)) % 2 == 0) {
                 setcolor(COLOR(255, 80, 80));
@@ -219,11 +250,51 @@ static void drawGameplay(const GameState& state) {
         }
 
         if (state.bossAttackActiveTimer > 0.0f) {
-            float progress = (0.4f - state.bossAttackActiveTimer) / 0.4f;
-            if (state.bossLevel % 2 == 0) {
-                drawBossSwordSlash((int)state.bossX, (int)state.bossY, 1.0f, progress);
+            if (state.bossAttackType == 1) {
+                // Vẽ các cột lửa dung nham phun trào từ lòng đất
+                for (int i = 0; i < 3; i++) {
+                    int plumeX = (int)state.eruptionX[i];
+                    int plumeY = (int)(GROUND_Y + 20);
+                    int h = 240; // Chiều cao cột lửa
+                    
+                    // Cột lửa cam ngoài cùng
+                    int ptsOuter[] = {
+                        plumeX - 35, plumeY,
+                        plumeX - 12, plumeY - h,
+                        plumeX + 12, plumeY - h,
+                        plumeX + 35, plumeY,
+                        plumeX - 35, plumeY
+                    };
+                    setcolor(COLOR(255, 69, 0));
+                    setfillstyle(SOLID_FILL, COLOR(255, 69, 0));
+                    fillpoly(5, ptsOuter);
+                    
+                    // Cột lửa vàng sáng bên trong
+                    int ptsInner[] = {
+                        plumeX - 18, plumeY,
+                        plumeX - 6, plumeY - (int)(h * 0.88f),
+                        plumeX + 6, plumeY - (int)(h * 0.88f),
+                        plumeX + 18, plumeY,
+                        plumeX - 18, plumeY
+                    };
+                    setcolor(COLOR(255, 230, 45));
+                    setfillstyle(SOLID_FILL, COLOR(255, 230, 45));
+                    fillpoly(5, ptsInner);
+                    
+                    // Tia điện/lửa đỏ phát sáng xung quanh cột lửa
+                    setcolor(COLOR(255, 0, 0));
+                    setlinestyle(SOLID_LINE, 0, 2);
+                    line(plumeX - 45, plumeY, plumeX - 25, plumeY - 60);
+                    line(plumeX + 45, plumeY, plumeX + 25, plumeY - 60);
+                    setlinestyle(SOLID_LINE, 0, 1);
+                }
             } else {
-                drawBossScytheSlash((int)state.bossX, (int)state.bossY, progress);
+                float progress = (0.4f - state.bossAttackActiveTimer) / 0.4f;
+                if (state.bossLevel % 2 == 0) {
+                    drawBossSwordSlash((int)state.bossX, (int)state.bossY, 1.0f, progress);
+                } else {
+                    drawBossScytheSlash((int)state.bossX, (int)state.bossY, progress);
+                }
             }
         }
     }

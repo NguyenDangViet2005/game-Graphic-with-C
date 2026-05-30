@@ -130,6 +130,16 @@ struct GameState {
     int isSlashing;         // 1 if active slash, 0 otherwise
     float swordSlashTime;   // remaining time for slash animation
     float swordSlashDuration;
+
+    // Demon Theme and Portal transition variables
+    int isDemonTheme;       // 0: normal, 1: demon
+    int showPortal;         // 0: hide, 1: show portal
+    float portalX;
+    float portalY;
+
+    // Demon Boss Eruption Skill variables
+    int bossAttackType;     // 0: Slash, 1: Lava Plumes
+    float eruptionX[3];     // X coordinates of warning/eruption circles
 };
 
 Vec2 applyAffine(const Vec2& p, float cosA, float sinA, float sx, float sy, float tx, float ty) {

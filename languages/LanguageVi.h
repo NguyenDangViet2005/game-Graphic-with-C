@@ -69,7 +69,10 @@ static const Language langVi = {
     // Spam Warning Screen
     "CANH BAO: NHAN SPACE QUA NHANH", // spam_title
     "Vui long nhan SPACE cham lai.",  // spam_message
-    "Choi Tiep"                      // spam_button
+    "Choi Tiep",                      // spam_button
+
+    // Portal
+    "BUOC VAO CONG DICH CHUYEN"       // portal_enter
 };
 
 #endif

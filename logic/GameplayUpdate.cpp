@@ -131,6 +131,83 @@ static void updateExplorer(GameState& state) {
         state.armSwing = -state.armSwing;
         state.headSway = -state.headSway;
     }
+
+    if (state.showPortal) {
+        float dist = (float)fabs(state.explorerX - state.portalX);
+        if (dist < 40.0f) {
+            state.showPortal = 0;
+            
+            // Hiệu ứng dịch chuyển (Teleportation effect)
+            float startX = state.explorerX;
+            float startY = state.explorerY;
+            float targetX = state.portalX;
+            float targetY = state.portalY - 30.0f;
+            
+            for (int frame = 0; frame <= 30; frame++) {
+                float progress = (float)frame / 30.0f;
+                int curX = (int)(startX + (targetX - startX) * progress);
+                int curY = (int)(startY + (targetY - startY) * progress);
+                float curScale = state.explorerScale * (1.0f - progress);
+                
+                setactivepage(state.page);
+                putimage(0, 0, cachedGameBackground, COPY_PUT);
+                
+                // Vẽ cổng dịch chuyển phát sáng hiệu ứng rung động
+                drawSummonSigil((int)state.portalX, (int)state.portalY - 60, 2.2f + (float)sin(progress * 3.14f) * 0.8f);
+                
+                // Vẽ các vòng tròn ma pháp thu nhỏ đồng tâm
+                setcolor(COLOR(255, 80 + (int)(progress * 175), 50));
+                setlinestyle(SOLID_LINE, 0, 2);
+                circle((int)state.portalX, (int)state.portalY - 60, (int)(150 * (1.0f - progress)));
+                circle((int)state.portalX, (int)state.portalY - 60, (int)(80 * (1.0f - progress)));
+                setlinestyle(SOLID_LINE, 0, 1);
+                
+                // Vẽ nhân vật thu nhỏ dần bay vào tâm cổng
+                if (state.facingRight) {
+                    drawExplorer(curX, curY, curScale, state.armSwing, state.headSway, state.currentWeapon, 0.0f);
+                } else {
+                    drawExplorerMirrored(curX, curY, curScale, state.armSwing, state.headSway, state.currentWeapon, 0.0f);
+                }
+                
+                setvisualpage(state.page);
+                state.page = 1 - state.page;
+                delay(25);
+            }
+            
+            // Vào màn hình Loading
+            playMusicLoading();
+            
+            setactivepage(0);
+            drawLoadingScreen(25, gCurrentLanguage->loading_text);
+            setvisualpage(0);
+            delay(200);
+            
+            setactivepage(0);
+            drawLoadingScreen(65, gCurrentLanguage->loading_text);
+            setvisualpage(0);
+            
+            // Nạp backgroundDemon ngầm trong lúc hiển thị Loading
+            state.isDemonTheme = (state.bossLevel % 2 == 0) ? 1 : 0;
+            extern void updateGameBackgroundTheme(bool isDemonTheme);
+            updateGameBackgroundTheme(state.isDemonTheme == 1);
+            
+            setactivepage(0);
+            drawLoadingScreen(100, gCurrentLanguage->loading_complete);
+            setvisualpage(0);
+            delay(450);
+            
+            // Đặt nhân vật ở đầu bản đồ mới để tiếp tục chiến đấu
+            state.explorerX = 150.0f;
+            state.explorerY = state.groundY;
+            state.explorerVx = 0.0f;
+            state.explorerVy = 0.0f;
+            
+            playMusicPlay();
+            playDemonSmile();
+            
+            while (kbhit()) getch();
+        }
+    }
 }
 
 static void updateProjectiles(GameState& state) {
@@ -300,7 +377,7 @@ static void updateProjectiles(GameState& state) {
             int canHit = (state.energyWaves[i].type == 0) || ((state.energyWaves[i].life / 0.6f) <= 0.4f);
             if (canHit && isEnergyWaveHitBoss(state.energyWaves[i], (int)state.bossX, (int)state.bossY)) {
                 state.energyWaves[i].hitBoss = 1;
-                state.bossHp -= (state.energyWaves[i].type == 1) ? 15 : 6;
+                state.bossHp -= 12; // Cân bằng sát thương của cả hai kỹ năng ở mức 12 HP
                 playDamage();
             }
         }
@@ -349,6 +426,7 @@ static void updateProjectiles(GameState& state) {
 }
 
 static void updateGhostsAndHazards(GameState& state) {
+    if (state.showPortal) return;
     int ghostLimit = (state.bossState == 0) ? MAX_GHOSTS : 2;
     int isGoblinPhase = (state.bossLevel % 2 == 0);
     
@@ -362,7 +440,7 @@ static void updateGhostsAndHazards(GameState& state) {
                     state.ghosts[i].y = (float)(GROUND_Y + 30); // Goblin ngang hàng Explorer
                     state.ghosts[i].vx = -160.0f - (float)(rand() % 50); // Đi nhanh hơn
                     state.ghosts[i].shootTimer = 0.8f; // Thời gian chờ chém lần đầu
-                    state.ghosts[i].hp = 3; // Máu nhiều hơn (3 hp)
+                    state.ghosts[i].hp = 2; // Máu Goblin (2 hp để bị tiêu diệt sau 1 nhát chém kiếm)
                 } else {
                     state.ghosts[i].y = state.ghostBaseY; // Ghost bay lơ lửng
                     state.ghosts[i].vx = -90.0f - (float)(rand() % 40);
@@ -473,6 +551,7 @@ static void updateGhostsAndHazards(GameState& state) {
 }
 
 static void updateBoss(GameState& state) {
+    if (state.showPortal) return;
     if (state.bossState == 0 && state.score >= state.nextBossScore) {
         state.bossState = 1;
         state.bossWarningTimer = 3.0f;
@@ -486,7 +565,7 @@ static void updateBoss(GameState& state) {
             state.bossX = SCREEN_WIDTH - 220.0f;
             state.bossY = GROUND_Y + 30.0f;
             state.bossHp = state.bossMaxHp;
-            playDemonSmile(); // Play demon smile sound effect when boss summon begins (summonSigil appears)
+            playDemonSmile(); 
         }
     } else if (state.bossState == 2) {
         state.bossSummonTimer -= state.dt;
@@ -502,20 +581,41 @@ static void updateBoss(GameState& state) {
         if (state.bossAttackChargeTimer > 0.0f) {
             state.bossAttackChargeTimer -= state.dt;
             if (state.bossAttackChargeTimer <= 0.0f) {
-                state.bossAttackActiveTimer = 0.4f;
+                state.bossAttackActiveTimer = (state.bossAttackType == 1) ? 0.6f : 0.4f;
                 playPowerFirer();
             }
         } else if (state.bossAttackActiveTimer > 0.0f) {
             state.bossAttackActiveTimer -= state.dt;
-            float progress = (0.4f - state.bossAttackActiveTimer) / 0.4f;
-            if (isExplorerHitBossAttack(state.explorerX, state.explorerY, state.bossX, state.bossY, progress)) {
-                state.hp = 0;
+            if (state.bossAttackType == 1) {
+                for (int i = 0; i < 3; i++) {
+                    if (fabs(state.explorerX - state.eruptionX[i]) < 45.0f && state.explorerY >= state.groundY - 10.0f) {
+                        state.hp = 0;
+                    }
+                }
+            } else {
+                float progress = (0.4f - state.bossAttackActiveTimer) / 0.4f;
+                if (isExplorerHitBossAttack(state.explorerX, state.explorerY, state.bossX, state.bossY, progress)) {
+                    state.hp = 0;
+                }
             }
         } else {
             state.bossAttackCooldown -= state.dt;
             if (state.bossAttackCooldown <= 0.0f) {
-                state.bossAttackChargeTimer = 1.2f;
                 state.bossAttackCooldown = 5.0f;
+                if (state.bossLevel % 2 == 0) {
+                    state.bossAttackType = rand() % 2; // 0: Slash, 1: Lava Plumes
+                } else {
+                    state.bossAttackType = 0; // Reaper only slashes
+                }
+                
+                if (state.bossAttackType == 1) {
+                    state.bossAttackChargeTimer = 1.8f;
+                    state.eruptionX[0] = state.explorerX - 110.0f - (rand() % 30);
+                    state.eruptionX[1] = state.explorerX + (rand() % 40) - 20.0f;
+                    state.eruptionX[2] = state.explorerX + 110.0f + (rand() % 30);
+                } else {
+                    state.bossAttackChargeTimer = 1.2f;
+                }
             }
         }
 
@@ -540,6 +640,11 @@ static void updateBoss(GameState& state) {
                 state.nextBossScore += 5000;
                 state.bossMaxHp = 120;
             }
+
+            // Kích hoạt cổng dịch chuyển (summonSigil) để chuyển theme
+            state.showPortal = 1;
+            state.portalX = (float)(SCREEN_WIDTH / 2);
+            state.portalY = (float)(GROUND_Y - 20);
         }
     }
 }

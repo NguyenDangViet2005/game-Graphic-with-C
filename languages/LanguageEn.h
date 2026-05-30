@@ -69,7 +69,10 @@ static const Language langEn = {
     // Spam Warning Screen
     "SPACE SPAM DETECTED",        // spam_title
     "Please slow down your SPACE presses.", // spam_message
-    "Resume"                      // spam_button
+    "Resume",                     // spam_button
+
+    // Portal
+    "ENTER TELEPORT PORTAL"       // portal_enter
 };
 
 #endif

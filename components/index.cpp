@@ -6,7 +6,7 @@
 #include "Tree.cpp"
 #include "Bush.cpp"
 #include "Background.cpp"
-#include "Forest.cpp"
+#include "BackgroundDemon.cpp"
 #include "FootGlow.cpp"
 #include "Explorer.cpp"
 #include "ExplorerMirrored.cpp"

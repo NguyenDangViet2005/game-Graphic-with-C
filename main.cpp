@@ -29,5 +29,5 @@ main() {
     initAudio();
     gameLoop(); 
     shutdownAudio();
-    closegraph();   
+    exit(0);
 }
